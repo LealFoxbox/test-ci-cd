@@ -14,7 +14,11 @@ const Stack = createStackNavigator<InspectionsNavigatorParamList>();
 
 const InspectionsNavigator: React.FC = () => (
   <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
-    <Stack.Screen name={INSPECTIONS_HOME} component={InspectionsScreen} options={{ headerTitle: 'Inspections' }} />
+    <Stack.Screen
+      name={INSPECTIONS_HOME}
+      component={InspectionsScreen}
+      options={{ headerTitle: 'Inspections', headerTitleStyle: { marginLeft: 15 } }}
+    />
   </Stack.Navigator>
 );
 

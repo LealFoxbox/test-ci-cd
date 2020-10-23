@@ -1,3 +1,4 @@
+/* eslint-disable */
 const mockGoBack = jest.fn();
 const mockNavigate = jest.fn();
 const mockReplace = jest.fn();

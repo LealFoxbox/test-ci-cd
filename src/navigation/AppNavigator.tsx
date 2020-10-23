@@ -7,14 +7,14 @@ import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 
 function AppNavigator() {
-  const [{ status }] = useUserSession();
+  const [{ status, data }] = useUserSession();
 
   if (status === 'starting') {
     return <LoadingOverlay />;
   } else if (status === 'shouldLogIn') {
     return <AuthNavigator />;
   } else if (status === 'loggedIn') {
-    return <MainNavigator />;
+    return <MainNavigator user={data} />;
   }
 
   throw Error('useSession status has an unexpected value');

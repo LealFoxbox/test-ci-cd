@@ -1,0 +1,11 @@
+.gitlab
+.idea
+node_modules
+coverage
+i18n
+*.config.js
+*.setup.js
+__mocks__
+ios
+android
+api-docs

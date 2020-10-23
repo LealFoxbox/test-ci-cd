@@ -3,6 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
 
+import { User } from 'src/types';
+
 import InspectionsNavigator, { InspectionsNavigatorParamList } from './InspectionsNavigator';
 import ScheduledNavigator, { ScheduledNavigatorParamList } from './ScheduledNavigator';
 import TicketsNavigator, { TicketsNavigatorParamList } from './TicketsNavigator';
@@ -18,7 +20,7 @@ export type MainTabsNavigatorParamList = {
 
 const Tab = createBottomTabNavigator<MainTabsNavigatorParamList>();
 
-function MainNavigator() {
+const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
   const { colors } = useTheme();
 
   return (
@@ -34,30 +36,36 @@ function MainNavigator() {
         },
       }}
     >
-      <Tab.Screen
-        name={INSPECTIONS_NAVIGATOR}
-        component={InspectionsNavigator}
-        options={{
-          tabBarLabel: 'Inspections',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="assignment" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name={SCHEDULED_NAVIGATOR}
-        component={ScheduledNavigator}
-        options={{
-          tabBarLabel: 'Scheduled',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="date-range" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name={TICKETS_NAVIGATOR}
-        component={TicketsNavigator}
-        options={{
-          tabBarLabel: 'Tickets',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="warning" color={color} size={size} />,
-        }}
-      />
+      {user?.features.inspection_feature.enabled && (
+        <Tab.Screen
+          name={INSPECTIONS_NAVIGATOR}
+          component={InspectionsNavigator}
+          options={{
+            tabBarLabel: 'Inspections',
+            tabBarIcon: ({ color, size }) => <MaterialIcons name="assignment" color={color} size={size} />,
+          }}
+        />
+      )}
+      {user?.features.schedule_feature.enabled && (
+        <Tab.Screen
+          name={SCHEDULED_NAVIGATOR}
+          component={ScheduledNavigator}
+          options={{
+            tabBarLabel: 'Scheduled',
+            tabBarIcon: ({ color, size }) => <MaterialIcons name="date-range" color={color} size={size} />,
+          }}
+        />
+      )}
+      {user?.features.ticket_feature.enabled && (
+        <Tab.Screen
+          name={TICKETS_NAVIGATOR}
+          component={TicketsNavigator}
+          options={{
+            tabBarLabel: 'Tickets',
+            tabBarIcon: ({ color, size }) => <MaterialIcons name="warning" color={color} size={size} />,
+          }}
+        />
+      )}
       <Tab.Screen
         name={ACCOUNT_NAVIGATOR}
         component={AccountNavigator}
@@ -68,7 +76,7 @@ function MainNavigator() {
       />
     </Tab.Navigator>
   );
-}
+};
 
 export type MainNavigatorParamList = {
   [INSPECTIONS_NAVIGATOR]: InspectionsNavigatorParamList;

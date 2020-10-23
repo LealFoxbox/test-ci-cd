@@ -17,10 +17,6 @@ export function getApiUrl(companyId: string) {
   return `https://${companyId}.${config.BACKEND_API_URL}`;
 }
 
-export function getBaseUrl(companyId: string) {
-  return `https://${companyId}.${config.BACKEND_BASE_URL}`;
-}
-
 export const authenticate = (params: AuthParams) => {
   return axios({
     method: 'post',

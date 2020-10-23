@@ -14,7 +14,11 @@ const Stack = createStackNavigator<TicketsNavigatorParamList>();
 
 const TicketsNavigator: React.FC = () => (
   <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
-    <Stack.Screen name={TICKETS_HOME} component={TicketsScreen} options={{ headerTitle: 'Tickets' }} />
+    <Stack.Screen
+      name={TICKETS_HOME}
+      component={TicketsScreen}
+      options={{ headerTitle: 'Tickets', headerTitleStyle: { marginLeft: 15 } }}
+    />
   </Stack.Navigator>
 );
 

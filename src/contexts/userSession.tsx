@@ -35,16 +35,19 @@ export const UserSessionProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (state.status === 'starting') {
-      storage.getItem('user').then(
-        (user) => {
+      storage
+        .getItem('user')
+        .then((user) => {
           if (!user) {
             dispatch({ type: 'logout' });
           } else {
             dispatch({ type: 'login', payload: JSON.parse(user || '') as User });
           }
-        },
-        () => {},
-      );
+        })
+        .catch(() => {
+          console.error('Async storage failed');
+          dispatch({ type: 'logout' });
+        });
     }
   }, [state]);
 

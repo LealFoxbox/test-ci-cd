@@ -14,7 +14,11 @@ const Stack = createStackNavigator<ScheduledNavigatorParamList>();
 
 const ScheduledNavigator: React.FC = () => (
   <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
-    <Stack.Screen name={SCHEDULED_HOME} component={ScheduledScreen} options={{ headerTitle: 'Scheduled' }} />
+    <Stack.Screen
+      name={SCHEDULED_HOME}
+      component={ScheduledScreen}
+      options={{ headerTitle: 'Scheduled', headerTitleStyle: { marginLeft: 15 } }}
+    />
   </Stack.Navigator>
 );
 

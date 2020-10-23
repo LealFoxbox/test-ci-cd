@@ -14,7 +14,11 @@ const Stack = createStackNavigator<AccountNavigatorParamList>();
 
 const AccountNavigator: React.FC = () => (
   <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
-    <Stack.Screen name={ACCOUNT_HOME} component={AccountScreen} options={{ headerTitle: 'Account' }} />
+    <Stack.Screen
+      name={ACCOUNT_HOME}
+      component={AccountScreen}
+      options={{ headerTitle: 'Account', headerTitleStyle: { marginLeft: 15 } }}
+    />
   </Stack.Navigator>
 );
 

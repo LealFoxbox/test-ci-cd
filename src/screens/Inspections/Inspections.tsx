@@ -3,11 +3,10 @@ import { ActivityIndicator, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import { useUserSession } from 'src/contexts/userSession';
-import { getBaseUrl } from 'src/services/api';
 import { User } from 'src/types';
 
 function getInspectionsUri(user: User) {
-  return `${getBaseUrl(user.account.subdomain)}/inspections?user_credentials=${user.single_access_token}`;
+  return `${user.features.inspection_feature.url}&user_credentials=${user.single_access_token}`;
 }
 
 const InspectionsScreen: React.FC<{}> = () => {

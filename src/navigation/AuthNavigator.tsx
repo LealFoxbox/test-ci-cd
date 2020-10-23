@@ -24,7 +24,11 @@ const Stack = createStackNavigator<AuthNavigatorParamList>();
 
 const AuthNavigator: React.FC<AuthNavigatorProps> = () => (
   <Stack.Navigator>
-    <Stack.Screen name={SIGN_IN} component={LoginScreen} options={{ headerTitle: 'Sign in' }} />
+    <Stack.Screen
+      name={SIGN_IN}
+      component={LoginScreen}
+      options={{ headerTitle: 'Sign in', headerTitleStyle: { marginLeft: 15 } }}
+    />
   </Stack.Navigator>
 );
 

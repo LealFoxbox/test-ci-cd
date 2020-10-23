@@ -9,6 +9,7 @@ import { ScrollView } from 'src/components/KeyboardAware';
 import { authenticate } from 'src/services/api';
 import { useUserSession } from 'src/contexts/userSession';
 import config from 'src/config';
+import sensitiveStorage from 'src/utils/sensitiveStorage';
 
 import { FormContainer } from './styles';
 
@@ -37,11 +38,13 @@ const LoginScreen: React.FC<{}> = () => {
       setAuthError('');
       const { data, status } = await authenticate(values);
       if (status === 200 && data.user) {
+        setLoading(false);
+        await sensitiveStorage.setItem('user', JSON.stringify(data.user));
         dispatch({ type: 'login', payload: data.user });
       } else {
+        setLoading(false);
         setAuthError(authenticateError);
       }
-      setLoading(false);
     } catch (err) {
       setAuthError(authenticateError);
       setLoading(false);
@@ -127,7 +130,7 @@ const LoginScreen: React.FC<{}> = () => {
               dark
               style={{ width: 120, alignSelf: 'flex-end', marginTop: 10 }}
             >
-              Submit
+              Sign in
             </Button>
           </FormContainer>
         )}
