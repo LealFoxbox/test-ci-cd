@@ -75,7 +75,7 @@ const LoginScreen: React.FC<{}> = () => {
               value={values.companyId}
               onChangeText={clearError(handleChange('companyId'))}
               onBlur={() => setFieldTouched('companyId')}
-              style={{ marginBottom: 10, textAlign: 'right', width: '100%' }}
+              style={{ marginBottom: 10, textAlign: 'right' }}
               keyboardType="default"
               autoCapitalize="none"
               dense

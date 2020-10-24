@@ -1,7 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { View } from 'react-native';
 
+import WebViewScreen from 'src/components/WebViewScreen';
 import { useUserSession } from 'src/contexts/userSession';
 import { User } from 'src/types';
 
@@ -16,19 +16,7 @@ const TicketsScreen: React.FC<{}> = () => {
     return <View />;
   }
 
-  return (
-    <WebView
-      source={{ uri: getTicketsUri(user) }}
-      style={{ flex: 1 }}
-      allowFileAccess
-      renderLoading={() => <ActivityIndicator />}
-      allowUniversalAccessFromFileURLs
-      originWhitelist={['*']}
-      onError={(err) => {
-        console.log('err', err);
-      }}
-    />
-  );
+  return <WebViewScreen source={{ uri: getTicketsUri(user) }} />;
 };
 
 export default TicketsScreen;

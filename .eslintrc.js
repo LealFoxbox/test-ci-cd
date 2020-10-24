@@ -48,6 +48,7 @@ module.exports = {
     '@typescript-eslint/restrict-plus-operands': 'error',
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-floating-promises': ['error', { ignoreIIFE: true }],
     'prettier/prettier': 'error',
     'react/prop-types': 'off',
     'react/jsx-boolean-value': 'error',

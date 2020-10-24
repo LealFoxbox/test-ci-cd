@@ -1,12 +1,13 @@
 import React from 'react';
-import { ActivityIndicator, ViewProps } from 'react-native';
+import { ViewProps } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 
 import { styled, withTheme } from 'src/paperTheme';
 
 const Container = withTheme(styled.View`
   flex: 1;
   position: absolute;
-  background-color: ${({ theme }) => theme.colors.backdrop};
+  background-color: ${({ theme }) => theme.colors.background};
   justify-content: center;
   align-items: center;
   top: 0;

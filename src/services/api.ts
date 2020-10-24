@@ -3,7 +3,7 @@ import axios, { AxiosPromise } from 'axios';
 import config from 'src/config';
 import { User } from 'src/types';
 
-export interface AuthReturn {
+export interface UserResponse {
   user: User;
 }
 
@@ -26,10 +26,32 @@ export const authenticate = (params: AuthParams) => {
         login: params.username,
         password: params.password,
       },
+      device_guid: config.DEVICE_ID,
+      app_version: config.APP_VERSION,
+      device_name: config.DEVICE_NAME,
     },
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
-  }) as AxiosPromise<AuthReturn>;
+  }) as AxiosPromise<UserResponse>;
+};
+
+export interface FetchUserParams {
+  companyId: string;
+  token: string;
+}
+
+export const fetchtUser = (params: FetchUserParams) => {
+  return axios.get(`${getApiUrl(params.companyId)}/authenticate`, {
+    params: {
+      user_credentials: params.token,
+      device_guid: config.DEVICE_ID,
+      app_version: config.APP_VERSION,
+    },
+    headers: {
+      Accept: 'application/json',
+      'cache-control': 'no-cache',
+    },
+  }) as AxiosPromise<UserResponse>;
 };

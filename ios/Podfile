@@ -12,6 +12,8 @@ target 'orange' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
+
   target 'orangeTests' do
     inherit! :complete
     # Pods for testing

@@ -1,7 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { View } from 'react-native';
 
+import WebViewScreen from 'src/components/WebViewScreen';
 import { useUserSession } from 'src/contexts/userSession';
 import { User } from 'src/types';
 
@@ -16,19 +16,7 @@ const ScheduledScreen: React.FC<{}> = () => {
     return <View />;
   }
 
-  return (
-    <WebView
-      source={{ uri: getScheduledUri(user) }}
-      style={{ flex: 1 }}
-      allowFileAccess
-      renderLoading={() => <ActivityIndicator />}
-      allowUniversalAccessFromFileURLs
-      originWhitelist={['*']}
-      onError={(err) => {
-        console.error('err', err);
-      }}
-    />
-  );
+  return <WebViewScreen source={{ uri: getScheduledUri(user) }} />;
 };
 
 export default ScheduledScreen;
