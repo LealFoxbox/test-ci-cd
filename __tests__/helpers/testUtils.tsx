@@ -1,7 +1,7 @@
 /* eslint-disable */
-const mockGoBack = jest.fn();
-const mockNavigate = jest.fn();
-const mockReplace = jest.fn();
+export const mockGoBack = jest.fn();
+export const mockNavigate = jest.fn();
+export const mockReplace = jest.fn();
 
 jest.mock('@react-navigation/native', () => {
   const navigationNative = jest.requireActual('@react-navigation/native');
@@ -27,20 +27,19 @@ jest.mock('@react-navigation/stack', () => ({
 }));
 
 import React, { ComponentType, ReactElement, ReactNode } from 'react';
-import { RenderResult, render } from '@testing-library/react-native';
+import { RenderAPI, render } from '@testing-library/react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
 
 import { UserSessionProvider } from 'src/contexts/userSession';
 import paperTheme from 'src/paperTheme';
 
-const { NavigationAnalyticsContainer } = jest.requireActual('src/services/analytics');
-
 const AllTheProviders = ({ children }: { children: ReactNode }): ReactElement => {
   return (
-    <NavigationAnalyticsContainer>
+    <NavigationContainer>
       <UserSessionProvider>
         <PaperProvider theme={paperTheme}>
           <SafeAreaProvider
@@ -53,7 +52,7 @@ const AllTheProviders = ({ children }: { children: ReactNode }): ReactElement =>
           </SafeAreaProvider>
         </PaperProvider>
       </UserSessionProvider>
-    </NavigationAnalyticsContainer>
+    </NavigationContainer>
   );
 };
 
@@ -62,10 +61,10 @@ interface Options {
   [_: string]: any;
 }
 
-const renderWithProviders = (ui: ReactElement, options?: Options): RenderResult =>
+export const renderWithProviders = (ui: ReactElement, options?: Options): RenderAPI =>
   render(ui, { wrapper: AllTheProviders, ...(options || {}) });
 
-const renderInTabs = (screenComponent: ComponentType<any>, routeParams?: any): RenderResult => {
+export const renderInTabs = (screenComponent: ComponentType<any>, routeParams?: any): RenderAPI => {
   const { Navigator, Screen } = createBottomTabNavigator();
 
   return renderWithProviders(
@@ -75,7 +74,7 @@ const renderInTabs = (screenComponent: ComponentType<any>, routeParams?: any): R
   );
 };
 
-const renderInStack = (screenComponent: ComponentType<any>, routeParams?: any): RenderResult => {
+export const renderInStack = (screenComponent: ComponentType<any>, routeParams?: any): RenderAPI => {
   const { Navigator, Screen } = createStackNavigator();
 
   return renderWithProviders(
@@ -85,17 +84,9 @@ const renderInStack = (screenComponent: ComponentType<any>, routeParams?: any): 
   );
 };
 
-const customRender = (ui: ReactElement): RenderResult => {
+const customRender = (ui: ReactElement): RenderAPI => {
   return renderInTabs(() => ui);
 };
 
 export * from '@testing-library/react-native';
-export {
-  customRender as render,
-  mockGoBack,
-  mockNavigate,
-  mockReplace,
-  renderInStack,
-  renderInTabs,
-  renderWithProviders,
-};
+export { customRender as render };

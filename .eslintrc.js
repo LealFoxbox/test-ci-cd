@@ -55,7 +55,6 @@ module.exports = {
     'react-native/no-unused-styles': 'error',
     'react-native/no-color-literals': 'error',
     'react-native/no-inline-styles': 'off',
-    'import/no-default-export': 'error',
     'sort-imports': ['error', { ignoreDeclarationSort: true }],
     'import/newline-after-import': ['error', { count: 1 }],
     'no-console': 'warn',
@@ -66,6 +65,7 @@ module.exports = {
     'import/no-default-export': 'off',
     'import/no-unresolved': 'off',
     'import/export': 'off',
+    'mp-void': 'off',
     'import/order': [
       'error',
       {

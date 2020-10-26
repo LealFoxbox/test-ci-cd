@@ -43,7 +43,9 @@ export interface FetchUserParams {
 }
 
 export const fetchtUser = (params: FetchUserParams) => {
-  return axios.get(`${getApiUrl(params.companyId)}/authenticate`, {
+  return axios({
+    method: 'get',
+    url: `${getApiUrl(params.companyId)}/authenticate`,
     params: {
       user_credentials: params.token,
       device_guid: config.DEVICE_ID,

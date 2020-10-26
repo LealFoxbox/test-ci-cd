@@ -12,7 +12,9 @@ jest.mock('react-native-device-info', () => {
   return {
     getBundleId: () => 'testbundle',
     getUniqueId: () => 'device-1-uid',
-    getDeviceName: () => 'device-1-name',
+    getDeviceName: () => Promise.resolve('device-1-name'),
+    getBuildNumber: () => '4',
+    getDeviceId: () => 'goldfish',
     isEmulator: () => Promise.resolve(false),
     getVersion: () => '1.0',
   };

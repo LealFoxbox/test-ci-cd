@@ -32,7 +32,7 @@ const LoginScreen: React.FC<{}> = () => {
   const [authError, setAuthError] = useState('');
   const [, dispatch] = useUserSession();
 
-  const handleSubmit = async (values: Form) => {
+  const handleFormikSubmit = async (values: Form) => {
     try {
       setLoading(true);
       setAuthError('');
@@ -67,7 +67,7 @@ const LoginScreen: React.FC<{}> = () => {
           password: 'foxbox2020',
         }}
         validationSchema={SignInSchema}
-        onSubmit={handleSubmit}
+        onSubmit={handleFormikSubmit}
       >
         {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
           <FormContainer>

@@ -3,7 +3,7 @@ import { BackHandler } from 'react-native';
 import { WebView, WebViewProps } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
 
-import LoadingOverlay from './LoadingOverlay';
+import LoadingOverlay from '../LoadingOverlay';
 
 const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   const webRef = useRef<WebView>();
