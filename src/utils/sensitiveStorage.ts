@@ -1,8 +1,6 @@
 import SInfo from 'react-native-sensitive-info';
 
-import config from 'src/config';
-
-const configName = `OrangeQCRNApp_${config.ENV.substr(0, 4)}`;
+const configName = `OrangeQCRNApp`;
 
 const options = {
   sharedPreferencesName: configName,

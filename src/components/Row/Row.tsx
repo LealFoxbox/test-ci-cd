@@ -4,6 +4,7 @@ import { Card, Paragraph, Title, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { styled } from 'src/paperTheme';
+import { getAccessibilityAndAutomationProps } from 'src/utils/accessibility';
 
 const Container = styled.View`
   background-color: white;
@@ -36,7 +37,11 @@ const Row: React.FC<RowProps> = ({ label, value, icon, onPress }) => {
   );
 
   if (onPress) {
-    return <ClickableContainer onPress={onPress}>{content}</ClickableContainer>;
+    return (
+      <ClickableContainer onPress={onPress} accessibilityRole="button" {...getAccessibilityAndAutomationProps(label)}>
+        {content}
+      </ClickableContainer>
+    );
   }
 
   return <Container>{content}</Container>;

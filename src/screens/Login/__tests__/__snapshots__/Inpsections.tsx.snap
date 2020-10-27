@@ -332,7 +332,7 @@ exports[`LoginScreen should render 1`] = `
                             ]
                           }
                         >
-                          .undefined
+                          .orangeqc-staging.com
                         </Text>
                       </View>
                     </View>

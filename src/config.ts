@@ -1,35 +1,29 @@
 import { Platform } from 'react-native';
-import Config from 'react-native-config';
 import { getBuildNumber, getDeviceId, getDeviceName, getVersion } from 'react-native-device-info';
 
-type Env = 'dev' | 'staging' | 'production';
-
-const { SENTRY_DSN, BACKEND_BASE_URL, BACKEND_API_URL, RELEASE_VERSION, APP_ENV, BUILD_ID } = Config;
+const stagingBaseurl = 'orangeqc-staging.com';
+const stagingApiUrl = 'orangeqc-staging.com/api/v4';
+const prodBaseUrl = 'orangeqc.com';
+const prodApiUrl = 'orangeqc.com/api/v4';
 
 interface Config {
   isDev: boolean;
-  ENV: Env;
+  isStaging: boolean;
   APP_VERSION: string;
   DEVICE_ID: string;
   DEVICE_NAME: string;
-  RELEASE_VERSION: string;
-  BUILD_ID: string;
-  SENTRY_DSN: string;
   BACKEND_BASE_URL: string;
   BACKEND_API_URL: string;
 }
 
 const config: Config = {
   isDev: __DEV__,
-  ENV: __DEV__ ? 'dev' : (APP_ENV as Env) || 'dev',
+  isStaging: true,
   APP_VERSION: `${Platform.OS} v${getVersion()} (${getBuildNumber()})`,
   DEVICE_ID: getDeviceId(),
   DEVICE_NAME: 'default name',
-  RELEASE_VERSION,
-  BUILD_ID,
-  SENTRY_DSN,
-  BACKEND_BASE_URL,
-  BACKEND_API_URL,
+  BACKEND_BASE_URL: stagingBaseurl,
+  BACKEND_API_URL: stagingApiUrl,
 };
 
 export const getConfigPromise = Promise.all([
@@ -41,5 +35,17 @@ export const getConfigPromise = Promise.all([
       console.error(e);
     }),
 ]);
+
+export const setEnv = (staging: boolean) => {
+  if (!staging) {
+    config.isStaging = false;
+    config.BACKEND_BASE_URL = prodBaseUrl;
+    config.BACKEND_API_URL = prodApiUrl;
+  } else {
+    config.isStaging = true;
+    config.BACKEND_BASE_URL = stagingBaseurl;
+    config.BACKEND_API_URL = stagingApiUrl;
+  }
+};
 
 export default config;
