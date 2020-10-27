@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
 
@@ -18,22 +18,17 @@ export type MainTabsNavigatorParamList = {
   [ACCOUNT_NAVIGATOR]: undefined;
 };
 
-const Tab = createBottomTabNavigator<MainTabsNavigatorParamList>();
+const Tab = createMaterialBottomTabNavigator<MainTabsNavigatorParamList>();
 
 const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
   const { colors } = useTheme();
 
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        inactiveBackgroundColor: colors.background,
-        activeBackgroundColor: colors.background,
-        activeTintColor: colors.primary,
-        inactiveTintColor: colors.text,
-        style: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.primary,
-        },
+      inactiveColor={colors.backdrop}
+      activeColor={colors.primary}
+      barStyle={{
+        backgroundColor: colors.background,
       }}
     >
       {user?.features.inspection_feature.enabled && (
@@ -42,7 +37,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           component={InspectionsNavigator}
           options={{
             tabBarLabel: 'Inspections',
-            tabBarIcon: ({ color, size }) => <MaterialIcons name="assignment" color={color} size={size} />,
+            tabBarIcon: ({ color }) => <MaterialIcons name="assignment" color={color} size={26} />,
           }}
         />
       )}
@@ -52,7 +47,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           component={ScheduledNavigator}
           options={{
             tabBarLabel: 'Scheduled',
-            tabBarIcon: ({ color, size }) => <MaterialIcons name="date-range" color={color} size={size} />,
+            tabBarIcon: ({ color }) => <MaterialIcons name="date-range" color={color} size={26} />,
           }}
         />
       )}
@@ -62,7 +57,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           component={TicketsNavigator}
           options={{
             tabBarLabel: 'Tickets',
-            tabBarIcon: ({ color, size }) => <MaterialIcons name="warning" color={color} size={size} />,
+            tabBarIcon: ({ color }) => <MaterialIcons name="warning" color={color} size={26} />,
           }}
         />
       )}
@@ -71,7 +66,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
         component={AccountNavigator}
         options={{
           tabBarLabel: 'Account',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="account-circle" color={color} size={size} />,
+          tabBarIcon: ({ color }) => <MaterialIcons name="account-circle" color={color} size={26} />,
         }}
       />
     </Tab.Navigator>
