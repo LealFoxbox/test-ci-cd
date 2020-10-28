@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, View } from 'react-native';
 import { WebView, WebViewProps } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
 
 import LoadingOverlay from '../LoadingOverlay';
+import ConnectionBanner from '../ConnectionBanner';
 
 const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   const webRef = useRef<WebView>(null);
@@ -22,19 +23,22 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   });
 
   return (
-    <WebView
-      {...props}
-      ref={webRef}
-      style={[{ flex: 1 }, style]}
-      allowFileAccess
-      renderLoading={() => <LoadingOverlay />}
-      allowUniversalAccessFromFileURLs
-      originWhitelist={['*']}
-      startInLoadingState
-      onError={(err) => {
-        console.error('Webview err', err);
-      }}
-    />
+    <View style={[{ flex: 1 }, style]}>
+      <ConnectionBanner />
+      <WebView
+        {...props}
+        ref={webRef}
+        style={[{ flex: 1 }, style]}
+        allowFileAccess
+        renderLoading={() => <LoadingOverlay />}
+        allowUniversalAccessFromFileURLs
+        originWhitelist={['*']}
+        startInLoadingState
+        onError={(err) => {
+          console.error('Webview err', err);
+        }}
+      />
+    </View>
   );
 };
 

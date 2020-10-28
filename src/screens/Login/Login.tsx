@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
+import ConnectionBanner from 'src/components/ConnectionBanner';
 import { authenticate } from 'src/services/api';
 import { useUserSession } from 'src/contexts/userSession';
 import config, { setEnv } from 'src/config';
@@ -49,7 +50,9 @@ const LoginScreen: React.FC<{}> = () => {
         setAuthError(authenticateError);
       }
     } catch (err) {
-      setAuthError(authenticateError);
+      if (err?.message !== 'Network Error') {
+        setAuthError(authenticateError);
+      }
       setLoading(false);
     }
   };
@@ -77,6 +80,7 @@ const LoginScreen: React.FC<{}> = () => {
 
   return (
     <ScrollView>
+      <ConnectionBanner />
       <Formik
         initialValues={{
           companyId: config.isDev ? 'mobiletest' : '',

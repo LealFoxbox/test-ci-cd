@@ -49,6 +49,7 @@ module.exports = {
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-floating-promises': ['error', { ignoreIIFE: true }],
+    '@typescript-eslint/no-unsafe-member-access': 'off',
     'prettier/prettier': 'error',
     'react/prop-types': 'off',
     'react/jsx-boolean-value': 'error',
@@ -65,7 +66,7 @@ module.exports = {
     'import/no-default-export': 'off',
     'import/no-unresolved': 'off',
     'import/export': 'off',
-    'mp-void': 'off',
+    'no-void': 'off',
     'import/order': [
       'error',
       {

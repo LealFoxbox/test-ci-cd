@@ -1,12 +1,13 @@
 import React from 'react';
 import { Text } from 'react-native-paper';
-import styled from 'styled-components/native';
 
-const ColoredText = styled(Text)`
+import { styled, withTheme } from 'src/paperTheme';
+
+const ColoredText = withTheme(styled(Text)`
   font-size: 12px;
-  color: #ff0d10;
+  color: ${({ theme }) => theme.colors.error};
   margin-bottom: 10px;
-`;
+`);
 
 const ErrorMessage: React.FC<{}> = ({ children }) => <ColoredText>{children}</ColoredText>;
 

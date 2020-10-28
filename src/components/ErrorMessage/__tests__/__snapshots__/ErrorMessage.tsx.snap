@@ -12,7 +12,7 @@ exports[`ErrorMessage should render 1`] = `
       },
       Array [
         Object {
-          "color": "#ff0d10",
+          "color": "#B00020",
           "fontSize": 12,
           "marginBottom": 10,
         },
