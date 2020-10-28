@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import LoadingOverlay from '../LoadingOverlay';
 
 const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
-  const webRef = useRef<WebView>();
+  const webRef = useRef<WebView>(null);
 
   useFocusEffect(() => {
     const handleBackButton = () => {
@@ -24,8 +24,7 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   return (
     <WebView
       {...props}
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      ref={webRef as any}
+      ref={webRef}
       style={[{ flex: 1 }, style]}
       allowFileAccess
       renderLoading={() => <LoadingOverlay />}

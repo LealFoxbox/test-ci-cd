@@ -18,12 +18,12 @@ interface Config {
 
 const config: Config = {
   isDev: __DEV__,
-  isStaging: true,
+  isStaging: false,
   APP_VERSION: `${Platform.OS} v${getVersion()} (${getBuildNumber()})`,
   DEVICE_ID: getDeviceId(),
   DEVICE_NAME: 'default name',
-  BACKEND_BASE_URL: stagingBaseurl,
-  BACKEND_API_URL: stagingApiUrl,
+  BACKEND_BASE_URL: '',
+  BACKEND_API_URL: '',
 };
 
 export const getConfigPromise = Promise.all([
@@ -47,5 +47,8 @@ export const setEnv = (staging: boolean) => {
     config.BACKEND_API_URL = stagingApiUrl;
   }
 };
+
+// let's set the urls. Devs get set to staging by default.
+setEnv(config.isDev);
 
 export default config;

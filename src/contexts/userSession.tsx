@@ -3,7 +3,7 @@ import React, { Dispatch, useEffect, useReducer } from 'react';
 import storage from 'src/utils/sensitiveStorage';
 import { User } from 'src/types';
 import { fetchtUser } from 'src/services/api';
-import { getConfigPromise } from 'src/config';
+import { getConfigPromise, setEnv } from 'src/config';
 
 export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn';
 type State = {
@@ -15,12 +15,12 @@ type Action = {
   payload?: UserSessionStatus | User;
 };
 
-const initialState: State = {
+export const initialState: State = {
   status: 'starting',
   data: null,
 };
 
-const UserSessionContext = React.createContext<[State, Dispatch<Action>] | undefined>(undefined);
+export const UserSessionContext = React.createContext<[State, Dispatch<Action>] | undefined>(undefined);
 
 async function refetchUser(dispatch: React.Dispatch<Action>, user: User) {
   const response = await fetchtUser({
@@ -35,7 +35,7 @@ async function refetchUser(dispatch: React.Dispatch<Action>, user: User) {
   }
 }
 
-function userSessionReducer(state: State, action: Action): State {
+export function userSessionReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'login':
       return { ...state, status: 'loggedIn', data: action.payload as User };
@@ -64,6 +64,9 @@ export const UserSessionProvider: React.FC = ({ children }) => {
             if (!user) {
               dispatch({ type: 'logout' });
             } else {
+              const isStagingString = await storage.getItem('isStaging');
+              setEnv(JSON.parse(isStagingString || 'false') as boolean);
+
               await refetchUser(dispatch, user);
             }
           } catch (e) {

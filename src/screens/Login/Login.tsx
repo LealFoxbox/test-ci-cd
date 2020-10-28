@@ -8,10 +8,11 @@ import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import { authenticate } from 'src/services/api';
 import { useUserSession } from 'src/contexts/userSession';
-import config from 'src/config';
+import config, { setEnv } from 'src/config';
 import sensitiveStorage from 'src/utils/sensitiveStorage';
 
 import { FormContainer } from './styles';
+import StagingDialog from './StagingDialog';
 
 interface Form {
   companyId: string;
@@ -28,6 +29,7 @@ const SignInSchema = Yup.object().shape({
 const authenticateError = 'Your username or password appears to be incorrect for this account';
 
 const LoginScreen: React.FC<{}> = () => {
+  const [isStaging, setStaging] = useState(config.isStaging);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [, dispatch] = useUserSession();
@@ -40,6 +42,7 @@ const LoginScreen: React.FC<{}> = () => {
       if (status === 200 && data.user) {
         setLoading(false);
         await sensitiveStorage.setItem('user', JSON.stringify(data.user));
+        await sensitiveStorage.setItem('isStaging', JSON.stringify(isStaging));
         dispatch({ type: 'login', payload: data.user });
       } else {
         setLoading(false);
@@ -51,10 +54,24 @@ const LoginScreen: React.FC<{}> = () => {
     }
   };
 
-  const clearError = <T extends string | React.ChangeEvent<any>>(cb: (e: T) => void) => {
+  const handleEasterEgg = () => {
+    if (!loading) {
+      setAuthError('');
+
+      if (isStaging) {
+        setEnv(false);
+        setStaging(false);
+      } else {
+        setEnv(true);
+        setStaging(true);
+      }
+    }
+  };
+
+  const clearError = <T extends string | React.ChangeEvent<any>>(onChange: (e: T) => void) => {
     return (e: T) => {
       setAuthError('');
-      cb(e);
+      onChange(e);
     };
   };
 
@@ -62,9 +79,9 @@ const LoginScreen: React.FC<{}> = () => {
     <ScrollView>
       <Formik
         initialValues={{
-          companyId: 'mobiletest',
-          username: 'foxbox',
-          password: 'foxbox2020',
+          companyId: config.isDev ? 'mobiletest' : '',
+          username: config.isDev ? 'foxbox' : '',
+          password: config.isDev ? 'foxbox2020' : '',
         }}
         validationSchema={SignInSchema}
         onSubmit={handleFormikSubmit}
@@ -132,6 +149,7 @@ const LoginScreen: React.FC<{}> = () => {
             >
               Sign in
             </Button>
+            <StagingDialog onConfirm={handleEasterEgg} />
           </FormContainer>
         )}
       </Formik>

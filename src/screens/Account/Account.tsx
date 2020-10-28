@@ -60,6 +60,12 @@ const AccountScreen: React.FC<{}> = () => {
           />
           <Divider />
           <Row label="App version" value={config.APP_VERSION} />
+          {config.isStaging && (
+            <>
+              <Divider />
+              <Row label="Environment" value="Staging" />
+            </>
+          )}
           <Portal>
             <Dialog visible={visible} onDismiss={hideDialog}>
               <Dialog.Title>Sign out</Dialog.Title>
