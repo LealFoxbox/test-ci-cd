@@ -310,20 +310,16 @@ PODS:
     - React-jsi (= 0.63.3)
   - RNCMaskedView (0.1.10):
     - React
+  - RNDeviceInfo (7.0.2):
+    - React-Core
   - RNGestureHandler (1.8.0):
     - React
   - RNReanimated (1.13.0):
     - React
   - RNScreens (2.10.1):
     - React
-  - RNSentry (1.9.0):
-    - React-Core
-    - Sentry (~> 5.2.0)
   - RNVectorIcons (7.1.0):
     - React
-  - Sentry (5.2.2):
-    - Sentry/Core (= 5.2.2)
-  - Sentry/Core (5.2.2)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -381,10 +377,10 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
-  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -401,7 +397,6 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - OpenSSL-Universal
-    - Sentry
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -467,14 +462,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCMaskedView:
     :path: "../node_modules/@react-native-community/masked-view"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
-  RNSentry:
-    :path: "../node_modules/@sentry/react-native"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   Yoga:
@@ -523,15 +518,14 @@ SPEC CHECKSUMS:
   React-RCTVibration: 8e9fb25724a0805107fc1acc9075e26f814df454
   ReactCommon: 4167844018c9ed375cc01a843e9ee564399e53c3
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
+  RNDeviceInfo: e1d82a27d0c1ea6278e3b141784dc38e51fc90f4
   RNGestureHandler: 7a5833d0f788dbd107fbb913e09aa0c1ff333c39
   RNReanimated: 89f5e0a04d1dd52fbf27e7e7030d8f80a646a3fc
   RNScreens: b748efec66e095134c7166ca333b628cd7e6f3e2
-  RNSentry: 1adaa43b01c6a3ab5091d4d1add66b7c58558898
   RNVectorIcons: bc69e6a278b14842063605de32bec61f0b251a59
-  Sentry: 8fa58a051237554f22507fb483b9a1de0171a2dc
   Yoga: 7d13633d129fd179e01b8953d38d47be90db185a
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 2e0c73fa3a02acc6fa794b0e810d30ce2ada7cd4
+PODFILE CHECKSUM: c2d4a7f01bbda11a393dfa5a18394b56a2550dea
 
 COCOAPODS: 1.9.3
