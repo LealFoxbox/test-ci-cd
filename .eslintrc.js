@@ -50,6 +50,7 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-floating-promises': ['error', { ignoreIIFE: true }],
     '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
     'prettier/prettier': 'error',
     'react/prop-types': 'off',
     'react/jsx-boolean-value': 'error',

@@ -4,6 +4,8 @@ import { ActivityIndicator } from 'react-native-paper';
 
 import { styled, withTheme } from 'src/paperTheme';
 
+export type LoadingOverlayProps = ViewProps;
+
 const Container = withTheme(styled.View`
   flex: 1;
   position: absolute;
@@ -16,8 +18,6 @@ const Container = withTheme(styled.View`
   bottom: 0;
   z-index: 9999;
 `);
-
-export type LoadingOverlayProps = ViewProps;
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = (props) => (
   <Container {...props}>

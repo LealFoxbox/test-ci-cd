@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { TextInput as NativeTextInput } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
+import { useMutation } from 'react-query';
+import { AxiosError, AxiosResponse } from 'axios';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
-import { authenticate } from 'src/services/api';
+import { UserResponse, authenticate } from 'src/services/api';
 import { useUserSession } from 'src/contexts/userSession';
 import config, { setEnv } from 'src/config';
 import sensitiveStorage from 'src/utils/sensitiveStorage';
@@ -31,34 +33,40 @@ const authenticateError = 'Your username or password appears to be incorrect for
 
 const LoginScreen: React.FC<{}> = () => {
   const [isStaging, setStaging] = useState(config.isStaging);
-  const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [, dispatch] = useUserSession();
 
-  const handleFormikSubmit = async (values: Form) => {
-    try {
-      setLoading(true);
+  const [mutateSubmit, { isLoading }] = useMutation<AxiosResponse<UserResponse>, AxiosError, Form>(authenticate, {
+    onMutate: () => {
       setAuthError('');
-      const { data, status } = await authenticate(values);
-      if (status === 200 && data.user) {
-        setLoading(false);
-        await sensitiveStorage.setItem('user', JSON.stringify(data.user));
-        await sensitiveStorage.setItem('isStaging', JSON.stringify(isStaging));
-        dispatch({ type: 'login', payload: data.user });
+    },
+    onSuccess: async (userData) => {
+      setAuthError('');
+
+      if (userData.status === 200 && userData.data.user) {
+        try {
+          await sensitiveStorage.setItem('user', JSON.stringify(userData.data.user));
+          await sensitiveStorage.setItem('isStaging', JSON.stringify(isStaging));
+        } catch (err) {
+          if (err?.message !== 'Network Error') {
+            setAuthError(authenticateError);
+          }
+        }
+
+        dispatch({ type: 'login', payload: userData.data.user });
       } else {
-        setLoading(false);
         setAuthError(authenticateError);
       }
-    } catch (err) {
+    },
+    onError: (err) => {
       if (err?.message !== 'Network Error') {
         setAuthError(authenticateError);
       }
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   const handleEasterEgg = () => {
-    if (!loading) {
+    if (!isLoading) {
       setAuthError('');
 
       if (isStaging) {
@@ -88,7 +96,7 @@ const LoginScreen: React.FC<{}> = () => {
           password: config.isDev ? 'foxbox2020' : '',
         }}
         validationSchema={SignInSchema}
-        onSubmit={handleFormikSubmit}
+        onSubmit={(form) => mutateSubmit(form)}
       >
         {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
           <FormContainer>
@@ -104,7 +112,7 @@ const LoginScreen: React.FC<{}> = () => {
               /* @ts-ignore */
               render={(props) => <NativeTextInput {...props} textAlign="right" />}
               label="Account Name"
-              disabled={loading}
+              disabled={isLoading}
               error={touched.companyId && !!errors.companyId}
             />
             {touched.companyId && errors.companyId && <ErrorMessage>{errors.companyId}</ErrorMessage>}
@@ -117,7 +125,7 @@ const LoginScreen: React.FC<{}> = () => {
               autoCapitalize="none"
               dense
               label="Email or Username"
-              disabled={loading}
+              disabled={isLoading}
               error={touched.username && !!errors.username}
             />
             {touched.username && errors.username && <ErrorMessage>{errors.username}</ErrorMessage>}
@@ -132,7 +140,7 @@ const LoginScreen: React.FC<{}> = () => {
               label="Password"
               onBlur={() => setFieldTouched('password')}
               secureTextEntry
-              disabled={loading}
+              disabled={isLoading}
               onSubmitEditing={() => {
                 if (isValid && !authError) {
                   handleSubmit();
@@ -144,10 +152,10 @@ const LoginScreen: React.FC<{}> = () => {
               <ErrorMessage>{errors.password || authError}</ErrorMessage>
             )}
             <Button
-              disabled={!isValid || !!authError || loading}
+              disabled={!isValid || !!authError || isLoading}
               onPress={handleSubmit}
               mode="contained"
-              loading={loading}
+              loading={isLoading}
               dark
               style={{ width: 120, alignSelf: 'flex-end', marginTop: 10 }}
             >

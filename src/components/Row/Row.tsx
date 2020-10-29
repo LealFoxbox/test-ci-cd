@@ -18,12 +18,13 @@ const ClickableContainer = styled.TouchableOpacity`
 
 interface RowProps {
   label: string;
+  accessibilityLabel?: string;
   value: string;
   icon?: string;
   onPress?: () => void;
 }
 
-const Row: React.FC<RowProps> = ({ label, value, icon, onPress }) => {
+const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, onPress }) => {
   const theme = useTheme();
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
@@ -38,7 +39,11 @@ const Row: React.FC<RowProps> = ({ label, value, icon, onPress }) => {
 
   if (onPress) {
     return (
-      <ClickableContainer onPress={onPress} accessibilityRole="button" {...getAccessibilityAndAutomationProps(label)}>
+      <ClickableContainer
+        onPress={onPress}
+        accessibilityRole="button"
+        {...getAccessibilityAndAutomationProps(accessibilityLabel || label)}
+      >
         {content}
       </ClickableContainer>
     );

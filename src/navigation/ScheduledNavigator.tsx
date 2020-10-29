@@ -17,7 +17,7 @@ const ScheduledNavigator: React.FC = () => (
     <Stack.Screen
       name={SCHEDULED_HOME}
       component={ScheduledScreen}
-      options={{ headerTitle: 'Scheduled', headerTitleStyle: { marginLeft: 15 } }}
+      options={{ headerTitle: 'Schedule', headerTitleStyle: { marginLeft: 15 } }}
     />
   </Stack.Navigator>
 );

@@ -48,9 +48,16 @@ const AccountScreen: React.FC<{}> = () => {
     <Container>
       {!!user && (
         <>
-          <Row label={user.email} value={user.account.name} icon="logout" onPress={showDialog} />
+          <Row
+            accessibilityLabel="userInfo"
+            label={user.email}
+            value={user.account.name}
+            icon="logout"
+            onPress={showDialog}
+          />
           <Divider />
           <Row
+            accessibilityLabel="support"
             label="Email Support"
             value="Get help using the app"
             icon="email"

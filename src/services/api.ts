@@ -1,7 +1,11 @@
 import axios, { AxiosPromise } from 'axios';
+import * as rax from 'retry-axios';
+import { getOr } from 'lodash/fp';
 
 import config from 'src/config';
 import { User } from 'src/types';
+
+rax.attach();
 
 export interface UserResponse {
   user: User;
@@ -29,6 +33,16 @@ export const authenticate = (params: AuthParams) => {
       device_guid: config.DEVICE_ID,
       app_version: config.APP_VERSION,
       device_name: config.DEVICE_NAME,
+    },
+    raxConfig: {
+      shouldRetry: (err) => {
+        const cfg = rax.getConfig(err);
+        if (getOr(0, 'currentRetryAttempt', cfg) <= getOr(3, 'retry', cfg)) {
+          console.warn('Endpoint Error. Axios retry?', JSON.stringify(err));
+          return err.response?.status === 503;
+        }
+        return false;
+      },
     },
     headers: {
       'Content-Type': 'application/json',
