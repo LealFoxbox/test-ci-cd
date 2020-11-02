@@ -30,6 +30,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
       barStyle={{
         backgroundColor: colors.background,
       }}
+      shifting={false}
     >
       {user?.features.inspection_feature.enabled && (
         <Tab.Screen

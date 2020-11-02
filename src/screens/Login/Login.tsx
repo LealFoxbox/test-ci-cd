@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 import { TextInput as NativeTextInput } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { useMutation } from 'react-query';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
-import { UserResponse, authenticate } from 'src/services/api';
+import { ApiError, UserResponse, authenticate } from 'src/services/api';
 import { useUserSession } from 'src/contexts/userSession';
 import config, { setEnv } from 'src/config';
 import sensitiveStorage from 'src/utils/sensitiveStorage';
+import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 import { FormContainer } from './styles';
 import StagingDialog from './StagingDialog';
@@ -36,7 +37,9 @@ const LoginScreen: React.FC<{}> = () => {
   const [authError, setAuthError] = useState('');
   const [, dispatch] = useUserSession();
 
-  const [mutateSubmit, { isLoading }] = useMutation<AxiosResponse<UserResponse>, AxiosError, Form>(authenticate, {
+  const connected = useNetworkStatus();
+
+  const [mutateSubmit, { isLoading }] = useMutation<AxiosResponse<UserResponse>, ApiError, Form>(authenticate, {
     onMutate: () => {
       setAuthError('');
     },
@@ -60,7 +63,7 @@ const LoginScreen: React.FC<{}> = () => {
     },
     onError: (err) => {
       if (err?.message !== 'Network Error') {
-        setAuthError(authenticateError);
+        setAuthError(err?.response?.data.message || authenticateError);
       }
     },
   });
@@ -88,11 +91,11 @@ const LoginScreen: React.FC<{}> = () => {
 
   return (
     <ScrollView>
-      <ConnectionBanner />
+      <ConnectionBanner connected={connected} />
       <Formik
         initialValues={{
           companyId: config.isDev ? 'mobiletest' : '',
-          username: config.isDev ? 'foxbox' : '',
+          username: config.isDev ? 'diego' : '',
           password: config.isDev ? 'foxbox2020' : '',
         }}
         validationSchema={SignInSchema}

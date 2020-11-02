@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Text, useTheme } from 'react-native-paper';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { styled, withTheme } from 'src/paperTheme';
@@ -18,21 +17,12 @@ const ColoredText = withTheme(styled(Text)`
   text-align: center;
 `);
 
-const ConnectionBanner = () => {
+interface ConnectionBannerProps {
+  connected: boolean;
+}
+
+const ConnectionBanner: React.FC<ConnectionBannerProps> = ({ connected }) => {
   const theme = useTheme();
-  const [connected, setConnected] = useState(true);
-
-  const setNetworkStatus = ({ isInternetReachable, isConnected }: NetInfoState) => {
-    setConnected(typeof isInternetReachable === 'boolean' ? isInternetReachable : isConnected);
-  };
-
-  useEffect(() => {
-    void NetInfo.fetch().then(setNetworkStatus);
-
-    const unsubscribe = NetInfo.addEventListener(setNetworkStatus);
-
-    return unsubscribe;
-  }, []);
 
   if (connected) {
     return null;
@@ -40,7 +30,7 @@ const ConnectionBanner = () => {
 
   return (
     <Container>
-      <MaterialIcons name="wifi" color={theme.colors.background} size={26} />
+      <MaterialIcons name="signal-wifi-off" color={theme.colors.background} size={26} />
       <ColoredText>No internet connection</ColoredText>
     </Container>
   );
