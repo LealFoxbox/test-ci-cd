@@ -2,8 +2,14 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
     <item android:drawable="@color/bootsplash_background" />
-
-    <item>
-        <bitmap android:src="@mipmap/bootsplash_logo" android:gravity="center" />
+    <item
+        android:left="-56dp"
+        android:right="-56dp"
+        android:bottom="-4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <shape>
+            <stroke android:width="56dp" android:color="#FFFFFF" />
+        </shape>
     </item>
 </layer-list>

@@ -2,10 +2,14 @@ import { styled } from 'src/paperTheme';
 
 export const FormContainer = styled.View`
   padding: 50px;
+  padding-top: 100px;
 `;
 
 export const EasterEgg = styled.View`
-  width: 50px;
+  width: 120px;
   height: 50px;
-  margin-top: 15px;
+  position: absolute;
+  left: 25px;
+  top: 0;
+  z-index: -99999;
 `;

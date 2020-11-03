@@ -126,7 +126,7 @@ Array [
                             "paddingBottom": 50,
                             "paddingLeft": 50,
                             "paddingRight": 50,
-                            "paddingTop": 50,
+                            "paddingTop": 100,
                           },
                         ]
                       }
@@ -803,8 +803,11 @@ Array [
                           Array [
                             Object {
                               "height": 50,
-                              "marginTop": 15,
-                              "width": 50,
+                              "left": 25,
+                              "position": "absolute",
+                              "top": 0,
+                              "width": 120,
+                              "zIndex": -99999,
                             },
                           ]
                         }

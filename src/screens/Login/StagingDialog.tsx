@@ -29,7 +29,7 @@ const StagingDialog: React.FC<StagingDialog> = ({ onConfirm }) => {
 
   return (
     <>
-      <TouchableWithoutFeedback delayLongPress={2000} accessibilityRole="none" onLongPress={showDialog}>
+      <TouchableWithoutFeedback delayLongPress={4000} accessibilityRole="none" onLongPress={showDialog}>
         <EasterEgg />
       </TouchableWithoutFeedback>
       <Portal>

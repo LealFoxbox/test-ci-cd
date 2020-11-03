@@ -1,8 +1,8 @@
-import { styled, withTheme } from 'src/paperTheme';
+import { styled } from 'src/paperTheme';
 
-export const Container = withTheme(styled.View`
+export const Container = styled.View`
   position: absolute;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: #e9e9e9;
   justify-content: center;
   align-items: center;
   top: 0;
@@ -10,4 +10,4 @@ export const Container = withTheme(styled.View`
   right: 0;
   bottom: 0;
   z-index: 9999;
-`);
+`;
