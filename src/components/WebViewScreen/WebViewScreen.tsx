@@ -10,19 +10,12 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { TicketsNavigatorParamList } from 'src/navigation/TicketsNavigator';
 import { TICKETS_HOME } from 'src/navigation/screenNames';
 import { useUserSession } from 'src/contexts/userSession';
+import usePrevious from 'src/utils/usePrevious';
 
 import LoadingOverlay from '../LoadingOverlay';
 import ConnectionBanner from '../ConnectionBanner';
 
 import { Container, DisabledOverlay, MessageContainer } from './styles';
-
-function usePrevious<T>(value: T) {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
 
 const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   const {
