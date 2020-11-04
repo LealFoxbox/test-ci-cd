@@ -3,7 +3,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '10.0'
 
-target 'orange' do
+target 'OrangeQC' do
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
@@ -14,7 +14,7 @@ target 'orange' do
 
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
 
-  target 'orangeTests' do
+  target 'OrangeQCTests' do
     inherit! :complete
     # Pods for testing
   end
@@ -29,10 +29,10 @@ target 'orange' do
   end
 end
 
-target 'orange-tvOS' do
-  # Pods for orange-tvOS
+target 'OrangeQC-tvOS' do
+  # Pods for OrangeQC-tvOS
 
-  target 'orange-tvOSTests' do
+  target 'OrangeQC-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

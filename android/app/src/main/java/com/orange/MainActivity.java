@@ -1,4 +1,4 @@
-package com.orange;
+package com.orangeqc.app;
 
 import android.os.Bundle;
 
@@ -13,7 +13,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "orange";
+    return "OrangeQC";
   }
 
   @Override

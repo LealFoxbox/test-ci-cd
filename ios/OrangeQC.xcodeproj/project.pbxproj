@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00E356F31AD99517003FC87E /* orangeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* orangeTests.m */; };
-		09811C19B3C0CE4A88665843 /* libPods-orange.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C4A4E3B17103E55CCD80916 /* libPods-orange.a */; };
+		00E356F31AD99517003FC87E /* OrangeQCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* OrangeQCTests.m */; };
+		09811C19B3C0CE4A88665843 /* libPods-OrangeQC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C4A4E3B17103E55CCD80916 /* libPods-OrangeQC.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2DCD954D1E0B4F2C00145EB5 /* orangeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* orangeTests.m */; };
-		2F2FE58516D5BD179E4C2FD0 /* libPods-orange-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F854BD61FA65343BC0F795E /* libPods-orange-tvOS.a */; };
+		2DCD954D1E0B4F2C00145EB5 /* OrangeQCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* OrangeQCTests.m */; };
+		2F2FE58516D5BD179E4C2FD0 /* libPods-OrangeQC-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F854BD61FA65343BC0F795E /* libPods-OrangeQC-tvOS.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		CE9ABD3DED13558DA788FCA1 /* libPods-orange-orangeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 850AEB4D57FE3822547BDF38 /* libPods-orange-orangeTests.a */; };
-		EAFA496EB288C2AD56E7D73F /* libPods-orange-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 66E35BFACF7477F63C82C0F3 /* libPods-orange-tvOSTests.a */; };
+		CE9ABD3DED13558DA788FCA1 /* libPods-OrangeQC-OrangeQCTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 850AEB4D57FE3822547BDF38 /* libPods-OrangeQC-OrangeQCTests.a */; };
+		EAFA496EB288C2AD56E7D73F /* libPods-OrangeQC-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 66E35BFACF7477F63C82C0F3 /* libPods-OrangeQC-tvOSTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,61 +28,68 @@
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = orange;
+			remoteInfo = OrangeQC;
 		};
 		2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 2D02E47A1E0B4A5D006451C7;
-			remoteInfo = "orange-tvOS";
+			remoteInfo = "OrangeQC-tvOS";
+		};
+		584CA97E255342E800E082AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
+			remoteInfo = OrangeQC;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
-		00E356EE1AD99517003FC87E /* orangeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = orangeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356EE1AD99517003FC87E /* OrangeQCTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrangeQCTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* orangeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = orangeTests.m; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* orange.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = orange.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = orange/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = orange/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = orange/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = orange/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = orange/main.m; sourceTree = "<group>"; };
-		1FE14D9BE072AD28B2043912 /* Pods-orange-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-orange-tvOSTests/Pods-orange-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		234C9854858468F1F1DC7F59 /* Pods-orange-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-tvOS.release.xcconfig"; path = "Target Support Files/Pods-orange-tvOS/Pods-orange-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		2D02E47B1E0B4A5D006451C7 /* orange-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "orange-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D02E4901E0B4A5D006451C7 /* orange-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "orange-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356F21AD99517003FC87E /* OrangeQCTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrangeQCTests.m; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* OrangeQC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OrangeQC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = OrangeQC/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = OrangeQC/AppDelegate.m; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = OrangeQC/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = OrangeQC/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = OrangeQC/main.m; sourceTree = "<group>"; };
+		1FE14D9BE072AD28B2043912 /* Pods-OrangeQC-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-OrangeQC-tvOSTests/Pods-OrangeQC-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		234C9854858468F1F1DC7F59 /* Pods-OrangeQC-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-tvOS.release.xcconfig"; path = "Target Support Files/Pods-OrangeQC-tvOS/Pods-OrangeQC-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		2D02E47B1E0B4A5D006451C7 /* OrangeQC-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OrangeQC-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D02E4901E0B4A5D006451C7 /* OrangeQC-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "OrangeQC-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		316CB31A00DE446C80E37ADD /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
-		44FDC84255FA40E70AC2B9FB /* Pods-orange-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-orange-tvOSTests/Pods-orange-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		51A8B583A6FC678B313F1F2A /* Pods-orange-orangeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-orangeTests.release.xcconfig"; path = "Target Support Files/Pods-orange-orangeTests/Pods-orange-orangeTests.release.xcconfig"; sourceTree = "<group>"; };
-		525F956AB5A2B47ECDB39EBB /* Pods-orange.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange.release.xcconfig"; path = "Target Support Files/Pods-orange/Pods-orange.release.xcconfig"; sourceTree = "<group>"; };
+		44FDC84255FA40E70AC2B9FB /* Pods-OrangeQC-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-OrangeQC-tvOSTests/Pods-OrangeQC-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		51A8B583A6FC678B313F1F2A /* Pods-OrangeQC-OrangeQCTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-OrangeQCTests.release.xcconfig"; path = "Target Support Files/Pods-OrangeQC-OrangeQCTests/Pods-OrangeQC-OrangeQCTests.release.xcconfig"; sourceTree = "<group>"; };
+		525F956AB5A2B47ECDB39EBB /* Pods-OrangeQC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC.release.xcconfig"; path = "Target Support Files/Pods-OrangeQC/Pods-OrangeQC.release.xcconfig"; sourceTree = "<group>"; };
 		54D7D0B081A7435C982459AB /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		5A6124033B31470CB96C1BFA /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		63A51CA4AB46403FAD17D3F4 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
-		66E35BFACF7477F63C82C0F3 /* libPods-orange-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-orange-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		6F854BD61FA65343BC0F795E /* libPods-orange-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-orange-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		66E35BFACF7477F63C82C0F3 /* libPods-OrangeQC-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrangeQC-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F854BD61FA65343BC0F795E /* libPods-OrangeQC-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrangeQC-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		742063A1B38343CDBECB93DB /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		76384EF4250D494EA27BB023 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
-		7C4A4E3B17103E55CCD80916 /* libPods-orange.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-orange.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = orange/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		850AEB4D57FE3822547BDF38 /* libPods-orange-orangeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-orange-orangeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C4A4E3B17103E55CCD80916 /* libPods-OrangeQC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrangeQC.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = OrangeQC/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		850AEB4D57FE3822547BDF38 /* libPods-OrangeQC-OrangeQCTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrangeQC-OrangeQCTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		87AD77E2E35943338AAEE014 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		8E9F22B97DDE458EAC452A8E /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		907C4DC91431476ABD0BF756 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		B28036481E784B4CA2018239 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
-		B2F58FEC83026FE836EC120B /* Pods-orange-orangeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-orangeTests.debug.xcconfig"; path = "Target Support Files/Pods-orange-orangeTests/Pods-orange-orangeTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B2F58FEC83026FE836EC120B /* Pods-OrangeQC-OrangeQCTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-OrangeQCTests.debug.xcconfig"; path = "Target Support Files/Pods-OrangeQC-OrangeQCTests/Pods-OrangeQC-OrangeQCTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BCD938DDB6534D9885F65B47 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		D72A4824491544B09C545BC3 /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf"; sourceTree = "<group>"; };
-		DD3D54754CECB2EF15AB5F8B /* Pods-orange-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-orange-tvOS/Pods-orange-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		DD3D54754CECB2EF15AB5F8B /* Pods-OrangeQC-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-OrangeQC-tvOS/Pods-OrangeQC-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		DDD33EAEDC654B00ADFB2B72 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
 		EA1C16716A1F45EFBB21FD99 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 		EFF04C913A4B4AF2A9B36A99 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
 		F36FC5A1DA7E43E6BBEFD6CE /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Brands.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf"; sourceTree = "<group>"; };
-		FFDCB95B8806278FD2EBC231 /* Pods-orange.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-orange.debug.xcconfig"; path = "Target Support Files/Pods-orange/Pods-orange.debug.xcconfig"; sourceTree = "<group>"; };
+		FFDCB95B8806278FD2EBC231 /* Pods-OrangeQC.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrangeQC.debug.xcconfig"; path = "Target Support Files/Pods-OrangeQC/Pods-OrangeQC.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,7 +97,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE9ABD3DED13558DA788FCA1 /* libPods-orange-orangeTests.a in Frameworks */,
+				CE9ABD3DED13558DA788FCA1 /* libPods-OrangeQC-OrangeQCTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,7 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09811C19B3C0CE4A88665843 /* libPods-orange.a in Frameworks */,
+				09811C19B3C0CE4A88665843 /* libPods-OrangeQC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,7 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F2FE58516D5BD179E4C2FD0 /* libPods-orange-tvOS.a in Frameworks */,
+				2F2FE58516D5BD179E4C2FD0 /* libPods-OrangeQC-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,20 +121,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EAFA496EB288C2AD56E7D73F /* libPods-orange-tvOSTests.a in Frameworks */,
+				EAFA496EB288C2AD56E7D73F /* libPods-OrangeQC-tvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* orangeTests */ = {
+		00E356EF1AD99517003FC87E /* OrangeQCTests */ = {
 			isa = PBXGroup;
 			children = (
-				00E356F21AD99517003FC87E /* orangeTests.m */,
+				00E356F21AD99517003FC87E /* OrangeQCTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
-			path = orangeTests;
+			path = OrangeQCTests;
 			sourceTree = "<group>";
 		};
 		00E356F01AD99517003FC87E /* Supporting Files */ = {
@@ -138,7 +145,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* orange */ = {
+		13B07FAE1A68108700A75B9A /* OrangeQC */ = {
 			isa = PBXGroup;
 			children = (
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
@@ -149,7 +156,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
-			name = orange;
+			name = OrangeQC;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -157,10 +164,10 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				7C4A4E3B17103E55CCD80916 /* libPods-orange.a */,
-				850AEB4D57FE3822547BDF38 /* libPods-orange-orangeTests.a */,
-				6F854BD61FA65343BC0F795E /* libPods-orange-tvOS.a */,
-				66E35BFACF7477F63C82C0F3 /* libPods-orange-tvOSTests.a */,
+				7C4A4E3B17103E55CCD80916 /* libPods-OrangeQC.a */,
+				850AEB4D57FE3822547BDF38 /* libPods-OrangeQC-OrangeQCTests.a */,
+				6F854BD61FA65343BC0F795E /* libPods-OrangeQC-tvOS.a */,
+				66E35BFACF7477F63C82C0F3 /* libPods-OrangeQC-tvOSTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -198,9 +205,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* orange */,
+				13B07FAE1A68108700A75B9A /* OrangeQC */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* orangeTests */,
+				00E356EF1AD99517003FC87E /* OrangeQCTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BD39A8B842CC92E43C7C90FC /* Pods */,
@@ -214,10 +221,10 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* orange.app */,
-				00E356EE1AD99517003FC87E /* orangeTests.xctest */,
-				2D02E47B1E0B4A5D006451C7 /* orange-tvOS.app */,
-				2D02E4901E0B4A5D006451C7 /* orange-tvOSTests.xctest */,
+				13B07F961A680F5B00A75B9A /* OrangeQC.app */,
+				00E356EE1AD99517003FC87E /* OrangeQCTests.xctest */,
+				2D02E47B1E0B4A5D006451C7 /* OrangeQC-tvOS.app */,
+				2D02E4901E0B4A5D006451C7 /* OrangeQC-tvOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -225,14 +232,14 @@
 		BD39A8B842CC92E43C7C90FC /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				FFDCB95B8806278FD2EBC231 /* Pods-orange.debug.xcconfig */,
-				525F956AB5A2B47ECDB39EBB /* Pods-orange.release.xcconfig */,
-				B2F58FEC83026FE836EC120B /* Pods-orange-orangeTests.debug.xcconfig */,
-				51A8B583A6FC678B313F1F2A /* Pods-orange-orangeTests.release.xcconfig */,
-				DD3D54754CECB2EF15AB5F8B /* Pods-orange-tvOS.debug.xcconfig */,
-				234C9854858468F1F1DC7F59 /* Pods-orange-tvOS.release.xcconfig */,
-				1FE14D9BE072AD28B2043912 /* Pods-orange-tvOSTests.debug.xcconfig */,
-				44FDC84255FA40E70AC2B9FB /* Pods-orange-tvOSTests.release.xcconfig */,
+				FFDCB95B8806278FD2EBC231 /* Pods-OrangeQC.debug.xcconfig */,
+				525F956AB5A2B47ECDB39EBB /* Pods-OrangeQC.release.xcconfig */,
+				B2F58FEC83026FE836EC120B /* Pods-OrangeQC-OrangeQCTests.debug.xcconfig */,
+				51A8B583A6FC678B313F1F2A /* Pods-OrangeQC-OrangeQCTests.release.xcconfig */,
+				DD3D54754CECB2EF15AB5F8B /* Pods-OrangeQC-tvOS.debug.xcconfig */,
+				234C9854858468F1F1DC7F59 /* Pods-OrangeQC-tvOS.release.xcconfig */,
+				1FE14D9BE072AD28B2043912 /* Pods-OrangeQC-tvOSTests.debug.xcconfig */,
+				44FDC84255FA40E70AC2B9FB /* Pods-OrangeQC-tvOSTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -240,9 +247,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* orangeTests */ = {
+		00E356ED1AD99517003FC87E /* OrangeQCTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "orangeTests" */;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "OrangeQCTests" */;
 			buildPhases = (
 				53011E73191AB212F99E20E2 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
@@ -255,14 +262,14 @@
 			dependencies = (
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = orangeTests;
-			productName = orangeTests;
-			productReference = 00E356EE1AD99517003FC87E /* orangeTests.xctest */;
+			name = OrangeQCTests;
+			productName = OrangeQCTests;
+			productReference = 00E356EE1AD99517003FC87E /* OrangeQCTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		13B07F861A680F5B00A75B9A /* orange */ = {
+		13B07F861A680F5B00A75B9A /* OrangeQC */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "orange" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "OrangeQC" */;
 			buildPhases = (
 				AF7F5B4E516ADF461B14F535 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
@@ -276,14 +283,14 @@
 			);
 			dependencies = (
 			);
-			name = orange;
-			productName = orange;
-			productReference = 13B07F961A680F5B00A75B9A /* orange.app */;
+			name = OrangeQC;
+			productName = OrangeQC;
+			productReference = 13B07F961A680F5B00A75B9A /* OrangeQC.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E47A1E0B4A5D006451C7 /* orange-tvOS */ = {
+		2D02E47A1E0B4A5D006451C7 /* OrangeQC-tvOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "orange-tvOS" */;
+			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "OrangeQC-tvOS" */;
 			buildPhases = (
 				A7F2D176981336AFEFFD553E /* [CP] Check Pods Manifest.lock */,
 				FD10A7F122414F3F0027D42C /* Start Packager */,
@@ -296,14 +303,14 @@
 			);
 			dependencies = (
 			);
-			name = "orange-tvOS";
-			productName = "orange-tvOS";
-			productReference = 2D02E47B1E0B4A5D006451C7 /* orange-tvOS.app */;
+			name = "OrangeQC-tvOS";
+			productName = "OrangeQC-tvOS";
+			productReference = 2D02E47B1E0B4A5D006451C7 /* OrangeQC-tvOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E48F1E0B4A5D006451C7 /* orange-tvOSTests */ = {
+		2D02E48F1E0B4A5D006451C7 /* OrangeQC-tvOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "orange-tvOSTests" */;
+			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "OrangeQC-tvOSTests" */;
 			buildPhases = (
 				E21E1FE5B82827BB14EDC9DF /* [CP] Check Pods Manifest.lock */,
 				2D02E48C1E0B4A5D006451C7 /* Sources */,
@@ -314,10 +321,11 @@
 			);
 			dependencies = (
 				2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */,
+				584CA97F255342E800E082AC /* PBXTargetDependency */,
 			);
-			name = "orange-tvOSTests";
-			productName = "orange-tvOSTests";
-			productReference = 2D02E4901E0B4A5D006451C7 /* orange-tvOSTests.xctest */;
+			name = "OrangeQC-tvOSTests";
+			productName = "OrangeQC-tvOSTests";
+			productReference = 2D02E4901E0B4A5D006451C7 /* OrangeQC-tvOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -342,11 +350,11 @@
 					2D02E48F1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
-						TestTargetID = 2D02E47A1E0B4A5D006451C7;
+						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "orange" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "OrangeQC" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -359,10 +367,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* orange */,
-				00E356ED1AD99517003FC87E /* orangeTests */,
-				2D02E47A1E0B4A5D006451C7 /* orange-tvOS */,
-				2D02E48F1E0B4A5D006451C7 /* orange-tvOSTests */,
+				13B07F861A680F5B00A75B9A /* OrangeQC */,
+				00E356ED1AD99517003FC87E /* OrangeQCTests */,
+				2D02E47A1E0B4A5D006451C7 /* OrangeQC-tvOS */,
+				2D02E48F1E0B4A5D006451C7 /* OrangeQC-tvOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -436,7 +444,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-orange-orangeTests/Pods-orange-orangeTests-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-OrangeQC-OrangeQCTests/Pods-OrangeQC-OrangeQCTests-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -477,7 +485,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-orange-orangeTests/Pods-orange-orangeTests-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OrangeQC-OrangeQCTests/Pods-OrangeQC-OrangeQCTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		53011E73191AB212F99E20E2 /* [CP] Check Pods Manifest.lock */ = {
@@ -495,7 +503,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-orange-orangeTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-OrangeQC-OrangeQCTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -517,7 +525,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-orange-tvOS-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-OrangeQC-tvOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -539,7 +547,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-orange-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-OrangeQC-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -552,7 +560,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-orange/Pods-orange-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-OrangeQC/Pods-OrangeQC-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -593,7 +601,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-orange/Pods-orange-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OrangeQC/Pods-OrangeQC-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E21E1FE5B82827BB14EDC9DF /* [CP] Check Pods Manifest.lock */ = {
@@ -611,7 +619,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-orange-tvOSTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-OrangeQC-tvOSTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -663,7 +671,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00E356F31AD99517003FC87E /* orangeTests.m in Sources */,
+				00E356F31AD99517003FC87E /* OrangeQCTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -689,7 +697,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2DCD954D1E0B4F2C00145EB5 /* orangeTests.m in Sources */,
+				2DCD954D1E0B4F2C00145EB5 /* OrangeQCTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -698,27 +706,32 @@
 /* Begin PBXTargetDependency section */
 		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* orange */;
+			target = 13B07F861A680F5B00A75B9A /* OrangeQC */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
 		2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2D02E47A1E0B4A5D006451C7 /* orange-tvOS */;
+			target = 2D02E47A1E0B4A5D006451C7 /* OrangeQC-tvOS */;
 			targetProxy = 2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */;
+		};
+		584CA97F255342E800E082AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 13B07F861A680F5B00A75B9A /* OrangeQC */;
+			targetProxy = 584CA97E255342E800E082AC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B2F58FEC83026FE836EC120B /* Pods-orange-orangeTests.debug.xcconfig */;
+			baseConfigurationReference = B2F58FEC83026FE836EC120B /* Pods-OrangeQC-OrangeQCTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = orangeTests/Info.plist;
+				INFOPLIST_FILE = OrangeQCTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -728,17 +741,17 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/orange.app/orange";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OrangeQC.app/OrangeQC";
 			};
 			name = Debug;
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 51A8B583A6FC678B313F1F2A /* Pods-orange-orangeTests.release.xcconfig */;
+			baseConfigurationReference = 51A8B583A6FC678B313F1F2A /* Pods-OrangeQC-OrangeQCTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = orangeTests/Info.plist;
+				INFOPLIST_FILE = OrangeQCTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -748,19 +761,19 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/orange.app/orange";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OrangeQC.app/OrangeQC";
 			};
 			name = Release;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FFDCB95B8806278FD2EBC231 /* Pods-orange.debug.xcconfig */;
+			baseConfigurationReference = FFDCB95B8806278FD2EBC231 /* Pods-OrangeQC.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = orange/Info.plist;
+				INFOPLIST_FILE = OrangeQC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -768,7 +781,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = orange;
+				PRODUCT_NAME = OrangeQC;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -777,12 +790,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 525F956AB5A2B47ECDB39EBB /* Pods-orange.release.xcconfig */;
+			baseConfigurationReference = 525F956AB5A2B47ECDB39EBB /* Pods-OrangeQC.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = orange/Info.plist;
+				INFOPLIST_FILE = OrangeQC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -790,7 +803,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = orange;
+				PRODUCT_NAME = OrangeQC;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -798,7 +811,7 @@
 		};
 		2D02E4971E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DD3D54754CECB2EF15AB5F8B /* Pods-orange-tvOS.debug.xcconfig */;
+			baseConfigurationReference = DD3D54754CECB2EF15AB5F8B /* Pods-OrangeQC-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -809,14 +822,14 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "orange-tvOS/Info.plist";
+				INFOPLIST_FILE = "OrangeQC-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.orange-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.OrangeQC-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -826,7 +839,7 @@
 		};
 		2D02E4981E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 234C9854858468F1F1DC7F59 /* Pods-orange-tvOS.release.xcconfig */;
+			baseConfigurationReference = 234C9854858468F1F1DC7F59 /* Pods-OrangeQC-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -837,14 +850,14 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "orange-tvOS/Info.plist";
+				INFOPLIST_FILE = "OrangeQC-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.orange-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.OrangeQC-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -854,7 +867,7 @@
 		};
 		2D02E4991E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1FE14D9BE072AD28B2043912 /* Pods-orange-tvOSTests.debug.xcconfig */;
+			baseConfigurationReference = 1FE14D9BE072AD28B2043912 /* Pods-OrangeQC-tvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -864,24 +877,24 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "orange-tvOSTests/Info.plist";
+				INFOPLIST_FILE = "OrangeQC-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.orange-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.OrangeQC-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/orange-tvOS.app/orange-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OrangeQC.app/OrangeQC";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Debug;
 		};
 		2D02E49A1E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 44FDC84255FA40E70AC2B9FB /* Pods-orange-tvOSTests.release.xcconfig */;
+			baseConfigurationReference = 44FDC84255FA40E70AC2B9FB /* Pods-OrangeQC-tvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -891,17 +904,17 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "orange-tvOSTests/Info.plist";
+				INFOPLIST_FILE = "OrangeQC-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.orange-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.OrangeQC-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/orange-tvOS.app/orange-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OrangeQC.app/OrangeQC";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Release;
@@ -1022,7 +1035,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "orangeTests" */ = {
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "OrangeQCTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
@@ -1031,7 +1044,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "orange" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "OrangeQC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -1040,7 +1053,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "orange-tvOS" */ = {
+		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "OrangeQC-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4971E0B4A5E006451C7 /* Debug */,
@@ -1049,7 +1062,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "orange-tvOSTests" */ = {
+		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "OrangeQC-tvOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4991E0B4A5E006451C7 /* Debug */,
@@ -1058,7 +1071,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "orange" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "OrangeQC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

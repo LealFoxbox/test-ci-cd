@@ -32,7 +32,7 @@ const baseRaxConfig: rax.RaxConfig['raxConfig'] = {
     const retry = getOr(4, 'retry', cfg);
 
     if (currentRetryAttempt <= retry) {
-      console.warn('Endpoint Error. Axios retry?', JSON.stringify(err));
+      console.warn('Endpoint Error. Axios retry?', err.response?.status === 503);
       return err.response?.status === 503;
     }
     return false;
