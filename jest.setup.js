@@ -8,18 +8,6 @@ jest.mock('react-native-screens', () => {
   return RealComponent;
 });
 
-jest.mock('react-native-device-info', () => {
-  return {
-    getBundleId: () => 'testbundle',
-    getUniqueId: () => 'device-1-uid',
-    getDeviceName: () => Promise.resolve('device-1-name'),
-    getBuildNumber: () => '4',
-    getDeviceId: () => 'goldfish',
-    isEmulator: () => Promise.resolve(false),
-    getVersion: () => '1.0',
-  };
-});
-
 /**
  * Mock TouchableOpacity using TouchableHighlight to avoid a bug on RN
  * https://github.com/testing-library/native-testing-library/issues/113

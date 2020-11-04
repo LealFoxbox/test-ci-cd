@@ -23,15 +23,17 @@ const AccountScreen: React.FC<{}> = () => {
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
 
-  const emailSubject = encodeURIComponent(config.APP_VERSION);
+  const emailSubject = encodeURIComponent(`OrangeQC ${config.APP_VERSION}`);
   const emailBody = !user
     ? ''
     : encodeURIComponent(`
-Email: ${user.email}
-Name: ${user.first_name} ${user.last_name}
-Account name: ${user.account.name}
-Account subdomain: ${user.account.name}
-Login: ${user.login}
+
+
+
+------
+App: ${config.BUNDLE_ID}, ${config.APP_VERSION}
+Device: ${config.MODEL} (${config.PLATFORM_VERSION})
+Locale: ${config.PARSED_LOCALES}
 `);
 
   const showDialog = () => setVisible(true);
@@ -75,7 +77,7 @@ Login: ${user.login}
             onPress={() => openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`)}
           />
           <Divider />
-          <Row label="App version" value={config.APP_VERSION} />
+          <Row label="App version" value={`OrangeQC ${config.APP_VERSION}`} />
           {config.isStaging && (
             <>
               <Divider />

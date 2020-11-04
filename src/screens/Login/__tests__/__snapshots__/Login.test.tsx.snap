@@ -788,30 +788,6 @@ Array [
                           </View>
                         </View>
                       </View>
-                      <View
-                        accessibilityRole="none"
-                        accessible={true}
-                        focusable={false}
-                        onClick={[Function]}
-                        onResponderGrant={[Function]}
-                        onResponderMove={[Function]}
-                        onResponderRelease={[Function]}
-                        onResponderTerminate={[Function]}
-                        onResponderTerminationRequest={[Function]}
-                        onStartShouldSetResponder={[Function]}
-                        style={
-                          Array [
-                            Object {
-                              "height": 50,
-                              "left": 25,
-                              "position": "absolute",
-                              "top": 0,
-                              "width": 120,
-                              "zIndex": -99999,
-                            },
-                          ]
-                        }
-                      />
                     </View>
                   </View>
                 </RCTScrollView>
