@@ -9,4 +9,4 @@
 
 # Add any project specific keep options here:
 
--keep class com.orange.BuildConfig { *; }
+-keep class com.orangeqc.app.BuildConfig { *; }
