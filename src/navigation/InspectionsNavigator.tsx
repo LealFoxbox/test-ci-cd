@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Platform } from 'react-native';
 
 import InspectionsScreen from 'src/screens/Inspections';
 
@@ -18,7 +17,7 @@ const InspectionsNavigator: React.FC = () => {
   const [renderRight, setRenderRight] = useState<RenderRight>(() => () => null);
 
   return (
-    <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
+    <Stack.Navigator>
       <Stack.Screen
         name={INSPECTIONS_HOME}
         component={InspectionsScreen}

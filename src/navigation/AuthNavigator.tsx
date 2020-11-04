@@ -1,35 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import LoginScreen from 'src/screens/Login';
 
 import { SIGN_IN } from './screenNames';
 
-type SignUpParams = {
-  email: string;
-  id: string;
-  verification_code: string;
-};
+type RenderRight = () => React.ReactNode;
 
-type AuthNavigatorParamList = {
-  [SIGN_IN]: undefined;
-};
-
-type AuthNavigatorProps = {
-  // if signUpParams doesn't exist, then the user should sign in. If it exists then the user should signUp
-  signUpParams?: SignUpParams;
+export type AuthNavigatorParamList = {
+  [SIGN_IN]: { updateRenderRight: (render: RenderRight) => void };
 };
 
 const Stack = createStackNavigator<AuthNavigatorParamList>();
 
-const AuthNavigator: React.FC<AuthNavigatorProps> = () => (
-  <Stack.Navigator>
-    <Stack.Screen
-      name={SIGN_IN}
-      component={LoginScreen}
-      options={{ headerTitle: 'Sign in', headerTitleStyle: { marginLeft: 15 } }}
-    />
-  </Stack.Navigator>
-);
+const AuthNavigator: React.FC = () => {
+  const [renderRight, setRenderRight] = useState<RenderRight>(() => () => null);
+
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name={SIGN_IN}
+        component={LoginScreen}
+        options={{
+          headerTitle: 'Sign in',
+          headerTitleStyle: { marginLeft: 15 },
+          headerRight: renderRight,
+        }}
+        initialParams={{ updateRenderRight: (render: RenderRight) => setRenderRight(() => render) }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 export default AuthNavigator;

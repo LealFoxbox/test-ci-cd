@@ -6,10 +6,6 @@ export const FormContainer = styled.View`
 `;
 
 export const EasterEgg = styled.View`
-  width: 120px;
+  width: 100px;
   height: 50px;
-  position: absolute;
-  left: 25px;
-  top: 0;
-  z-index: -99999;
 `;

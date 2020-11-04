@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { getBuildNumber, getDeviceId, getDeviceName, getVersion } from 'react-native-device-info';
 
 const stagingBaseurl = 'orangeqc-staging.com';
@@ -19,7 +18,7 @@ interface Config {
 const config: Config = {
   isDev: __DEV__,
   isStaging: false,
-  APP_VERSION: `${Platform.OS} v${getVersion()} (${getBuildNumber()})`,
+  APP_VERSION: `OrangeQC ${getVersion()} (${getBuildNumber()})`,
   DEVICE_ID: getDeviceId(),
   DEVICE_NAME: 'default name',
   BACKEND_BASE_URL: '',

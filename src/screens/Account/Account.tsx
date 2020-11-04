@@ -23,6 +23,17 @@ const AccountScreen: React.FC<{}> = () => {
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
 
+  const emailSubject = encodeURIComponent(config.APP_VERSION);
+  const emailBody = !user
+    ? ''
+    : encodeURIComponent(`
+Email: ${user.email}
+Name: ${user.first_name} ${user.last_name}
+Account name: ${user.account.name}
+Account subdomain: ${user.account.name}
+Login: ${user.login}
+`);
+
   const showDialog = () => setVisible(true);
 
   const hideDialog = () => setVisible(false);
@@ -61,9 +72,7 @@ const AccountScreen: React.FC<{}> = () => {
             label="Email Support"
             value="Get help using the app"
             icon="email"
-            onPress={() =>
-              openURL(`mailto:support@orangeqc.com?subject=Help!&body=Sent from ${config.APP_VERSION} app`)
-            }
+            onPress={() => openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`)}
           />
           <Divider />
           <Row label="App version" value={config.APP_VERSION} />

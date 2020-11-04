@@ -1,10 +1,7 @@
 import React from 'react';
-import { TouchableWithoutFeedback } from 'react-native';
 import { Button, Dialog, Paragraph, Portal, useTheme } from 'react-native-paper';
 
 import { styled } from 'src/paperTheme';
-
-import { EasterEgg } from './styles';
 
 const NoButton = styled(Button)`
   margin-right: 10px;
@@ -12,15 +9,12 @@ const NoButton = styled(Button)`
 
 interface StagingDialog {
   onConfirm: () => void;
+  hideDialog: () => void;
+  visible: boolean;
 }
 
-const StagingDialog: React.FC<StagingDialog> = ({ onConfirm }) => {
+const StagingDialog: React.FC<StagingDialog> = ({ onConfirm, visible, hideDialog }) => {
   const theme = useTheme();
-  const [visible, setVisible] = React.useState(false);
-
-  const showDialog = () => setVisible(true);
-
-  const hideDialog = () => setVisible(false);
 
   const handleConfirm = () => {
     hideDialog();
@@ -29,9 +23,6 @@ const StagingDialog: React.FC<StagingDialog> = ({ onConfirm }) => {
 
   return (
     <>
-      <TouchableWithoutFeedback delayLongPress={4000} accessibilityRole="none" onLongPress={showDialog}>
-        <EasterEgg />
-      </TouchableWithoutFeedback>
       <Portal>
         <Dialog visible={visible} onDismiss={hideDialog}>
           <Dialog.Title>Alert</Dialog.Title>

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { TextInput as NativeTextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TextInput as NativeTextInput, TouchableWithoutFeedback } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { useMutation } from 'react-query';
 import { AxiosResponse } from 'axios';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
@@ -14,9 +15,11 @@ import { useUserSession } from 'src/contexts/userSession';
 import config, { setEnv } from 'src/config';
 import sensitiveStorage from 'src/utils/sensitiveStorage';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
+import { SIGN_IN } from 'src/navigation/screenNames';
+import { AuthNavigatorParamList } from 'src/navigation/AuthNavigator';
 
-import { FormContainer } from './styles';
 import StagingDialog from './StagingDialog';
+import { EasterEgg, FormContainer } from './styles';
 
 interface Form {
   companyId: string;
@@ -36,8 +39,11 @@ const LoginScreen: React.FC<{}> = () => {
   const [isStaging, setStaging] = useState(config.isStaging);
   const [authError, setAuthError] = useState('');
   const [, dispatch] = useUserSession();
-
   const connected = useNetworkStatus();
+  const [visible, setVisible] = React.useState(false);
+  const {
+    params: { updateRenderRight },
+  } = useRoute<RouteProp<AuthNavigatorParamList, typeof SIGN_IN>>();
 
   const [mutateSubmit, { isLoading }] = useMutation<AxiosResponse<UserResponse>, ApiError, Form>(authenticate, {
     onMutate: () => {
@@ -67,6 +73,14 @@ const LoginScreen: React.FC<{}> = () => {
       }
     },
   });
+
+  useEffect(() => {
+    updateRenderRight(() => (
+      <TouchableWithoutFeedback delayLongPress={4000} accessibilityRole="none" onLongPress={() => setVisible(true)}>
+        <EasterEgg />
+      </TouchableWithoutFeedback>
+    ));
+  }, [updateRenderRight, setVisible]);
 
   const handleEasterEgg = () => {
     if (!isLoading) {
@@ -164,10 +178,10 @@ const LoginScreen: React.FC<{}> = () => {
             >
               Sign in
             </Button>
-            <StagingDialog onConfirm={handleEasterEgg} />
           </FormContainer>
         )}
       </Formik>
+      <StagingDialog visible={visible} hideDialog={() => setVisible(false)} onConfirm={handleEasterEgg} />
     </ScrollView>
   );
 };
