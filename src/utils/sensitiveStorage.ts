@@ -1,6 +1,10 @@
 import SInfo from 'react-native-sensitive-info';
 
+import createCache from './cache';
+
 const configName = `OrangeQCRNApp`;
+
+const cache = createCache();
 
 const options = {
   sharedPreferencesName: configName,
@@ -8,47 +12,46 @@ const options = {
   kSecAttrAccessible: 'kSecAttrAccessibleAfterFirstUnlock', // https://github.com/mCodex/react-native-sensitive-info/issues/144
 } as const;
 
-let items: { [key: string]: string } = {};
-
-// TODO: use lodash for mods to items
-
 export default {
-  setItem: async function (key: string, value: string, persistNow = true): Promise<void> {
-    items[key] = value;
-    if (persistNow) {
-      await SInfo.setItem(key, value, options);
-    }
+  setItem: function (key: string, value: string) {
+    cache.setValue(key, value);
+    return SInfo.setItem(key, value, options);
   },
-  getItem: async function (key: string): Promise<string | undefined> {
-    if (!(key in items)) {
-      const tempItem = await SInfo.getItem(key, options);
-
-      if (tempItem === null) {
-        return undefined;
-      }
-
-      items[key] = tempItem;
-    }
-    return items[key];
+  setCacheOnly: function (key: string, value: string) {
+    cache.setValue(key, value);
   },
-  rehydrate: async function (): Promise<void> {
+  getItem: async function (key: string) {
+    if (cache.keyExists(key)) {
+      return cache.getValue(key);
+    }
+
+    const storedItem = await SInfo.getItem(key, options);
+
+    if (storedItem === null) {
+      return undefined;
+    }
+
+    cache.setValue(key, storedItem);
+
+    return storedItem;
+  },
+  rehydrate: async function () {
     const storedItems = await SInfo.getAllItems(options);
     // SInfo.getAllItems returns an array in iOS, but an object in Android. The docs don't specify this behaviour,
-    // so let's keep this "if" (instead of one based on Platform) to improve robustness.
     if (Array.isArray(storedItems)) {
       storedItems.flat().map(({ key, value }) => {
-        items[key] = value;
+        cache.setValue(key, value);
       });
     } else {
-      Object.assign(items, storedItems);
+      cache.setValues(storedItems);
     }
   },
-  persistAll: async function (): Promise<void> {
-    // this is used for when thrid-party libraries clear the secure storage for some reason
-    await Promise.all(Object.entries(items).map(([key, value]) => SInfo.setItem(key, value, options)));
+  persistAll: function () {
+    // this is only ever used when third-party libraries clear the secure storage for some reason
+    return Promise.all(cache.getEntries().map(([key, value]) => SInfo.setItem(key, value, options)));
   },
-  clearAll: async function (): Promise<void> {
-    await Promise.all(Object.keys(items).map((key) => SInfo.deleteItem(key, options)));
-    items = {};
+  clearAll: function () {
+    cache.clear();
+    return Promise.all(cache.getKeys().map((key) => SInfo.deleteItem(key, options)));
   },
 };

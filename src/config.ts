@@ -2,9 +2,9 @@ import { Platform } from 'react-native';
 import {
   getBuildNumber,
   getBundleId,
-  getDeviceId,
   getDeviceName,
   getModel,
+  getUniqueId,
   getVersion,
 } from 'react-native-device-info';
 import { Locale, getLocales } from 'react-native-localize';
@@ -34,7 +34,7 @@ const config: Config = {
   isDev: __DEV__,
   isStaging: false,
   APP_VERSION: `${getVersion()} (${getBuildNumber()})`,
-  DEVICE_ID: getDeviceId(),
+  DEVICE_ID: getUniqueId(),
   DEVICE_NAME: 'default name',
   MODEL: getModel(),
   PLATFORM_VERSION: Platform.Version,
