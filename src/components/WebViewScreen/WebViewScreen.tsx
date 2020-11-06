@@ -78,7 +78,7 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             startInLoadingState
             onNavigationStateChange={({ url }: WebViewNavigation) => {
               if (url.endsWith('.com/login')) {
-                dispatch({ type: 'logout' });
+                dispatch({ type: 'start_logout' });
               }
             }}
             onError={() => {

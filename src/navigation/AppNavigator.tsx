@@ -19,15 +19,13 @@ function AppNavigator() {
     }
   }, [status, prevStatus]);
 
-  if (status === 'starting') {
-    return <View />;
-  } else if (status === 'shouldLogIn') {
+  if (status === 'shouldLogIn') {
     return <AuthNavigator />;
   } else if (status === 'loggedIn') {
     return <MainNavigator user={data} />;
+  } else {
+    return <View />;
   }
-
-  throw Error('useSession status has an unexpected value');
 }
 
 export default AppNavigator;

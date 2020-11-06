@@ -7,7 +7,6 @@ import config from 'src/config';
 import { useUserSession } from 'src/contexts/userSession';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
-import sensitiveStorage from 'src/utils/sensitiveStorage';
 import Row from 'src/components/Row';
 
 const Container = styled.View`
@@ -18,31 +17,27 @@ const NoButton = styled(Button)`
   margin-right: 10px;
 `;
 
-const AccountScreen: React.FC<{}> = () => {
+const metadata = `
+  <br/><br/><br/>------<br/>
+  App: ${config.BUNDLE_ID}, ${config.APP_VERSION}<br/>
+  Device: ${config.MODEL} (${config.PLATFORM_VERSION})<br/>
+  Locale: ${config.PARSED_LOCALES}<br/>
+`;
+
+const AccountScreen: React.FC = () => {
   const [{ data: user }, dispatch] = useUserSession();
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
 
   const emailSubject = encodeURIComponent(`OrangeQC ${config.APP_VERSION}`);
-  const emailBody = !user
-    ? ''
-    : encodeURIComponent(`
-
-
-
-------
-App: ${config.BUNDLE_ID}, ${config.APP_VERSION}
-Device: ${config.MODEL} (${config.PLATFORM_VERSION})
-Locale: ${config.PARSED_LOCALES}
-`);
+  const emailBody = encodeURIComponent(metadata);
 
   const showDialog = () => setVisible(true);
 
   const hideDialog = () => setVisible(false);
 
-  const handleLogout = async () => {
-    await sensitiveStorage.clearAll();
-    dispatch({ type: 'logout' });
+  const handleLogout = () => {
+    dispatch({ type: 'start_logout' });
   };
 
   useFocusEffect(() => {

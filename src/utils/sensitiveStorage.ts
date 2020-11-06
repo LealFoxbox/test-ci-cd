@@ -51,7 +51,8 @@ export default {
     return Promise.all(cache.getEntries().map(([key, value]) => SInfo.setItem(key, value, options)));
   },
   clearAll: function () {
+    const keys = cache.getKeys();
     cache.clear();
-    return Promise.all(cache.getKeys().map((key) => SInfo.deleteItem(key, options)));
+    return Promise.all(keys.map((key) => SInfo.deleteItem(key, options)));
   },
 };

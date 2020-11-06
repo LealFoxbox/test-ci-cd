@@ -16,7 +16,7 @@ new Flurry.Builder()
   .withCrashReporting(true)
   .withLogEnabled(true)
   .withLogLevel(Flurry.LogLevel.DEBUG)
-  .build('R848C77KW2V32MT2Z3ZH'); //, FLURRY_IOS_API_KEY);
+  .build('6QVMX8CVBTYZ9S7S5SRG'); //, FLURRY_IOS_API_KEY);
 
 if (config.isDev) {
   // Whenever we use console.error, we get a red box on the phone, but no output to the console. Let's monkeypatch
