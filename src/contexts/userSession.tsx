@@ -1,4 +1,6 @@
 import React, { Dispatch, useEffect, useReducer } from 'react';
+import { PermissionsAndroid, Platform } from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
 
 import storage from 'src/utils/sensitiveStorage';
 import { User } from 'src/types';
@@ -41,6 +43,38 @@ async function refetchUser(dispatch: React.Dispatch<Action>, user: User) {
   }
 }
 
+async function requestLocationPermission() {
+  const reqFn = Platform.select({
+    ios: async () => {
+      try {
+        const response = await Geolocation.requestAuthorization('whenInUse');
+        return response === 'granted';
+      } catch (e) {
+        return false;
+      }
+    },
+    android: async () => {
+      try {
+        const response = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+          title: 'Location Access Permission',
+          message: 'We would like to use your location',
+          buttonPositive: 'Okay',
+        });
+
+        return response === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (e) {
+        return false;
+      }
+    },
+  });
+
+  if (!reqFn) {
+    return false;
+  }
+
+  return reqFn();
+}
+
 export function userSessionReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'login':
@@ -71,22 +105,28 @@ export const UserSessionProvider: React.FC = ({ children }) => {
           let user;
 
           try {
-            const userString = await storage.getItem('user');
-            user = JSON.parse(userString || 'null') as User;
-
-            if (!user) {
-              dispatch({ type: 'start_logout' });
-            } else {
-              const isStagingString = await storage.getItem('isStaging');
-              setEnv(JSON.parse(isStagingString || 'false') as boolean);
-            }
+            await requestLocationPermission();
           } catch (e) {
-            if (e?.message !== 'Network Error') {
-              dispatch({ type: 'start_logout' });
-            }
+            console.error(e);
           } finally {
-            if (user) {
-              await refetchUser(dispatch, user);
+            try {
+              const userString = await storage.getItem('user');
+              user = JSON.parse(userString || 'null') as User;
+
+              if (!user) {
+                dispatch({ type: 'start_logout' });
+              } else {
+                const isStagingString = await storage.getItem('isStaging');
+                setEnv(JSON.parse(isStagingString || 'false') as boolean);
+              }
+            } catch (e) {
+              if (e?.message !== 'Network Error') {
+                dispatch({ type: 'start_logout' });
+              }
+            } finally {
+              if (user) {
+                await refetchUser(dispatch, user);
+              }
             }
           }
         }

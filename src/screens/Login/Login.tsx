@@ -109,7 +109,7 @@ const LoginScreen: React.FC<{}> = () => {
       <Formik
         initialValues={{
           companyId: config.isDev ? 'mobiletest' : '',
-          username: config.isDev ? 'diego' : '',
+          username: config.isDev ? 'foxbox' : '',
           password: config.isDev ? 'foxbox2020' : '',
         }}
         validationSchema={SignInSchema}

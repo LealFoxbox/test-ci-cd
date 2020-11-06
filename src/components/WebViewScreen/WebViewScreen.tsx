@@ -76,6 +76,7 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             allowUniversalAccessFromFileURLs
             originWhitelist={['*']}
             startInLoadingState
+            geolocationEnabled
             onNavigationStateChange={({ url }: WebViewNavigation) => {
               if (url.endsWith('.com/login')) {
                 dispatch({ type: 'start_logout' });
