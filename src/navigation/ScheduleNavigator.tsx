@@ -2,26 +2,26 @@ import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Platform } from 'react-native';
 
-import ScheduledScreen from 'src/screens/Scheduled';
+import ScheduleScreen from 'src/screens/Schedule';
 
-import { SCHEDULED_HOME } from './screenNames';
+import { SCHEDULE_HOME } from './screenNames';
 
 type RenderRight = () => React.ReactNode;
 
-export type ScheduledNavigatorParamList = {
-  [SCHEDULED_HOME]: { updateRenderRight: (render: RenderRight) => void };
+export type ScheduleNavigatorParamList = {
+  [SCHEDULE_HOME]: { updateRenderRight: (render: RenderRight) => void };
 };
 
-const Stack = createStackNavigator<ScheduledNavigatorParamList>();
+const Stack = createStackNavigator<ScheduleNavigatorParamList>();
 
-const ScheduledNavigator: React.FC = () => {
+const ScheduleNavigator: React.FC = () => {
   const [renderRight, setRenderRight] = useState<RenderRight>(() => () => null);
 
   return (
     <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
       <Stack.Screen
-        name={SCHEDULED_HOME}
-        component={ScheduledScreen}
+        name={SCHEDULE_HOME}
+        component={ScheduleScreen}
         options={{ headerTitle: 'Schedule', headerTitleStyle: { marginLeft: 15 }, headerRight: renderRight }}
         initialParams={{ updateRenderRight: (render: RenderRight) => setRenderRight(() => render) }}
       />
@@ -29,4 +29,4 @@ const ScheduledNavigator: React.FC = () => {
   );
 };
 
-export default ScheduledNavigator;
+export default ScheduleNavigator;

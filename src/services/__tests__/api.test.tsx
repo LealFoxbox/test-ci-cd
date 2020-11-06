@@ -19,7 +19,7 @@ describe('api', () => {
         params: {
           user_credentials: 'token',
           device_guid: config.DEVICE_ID,
-          app_version: config.APP_VERSION,
+          app_version: `${config.PLATFORM}-${config.APP_VERSION}`,
         },
         headers: {
           Accept: 'application/json',
@@ -47,8 +47,8 @@ describe('api', () => {
             password: 'password',
           },
           device_guid: config.DEVICE_ID,
-          app_version: config.APP_VERSION,
-          device_name: config.DEVICE_NAME,
+          app_version: `${config.PLATFORM}-${config.APP_VERSION}`,
+          device_name: config.MODEL,
         },
         headers: {
           'Content-Type': 'application/json',

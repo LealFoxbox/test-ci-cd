@@ -6,14 +6,14 @@ import { useTheme } from 'react-native-paper';
 import { User } from 'src/types';
 
 import InspectionsNavigator, { InspectionsNavigatorParamList } from './InspectionsNavigator';
-import ScheduledNavigator, { ScheduledNavigatorParamList } from './ScheduledNavigator';
+import ScheduleNavigator, { ScheduleNavigatorParamList } from './ScheduleNavigator';
 import TicketsNavigator, { TicketsNavigatorParamList } from './TicketsNavigator';
 import AccountNavigator, { AccountNavigatorParamList } from './AccountNavigator';
-import { ACCOUNT_NAVIGATOR, INSPECTIONS_NAVIGATOR, SCHEDULED_NAVIGATOR, TICKETS_NAVIGATOR } from './screenNames';
+import { ACCOUNT_NAVIGATOR, INSPECTIONS_NAVIGATOR, SCHEDULE_NAVIGATOR, TICKETS_NAVIGATOR } from './screenNames';
 
 export type MainTabsNavigatorParamList = {
   [INSPECTIONS_NAVIGATOR]: undefined;
-  [SCHEDULED_NAVIGATOR]: undefined;
+  [SCHEDULE_NAVIGATOR]: undefined;
   [TICKETS_NAVIGATOR]: undefined;
   [ACCOUNT_NAVIGATOR]: undefined;
 };
@@ -44,10 +44,10 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
       )}
       {user?.features.schedule_feature.enabled && (
         <Tab.Screen
-          name={SCHEDULED_NAVIGATOR}
-          component={ScheduledNavigator}
+          name={SCHEDULE_NAVIGATOR}
+          component={ScheduleNavigator}
           options={{
-            tabBarLabel: 'Scheduled',
+            tabBarLabel: 'Schedule',
             tabBarIcon: ({ color }) => <MaterialIcons name="date-range" color={color} size={26} />,
           }}
         />
@@ -58,7 +58,9 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           component={TicketsNavigator}
           options={{
             tabBarLabel: 'Tickets',
-            tabBarIcon: ({ color }) => <MaterialIcons name="warning" color={color} size={26} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="warning" color={color} size={26} style={{ marginRight: -1 }} />
+            ),
           }}
         />
       )}
@@ -76,7 +78,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
 
 export type MainNavigatorParamList = {
   [INSPECTIONS_NAVIGATOR]: InspectionsNavigatorParamList;
-  [SCHEDULED_NAVIGATOR]: ScheduledNavigatorParamList;
+  [SCHEDULE_NAVIGATOR]: ScheduleNavigatorParamList;
   [TICKETS_NAVIGATOR]: TicketsNavigatorParamList;
   [ACCOUNT_NAVIGATOR]: AccountNavigatorParamList;
 };

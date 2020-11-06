@@ -115,6 +115,7 @@ exports[`WebViewScreen should render 1`] = `
                       allowFileAccess={true}
                       allowUniversalAccessFromFileURLs={true}
                       cacheEnabled={true}
+                      geolocationEnabled={true}
                       injectedJavaScriptBeforeContentLoadedForMainFrameOnly={true}
                       injectedJavaScriptForMainFrameOnly={true}
                       javaScriptEnabled={true}

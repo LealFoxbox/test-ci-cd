@@ -1,12 +1,5 @@
 import { Platform } from 'react-native';
-import {
-  getBuildNumber,
-  getBundleId,
-  getDeviceName,
-  getModel,
-  getUniqueId,
-  getVersion,
-} from 'react-native-device-info';
+import { getBuildNumber, getBundleId, getModel, getUniqueId, getVersion } from 'react-native-device-info';
 import { Locale, getLocales } from 'react-native-localize';
 import { map } from 'lodash/fp';
 
@@ -20,10 +13,10 @@ interface Config {
   isStaging: boolean;
   APP_VERSION: string;
   DEVICE_ID: string;
-  DEVICE_NAME: string;
   MODEL: string;
   PLATFORM_VERSION: string | number;
   BUNDLE_ID: string;
+  PLATFORM: typeof Platform.OS;
   LOCALES: Locale[];
   PARSED_LOCALES: string;
   BACKEND_BASE_URL: string;
@@ -35,7 +28,6 @@ const config: Config = {
   isStaging: false,
   APP_VERSION: `${getVersion()} (${getBuildNumber()})`,
   DEVICE_ID: getUniqueId(),
-  DEVICE_NAME: 'default name',
   MODEL: getModel(),
   PLATFORM_VERSION: Platform.Version,
   BUNDLE_ID: getBundleId(),
@@ -43,17 +35,8 @@ const config: Config = {
   PARSED_LOCALES: map('languageTag', getLocales()).join(', '),
   BACKEND_BASE_URL: '',
   BACKEND_API_URL: '',
+  PLATFORM: Platform.OS,
 };
-
-export const getConfigPromise = Promise.all([
-  getDeviceName()
-    .then((name) => {
-      config.DEVICE_NAME = name;
-    })
-    .catch((e) => {
-      console.error(e);
-    }),
-]);
 
 export const setEnv = (staging: boolean) => {
   if (!staging) {

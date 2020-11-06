@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ScheduledScreen should render 1`] = `
+exports[`ScheduleScreen should render 1`] = `
 <View
   collapsable={false}
   pointerEvents="box-none"

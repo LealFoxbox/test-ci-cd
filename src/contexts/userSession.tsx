@@ -5,7 +5,7 @@ import Geolocation from 'react-native-geolocation-service';
 import storage from 'src/utils/sensitiveStorage';
 import { User } from 'src/types';
 import { fetchtUser } from 'src/services/api';
-import { getConfigPromise, setEnv } from 'src/config';
+import { setEnv } from 'src/config';
 
 export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
 type State = {
@@ -97,36 +97,30 @@ export const UserSessionProvider: React.FC = ({ children }) => {
         await storage.clearAll();
         dispatch({ type: 'finish_logout' });
       } else if (state.status === 'starting') {
+        let user;
+
         try {
-          await getConfigPromise;
+          await requestLocationPermission();
         } catch (e) {
           console.error(e);
         } finally {
-          let user;
-
           try {
-            await requestLocationPermission();
-          } catch (e) {
-            console.error(e);
-          } finally {
-            try {
-              const userString = await storage.getItem('user');
-              user = JSON.parse(userString || 'null') as User;
+            const userString = await storage.getItem('user');
+            user = JSON.parse(userString || 'null') as User;
 
-              if (!user) {
-                dispatch({ type: 'start_logout' });
-              } else {
-                const isStagingString = await storage.getItem('isStaging');
-                setEnv(JSON.parse(isStagingString || 'false') as boolean);
-              }
-            } catch (e) {
-              if (e?.message !== 'Network Error') {
-                dispatch({ type: 'start_logout' });
-              }
-            } finally {
-              if (user) {
-                await refetchUser(dispatch, user);
-              }
+            if (!user) {
+              dispatch({ type: 'start_logout' });
+            } else {
+              const isStagingString = await storage.getItem('isStaging');
+              setEnv(JSON.parse(isStagingString || 'false') as boolean);
+            }
+          } catch (e) {
+            if (e?.message !== 'Network Error') {
+              dispatch({ type: 'start_logout' });
+            }
+          } finally {
+            if (user) {
+              await refetchUser(dispatch, user);
             }
           }
         }

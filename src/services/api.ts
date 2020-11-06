@@ -53,8 +53,8 @@ export const authenticate = (params: AuthParams) => {
         password: params.password,
       },
       device_guid: config.DEVICE_ID,
-      app_version: config.APP_VERSION,
-      device_name: config.DEVICE_NAME,
+      app_version: `${config.PLATFORM}-${config.APP_VERSION}`,
+      device_name: config.MODEL,
     },
     raxConfig: baseRaxConfig,
     headers: {
@@ -77,7 +77,7 @@ export const fetchtUser = (params: FetchUserParams) => {
     params: {
       user_credentials: params.token,
       device_guid: config.DEVICE_ID,
-      app_version: config.APP_VERSION,
+      app_version: `${config.PLATFORM}-${config.APP_VERSION}`,
     },
     raxConfig: baseRaxConfig,
     headers: {
