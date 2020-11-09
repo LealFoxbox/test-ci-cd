@@ -18,11 +18,13 @@ const NoButton = styled(Button)`
 `;
 
 const metadata = `
-  <br/><br/><br/>------<br/>
-  App: ${config.BUNDLE_ID}, ${config.APP_VERSION}<br/>
-  Device: ${config.MODEL} (${config.PLATFORM_VERSION})<br/>
-  Locale: ${config.PARSED_LOCALES}<br/>
-  Platform: ${config.PLATFORM}<br/>
+
+
+  ------
+  App: ${config.BUNDLE_ID}, ${config.APP_VERSION}
+  Device: ${config.MODEL} (${config.PLATFORM_VERSION})
+  Locale: ${config.PARSED_LOCALES}
+  Platform: ${config.PLATFORM}
 `;
 
 const AccountScreen: React.FC = () => {

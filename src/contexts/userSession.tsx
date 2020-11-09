@@ -2,10 +2,11 @@ import React, { Dispatch, useEffect, useReducer } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
-import storage from 'src/utils/sensitiveStorage';
-import { User } from 'src/types';
 import { fetchtUser } from 'src/services/api';
+import storage from 'src/utils/sensitiveStorage';
+import { catchTo } from 'src/utils/catchTo';
 import { setEnv } from 'src/config';
+import { User } from 'src/types';
 
 export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
 type State = {
@@ -33,13 +34,16 @@ async function refetchUser(dispatch: React.Dispatch<Action>, user: User) {
 
     if (response.data) {
       dispatch({ type: 'login', payload: response.data.user });
-    } else if (response.status === 401) {
-      dispatch({ type: 'start_logout' });
     } else {
       dispatch({ type: 'login', payload: user });
     }
   } catch (e) {
-    dispatch({ type: 'login', payload: user });
+    console.warn(JSON.stringify(e));
+    if (e?.response?.status === 401) {
+      dispatch({ type: 'start_logout' });
+    } else {
+      dispatch({ type: 'login', payload: user });
+    }
   }
 }
 
@@ -90,39 +94,27 @@ export function userSessionReducer(state: State, action: Action): State {
 export const UserSessionProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(userSessionReducer, initialState);
 
-  // TODO: review this chain of promises
   useEffect(() => {
     (async () => {
       if (state.status === 'logoutTriggered') {
         await storage.clearAll();
         dispatch({ type: 'finish_logout' });
       } else if (state.status === 'starting') {
-        let user;
+        const [permissionError] = await catchTo(requestLocationPermission());
+        permissionError && console.error(permissionError);
 
-        try {
-          await requestLocationPermission();
-        } catch (e) {
-          console.error(e);
-        } finally {
-          try {
-            const userString = await storage.getItem('user');
-            user = JSON.parse(userString || 'null') as User;
+        const [userStorageError, userString] = await catchTo(storage.getItem('user'));
+        userStorageError && console.error(userStorageError);
+        const user = JSON.parse(userString || 'null') as User;
 
-            if (!user) {
-              dispatch({ type: 'start_logout' });
-            } else {
-              const isStagingString = await storage.getItem('isStaging');
-              setEnv(JSON.parse(isStagingString || 'false') as boolean);
-            }
-          } catch (e) {
-            if (e?.message !== 'Network Error') {
-              dispatch({ type: 'start_logout' });
-            }
-          } finally {
-            if (user) {
-              await refetchUser(dispatch, user);
-            }
-          }
+        if (!user) {
+          dispatch({ type: 'start_logout' });
+        } else {
+          const [stagingStorageError, isStagingString] = await catchTo(storage.getItem('isStaging'));
+          stagingStorageError && console.error(stagingStorageError);
+
+          setEnv(JSON.parse(isStagingString || 'false') as boolean);
+          await refetchUser(dispatch, user);
         }
       }
     })();

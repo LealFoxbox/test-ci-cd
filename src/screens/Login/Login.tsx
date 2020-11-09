@@ -70,6 +70,9 @@ const LoginScreen: React.FC<{}> = () => {
     onError: (err) => {
       if (err?.message !== 'Network Error') {
         setAuthError(err?.response?.data.message || authenticateError);
+      } else if (connected) {
+        // TODO: check if we should use another custom error
+        setAuthError(authenticateError);
       }
     },
   });
