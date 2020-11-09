@@ -15,6 +15,7 @@ interface Config {
   isStaging: boolean;
   APP_NAME: string;
   APP_VERSION: string;
+  APP_BUILD: string;
   DEVICE_ID: string;
   MODEL: string;
   PLATFORM_VERSION: string | number;
@@ -30,7 +31,8 @@ const config: Config = {
   isDev: __DEV__,
   isStaging: false,
   APP_NAME: appName,
-  APP_VERSION: `${getVersion()} (${getBuildNumber()})`,
+  APP_VERSION: getVersion(),
+  APP_BUILD: getBuildNumber(),
   DEVICE_ID: getUniqueId(),
   MODEL: getModel(),
   PLATFORM_VERSION: Platform.Version,

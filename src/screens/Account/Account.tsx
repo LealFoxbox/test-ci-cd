@@ -17,11 +17,13 @@ const NoButton = styled(Button)`
   margin-right: 10px;
 `;
 
+const appVersionAndBuild = `${config.APP_VERSION} (${config.APP_BUILD})`;
+
 const metadata = `
 
 
   ------
-  App: ${config.BUNDLE_ID}, ${config.APP_VERSION}
+  App: ${config.BUNDLE_ID}, ${appVersionAndBuild}
   Device: ${config.MODEL} (${config.PLATFORM_VERSION})
   Locale: ${config.PARSED_LOCALES}
   Platform: ${config.PLATFORM}
@@ -32,7 +34,7 @@ const AccountScreen: React.FC = () => {
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
 
-  const emailSubject = encodeURIComponent(`${config.APP_NAME} ${config.APP_VERSION}`);
+  const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
   const emailBody = encodeURIComponent(metadata);
 
   const showDialog = () => setVisible(true);
@@ -75,7 +77,7 @@ const AccountScreen: React.FC = () => {
             onPress={() => openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`)}
           />
           <Divider />
-          <Row label="App version" value={`${config.APP_NAME} ${config.APP_VERSION}`} />
+          <Row label="App version" value={`${config.APP_NAME} ${appVersionAndBuild}`} />
           {config.isStaging && (
             <>
               <Divider />
