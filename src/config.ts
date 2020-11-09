@@ -3,6 +3,8 @@ import { getBuildNumber, getBundleId, getModel, getUniqueId, getVersion } from '
 import { Locale, getLocales } from 'react-native-localize';
 import { map } from 'lodash/fp';
 
+import { name as appName } from '../app.json';
+
 const stagingBaseurl = 'orangeqc-staging.com';
 const stagingApiUrl = 'orangeqc-staging.com/api/v4';
 const prodBaseUrl = 'orangeqc.com';
@@ -11,6 +13,7 @@ const prodApiUrl = 'orangeqc.com/api/v4';
 interface Config {
   isDev: boolean;
   isStaging: boolean;
+  APP_NAME: string;
   APP_VERSION: string;
   DEVICE_ID: string;
   MODEL: string;
@@ -26,6 +29,7 @@ interface Config {
 const config: Config = {
   isDev: __DEV__,
   isStaging: false,
+  APP_NAME: appName,
   APP_VERSION: `${getVersion()} (${getBuildNumber()})`,
   DEVICE_ID: getUniqueId(),
   MODEL: getModel(),

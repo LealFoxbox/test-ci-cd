@@ -6,7 +6,6 @@ import Flurry from 'react-native-flurry-sdk';
 import config from 'src/config';
 
 import App from './src/App';
-import { name as appName } from './app.json';
 
 // Init Flurry once as early as possible recommended in index.js.
 // For each platform (Android, iOS) where the app runs you need to acquire a unique Flurry API Key.
@@ -28,4 +27,4 @@ if (config.isDev) {
   };
 }
 
-AppRegistry.registerComponent(appName, () => App);
+AppRegistry.registerComponent(config.APP_NAME, () => App);
