@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorMessage should render 1`] = `
+<Text
+  style={
+    Array [
+      Object {
+        "color": "#000000",
+        "fontFamily": "System",
+        "fontWeight": "400",
+        "textAlign": "left",
+      },
+      Array [
+        Object {
+          "color": "#B00020",
+          "fontSize": 12,
+          "marginBottom": 10,
+        },
+      ],
+    ]
+  }
+/>
+`;
