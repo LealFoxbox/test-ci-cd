@@ -2,6 +2,7 @@
 import { AppRegistry } from 'react-native';
 import 'react-native-gesture-handler';
 import Flurry from 'react-native-flurry-sdk';
+import * as Sentry from '@sentry/react-native';
 
 import config from 'src/config';
 
@@ -26,5 +27,10 @@ if (config.isDev) {
     consoleError.apply(console, args);
   };
 }
+
+Sentry.init({
+  dsn: 'https://baa11a89e28842559010058d6cea2634@o88422.ingest.sentry.io/5550845',
+  debug: config.isDev,
+});
 
 AppRegistry.registerComponent(config.APP_NAME, () => App);
