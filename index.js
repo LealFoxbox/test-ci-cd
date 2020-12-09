@@ -34,7 +34,3 @@ Sentry.init({
 });
 
 AppRegistry.registerComponent(config.APP_NAME, () => App);
-
-setTimeout(() => {
-  Sentry.nativeCrash();
-}, 5000);
