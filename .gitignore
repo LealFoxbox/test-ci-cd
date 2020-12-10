@@ -80,3 +80,6 @@ ios/Carthage
 # env files
 .env
 
+*.hprof
+*.aab
+*.apk

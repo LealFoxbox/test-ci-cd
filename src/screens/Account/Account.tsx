@@ -4,10 +4,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Button, Dialog, Divider, Paragraph, Portal, useTheme } from 'react-native-paper';
 
 import config from 'src/config';
-import { useUserSession } from 'src/contexts/userSession';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { logoutAction } from 'src/pullstate/persistentActions';
 
 const Container = styled.View`
   flex: 1;
@@ -30,7 +31,8 @@ const metadata = `
 `;
 
 const AccountScreen: React.FC = () => {
-  const [{ data: user }, dispatch] = useUserSession();
+  const userData = PersistentUserStore.useState((s) => s.userData);
+  const isStaging = PersistentUserStore.useState((s) => s.isStaging);
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
 
@@ -42,7 +44,7 @@ const AccountScreen: React.FC = () => {
   const hideDialog = () => setVisible(false);
 
   const handleLogout = () => {
-    dispatch({ type: 'start_logout' });
+    void logoutAction();
   };
 
   useFocusEffect(() => {
@@ -59,12 +61,12 @@ const AccountScreen: React.FC = () => {
 
   return (
     <Container>
-      {!!user && (
+      {!!userData && (
         <>
           <Row
             accessibilityLabel="userInfo"
-            label={user.email}
-            value={user.account.name}
+            label={userData.email}
+            value={userData.account.name}
             icon="logout"
             onPress={showDialog}
           />
@@ -78,7 +80,7 @@ const AccountScreen: React.FC = () => {
           />
           <Divider />
           <Row label="App version" value={`${config.APP_NAME} ${appVersionAndBuild}`} />
-          {config.isStaging && (
+          {isStaging && (
             <>
               <Divider />
               <Row label="Environment" value="Staging" />

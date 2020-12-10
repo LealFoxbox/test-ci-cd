@@ -4,8 +4,6 @@ import { act, render } from 'helpers/testUtils';
 
 import Tickets from '../Tickets';
 
-jest.mock('src/contexts/userSession');
-
 describe('TicketsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

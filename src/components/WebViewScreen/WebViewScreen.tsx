@@ -9,8 +9,8 @@ import RCTNetworking from 'react-native/Libraries/Network/RCTNetworking';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { TicketsNavigatorParamList } from 'src/navigation/TicketsNavigator';
 import { TICKETS_HOME } from 'src/navigation/screenNames';
-import { useUserSession } from 'src/contexts/userSession';
 import usePrevious from 'src/utils/usePrevious';
+import { logoutAction } from 'src/pullstate/persistentActions';
 
 import LoadingOverlay from '../LoadingOverlay';
 import ConnectionBanner from '../ConnectionBanner';
@@ -26,7 +26,6 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
-  const [, dispatch] = useUserSession();
   const theme = useTheme();
 
   const handleReload = () => {
@@ -79,7 +78,7 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             geolocationEnabled
             onNavigationStateChange={({ url }: WebViewNavigation) => {
               if (url.endsWith('.com/login')) {
-                dispatch({ type: 'start_logout' });
+                void logoutAction();
               }
             }}
             onError={() => {

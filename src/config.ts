@@ -44,8 +44,8 @@ const config: Config = {
   PLATFORM: Platform.OS,
 };
 
-export const setEnv = (staging: boolean) => {
-  if (!staging) {
+export const setEnv = (isStaging: boolean) => {
+  if (!isStaging) {
     config.isStaging = false;
     config.BACKEND_BASE_URL = prodBaseUrl;
     config.BACKEND_API_URL = prodApiUrl;

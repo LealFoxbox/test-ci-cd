@@ -26,11 +26,11 @@ if (config.isDev) {
     console.log('\x1b[45mERROR:', ...args, '\x1b[0m'); // Using a magenta background because it looks cool. If you prefer old boring red, change [45m to [41m
     consoleError.apply(console, args);
   };
+} else {
+  Sentry.init({
+    dsn: 'https://baa11a89e28842559010058d6cea2634@o88422.ingest.sentry.io/5550845',
+    debug: config.isDev,
+  });
 }
-
-Sentry.init({
-  dsn: 'https://baa11a89e28842559010058d6cea2634@o88422.ingest.sentry.io/5550845',
-  debug: config.isDev,
-});
 
 AppRegistry.registerComponent(config.APP_NAME, () => App);

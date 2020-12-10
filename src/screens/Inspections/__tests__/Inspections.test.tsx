@@ -4,8 +4,6 @@ import { act, render } from 'helpers/testUtils';
 
 import Inspections from '../Inspections';
 
-jest.mock('src/contexts/userSession');
-
 describe('InspectionsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

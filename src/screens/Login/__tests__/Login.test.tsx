@@ -4,8 +4,6 @@ import { act, render } from 'helpers/testUtils';
 
 import Login from '../Login';
 
-jest.mock('src/contexts/userSession');
-
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const { useRoute } = jest.requireMock('@react-navigation/native');
 

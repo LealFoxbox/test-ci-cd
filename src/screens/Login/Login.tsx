@@ -11,12 +11,12 @@ import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { ApiError, UserResponse, authenticate } from 'src/services/api';
-import { useUserSession } from 'src/contexts/userSession';
-import config, { setEnv } from 'src/config';
-import sensitiveStorage from 'src/utils/sensitiveStorage';
+import config from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { SIGN_IN } from 'src/navigation/screenNames';
 import { AuthNavigatorParamList } from 'src/navigation/AuthNavigator';
+import { loginAction, setStagingAction } from 'src/pullstate/persistentActions';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
 import StagingDialog from './StagingDialog';
 import { EasterEgg, FormContainer } from './styles';
@@ -36,9 +36,8 @@ const SignInSchema = Yup.object().shape({
 const authenticateError = 'Your username or password appears to be incorrect for this account';
 
 const LoginScreen: React.FC<{}> = () => {
-  const [isStaging, setStaging] = useState(config.isStaging);
+  const isStaging = PersistentUserStore.useState((s) => s.isStaging);
   const [authError, setAuthError] = useState('');
-  const [, dispatch] = useUserSession();
   const connected = useNetworkStatus();
   const [visible, setVisible] = React.useState(false);
   const {
@@ -49,20 +48,11 @@ const LoginScreen: React.FC<{}> = () => {
     onMutate: () => {
       setAuthError('');
     },
-    onSuccess: async (userData) => {
-      setAuthError('');
-
+    onSuccess: (userData) => {
       if (userData.status === 200 && userData.data.user) {
-        try {
-          await sensitiveStorage.setItem('user', JSON.stringify(userData.data.user));
-          await sensitiveStorage.setItem('isStaging', JSON.stringify(isStaging));
-        } catch (err) {
-          if (err?.message !== 'Network Error') {
-            setAuthError(authenticateError);
-          }
-        }
-
-        dispatch({ type: 'login', payload: userData.data.user });
+        setAuthError('');
+        setStagingAction(isStaging);
+        loginAction(userData.data.user);
       } else {
         setAuthError(authenticateError);
       }
@@ -90,11 +80,9 @@ const LoginScreen: React.FC<{}> = () => {
       setAuthError('');
 
       if (isStaging) {
-        setEnv(false);
-        setStaging(false);
+        PersistentUserStore.update((s) => (s.isStaging = false));
       } else {
-        setEnv(true);
-        setStaging(true);
+        PersistentUserStore.update((s) => (s.isStaging = true));
       }
     }
   };
