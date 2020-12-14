@@ -6,10 +6,10 @@ import { fetchtUser } from 'src/services/api';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
 
 import { loginAction, logoutAction } from './persistentActions';
-import { State, initialState } from './persistentInitialState';
+import { PersistentState, initialState } from './persistentInitialState';
 import { initStoreStorage } from './storeStorage';
 
-export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
+export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'downloading' | 'loggedIn' | 'logoutTriggered';
 
 async function requestLocationPermission() {
   const reqFn = Platform.select({
@@ -47,7 +47,7 @@ export const PersistentUserStore = new Store(initialState);
 
 const { init, subscribe } = initStoreStorage('peristentUserStore', PersistentUserStore);
 
-void init().then(async (state: State) => {
+void init().then(async (state: PersistentState) => {
   const [permissionError] = await catchTo(requestLocationPermission());
   permissionError && console.error(permissionError);
 
@@ -78,4 +78,5 @@ void init().then(async (state: State) => {
     }
   }
 });
+
 subscribe();

@@ -7,13 +7,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from 'src/navigation/AppNavigator';
 
 import paperTheme from './paperTheme';
-import { UserSessionEffect } from './pullstate/persistentEffects';
 
 enableScreens();
 
 const App = () => {
-  UserSessionEffect();
-
   return (
     <NavigationContainer>
       <SafeAreaProvider>
