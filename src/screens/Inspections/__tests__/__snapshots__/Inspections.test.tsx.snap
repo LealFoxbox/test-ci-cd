@@ -78,7 +78,17 @@ exports[`InspectionsScreen should render 1`] = `
                 ]
               }
             >
-              <View />
+              <View
+                style={
+                  Array [
+                    Object {
+                      "flexBasis": 0,
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                    },
+                  ]
+                }
+              />
             </View>
           </View>
         </View>

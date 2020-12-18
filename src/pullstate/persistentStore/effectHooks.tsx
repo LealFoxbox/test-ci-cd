@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { setEnv } from 'src/config';
 
-import { PersistentUserStore } from './persistentStore';
+import { PersistentUserStore } from '.';
 
 export const UserSessionEffect = () => {
   useEffect(

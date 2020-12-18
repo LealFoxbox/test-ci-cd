@@ -1,15 +1,12 @@
-import axios, { AxiosError, AxiosPromise } from 'axios';
+import axios, { AxiosPromise } from 'axios';
 import * as rax from 'retry-axios';
-import { getOr } from 'lodash/fp';
 
 import config from 'src/config';
 import { User } from 'src/types';
 
-rax.attach();
+import { baseRaxConfig, getApiUrl } from './utils';
 
-export interface UserResponse {
-  user: User;
-}
+rax.attach();
 
 export interface AuthParams {
   username: string;
@@ -17,26 +14,9 @@ export interface AuthParams {
   companyId: string;
 }
 
-export type ApiError = AxiosError<{ message: string; error: string }>;
-
-export function getApiUrl(companyId: string) {
-  return `https://${companyId}.${config.BACKEND_API_URL}`;
+export interface UserResponse {
+  user: User;
 }
-
-const baseRaxConfig: rax.RaxConfig['raxConfig'] = {
-  retryDelay: 200,
-  backoffType: 'exponential',
-  shouldRetry: (err) => {
-    const cfg = rax.getConfig(err);
-    const currentRetryAttempt = getOr(0, 'currentRetryAttempt', cfg);
-    const retry = getOr(4, 'retry', cfg);
-
-    if (currentRetryAttempt <= retry) {
-      return err.response?.status === 503;
-    }
-    return false;
-  },
-};
 
 // NOTE: we disable cookies with "withCredentials: false" because they're being set on the return header
 // and if we don't specify to NOT use cookies, we'll always log in as the last user logged in

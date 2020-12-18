@@ -10,13 +10,13 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
-import { ApiError, UserResponse, authenticate } from 'src/services/api';
+import { UserResponse, authenticate } from 'src/services/user';
 import config from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { SIGN_IN } from 'src/navigation/screenNames';
 import { AuthNavigatorParamList } from 'src/navigation/AuthNavigator';
-import { loginAction, setStagingAction } from 'src/pullstate/persistentActions';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { PersistentUserStore, loginAction, setStagingAction } from 'src/pullstate/persistentStore';
+import { ApiError } from 'src/services/utils';
 
 import StagingDialog from './StagingDialog';
 import { EasterEgg, FormContainer } from './styles';
@@ -99,8 +99,8 @@ const LoginScreen: React.FC<{}> = () => {
       <ConnectionBanner connected={connected} />
       <Formik
         initialValues={{
-          companyId: config.isDev ? 'mobiletest' : '',
-          username: config.isDev ? 'foxbox' : '',
+          companyId: config.isDev ? 'foxbox' : '',
+          username: config.isDev ? 'diego' : '',
           password: config.isDev ? 'foxbox2020' : '',
         }}
         validationSchema={SignInSchema}

@@ -2,14 +2,13 @@ import { Store } from 'pullstate';
 import { PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
-import { fetchtUser } from 'src/services/api';
+import { fetchtUser } from 'src/services/user';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
+import { User } from 'src/types';
 
-import { loginAction, logoutAction } from './persistentActions';
-import { PersistentState, initialState } from './persistentInitialState';
-import { initStoreStorage } from './storeStorage';
+import { initStoreStorage } from '../storeStorage';
 
-export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'downloading' | 'loggedIn' | 'logoutTriggered';
+import { PersistentState, initialState } from './initialState';
 
 async function requestLocationPermission() {
   const reqFn = Platform.select({
@@ -44,6 +43,32 @@ async function requestLocationPermission() {
 }
 
 export const PersistentUserStore = new Store(initialState);
+
+export const loginAction = (user: User) => {
+  PersistentUserStore.update((s) => {
+    s.status = 'loggedIn';
+    s.userData = user;
+  });
+};
+
+export const logoutAction = () => {
+  PersistentUserStore.update((s) => {
+    for (const key of Object.keys(s)) {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      s[key] = initialState[key];
+    }
+    s.status = 'shouldLogIn';
+  });
+
+  // TODO: clear db
+};
+
+export const setStagingAction = (isStaging: boolean) => {
+  PersistentUserStore.update((s) => {
+    s.isStaging = isStaging;
+  });
+};
 
 const { init, subscribe } = initStoreStorage('peristentUserStore', PersistentUserStore);
 

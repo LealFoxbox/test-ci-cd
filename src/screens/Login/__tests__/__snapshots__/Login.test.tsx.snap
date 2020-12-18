@@ -303,7 +303,7 @@ Array [
                             }
                             textAlign="right"
                             underlineColorAndroid="transparent"
-                            value="mobiletest"
+                            value="foxbox"
                           />
                         </View>
                         <View
@@ -506,7 +506,7 @@ Array [
                               ]
                             }
                             underlineColorAndroid="transparent"
-                            value="foxbox"
+                            value="diego"
                           />
                         </View>
                       </View>

@@ -7,8 +7,7 @@ import config from 'src/config';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { logoutAction } from 'src/pullstate/persistentActions';
+import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
 
 const Container = styled.View`
   flex: 1;

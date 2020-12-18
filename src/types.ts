@@ -30,3 +30,35 @@ export interface User {
   };
   single_access_token: string;
 }
+
+export interface Assignments {
+  id: number;
+  inspection_form_id: number;
+  structure_id: number;
+  updated_at: string;
+}
+
+export interface Form {
+  id: number;
+}
+
+export interface Ratings {
+  id: number;
+}
+
+export interface Structure {
+  id: number;
+  updated_at: string | null;
+  ancestry: string | null;
+  notes: string;
+  active_children_count: number;
+  // missing from endpoint
+  job_number: string | null;
+  structure_id: number;
+  structure_path: string[];
+  account_id: number;
+  name: string;
+  deleted_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+}

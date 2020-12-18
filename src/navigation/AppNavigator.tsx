@@ -3,9 +3,10 @@ import { View } from 'react-native';
 import { hide } from 'react-native-bootsplash';
 
 import { createJob, useDownloadQueue } from 'src/pullstate/downloadQueue';
-import { UserSessionEffect } from 'src/pullstate/persistentEffects';
+import { UserSessionEffect } from 'src/pullstate/persistentStore/effectHooks';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { UserResponse, fetchtUser } from 'src/services/api';
+import { FetchUserResponse, fetchtUser } from 'src/services/user';
+import { useDownloader } from 'src/downloader';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
@@ -15,6 +16,8 @@ let splashHidden = false;
 function AppNavigator() {
   const status = PersistentUserStore.useState((s) => s.status);
   const userData = PersistentUserStore.useState((s) => s.userData);
+
+  useDownloader();
 
   const { addJob } = useDownloadQueue();
 
@@ -27,12 +30,13 @@ function AppNavigator() {
     }
   }, [status]);
 
+  /*
   useEffect(() => {
     addJob(
-      createJob<UserResponse>('id', () => fetchtUser({ companyId: '1', token: 'abcd' })),
+      createJob<FetchUserResponse>('id', () => fetchtUser({ companyId: '1', token: 'abcd' })),
     );
   }, [addJob]);
-
+*/
   if (status === 'shouldLogIn') {
     return <AuthNavigator />;
   } else if (status === 'loggedIn') {

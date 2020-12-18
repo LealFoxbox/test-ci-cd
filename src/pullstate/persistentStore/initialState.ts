@@ -1,7 +1,7 @@
 import config from 'src/config';
 import { User } from 'src/types';
 
-import { UserSessionStatus } from './persistentStore';
+export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
 
 export interface Query {
   doneTimeStamp: number | null; // should be null if progress is < 100

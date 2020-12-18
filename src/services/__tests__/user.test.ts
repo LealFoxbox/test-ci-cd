@@ -2,7 +2,8 @@ import axios from 'axios';
 
 import config from 'src/config';
 
-import { authenticate, fetchtUser, getApiUrl } from '../api';
+import { authenticate, fetchtUser } from '../user';
+import { getApiUrl } from '../utils';
 
 describe('api', () => {
   it('fetchtUser successfully fetches', async () => {

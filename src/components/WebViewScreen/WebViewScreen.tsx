@@ -10,7 +10,7 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { TicketsNavigatorParamList } from 'src/navigation/TicketsNavigator';
 import { TICKETS_HOME } from 'src/navigation/screenNames';
 import usePrevious from 'src/utils/usePrevious';
-import { logoutAction } from 'src/pullstate/persistentActions';
+import { logoutAction } from 'src/pullstate/persistentStore';
 
 import LoadingOverlay from '../LoadingOverlay';
 import ConnectionBanner from '../ConnectionBanner';
