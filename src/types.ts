@@ -31,7 +31,7 @@ export interface User {
   single_access_token: string;
 }
 
-export interface Assignments {
+export interface Assignment {
   id: number;
   inspection_form_id: number;
   structure_id: number;
@@ -40,6 +40,24 @@ export interface Assignments {
 
 export interface Form {
   id: number;
+  categories: Array<{ id: number }>;
+  inspection_form_items: Array<{
+    id: number;
+    category_id: number | null;
+    description: string | null;
+    display_name: string;
+    line_item_id: number;
+    position: number;
+    rating_id: number;
+    weight: number;
+  }>;
+  name: string;
+  notes: string | null;
+  private_inspection: boolean;
+  updated_at: string;
+
+  // added by us
+  lastDownloaded: number; // this is a stored Date.now()
 }
 
 export interface Ratings {
@@ -50,15 +68,21 @@ export interface Structure {
   id: number;
   updated_at: string | null;
   ancestry: string | null;
-  notes: string;
+  notes: string | null;
   active_children_count: number;
+
+  // missing from docs but present in api
+  parent_id: number | null;
+  display_name: string;
+  location_path: string | null;
+
   // missing from endpoint
-  job_number: string | null;
-  structure_id: number;
-  structure_path: string[];
-  account_id: number;
-  name: string;
-  deleted_at: string | null;
-  started_at: string | null;
-  ended_at: string | null;
+  job_number?: string | null;
+  structure_id?: number;
+  structure_path?: string[];
+  account_id?: number;
+  name?: string;
+  deleted_at?: string | null;
+  started_at?: string | null;
+  ended_at?: string | null;
 }

@@ -10,6 +10,8 @@ const stagingApiUrl = 'orangeqc-staging.com/api/v4';
 const prodBaseUrl = 'orangeqc.com';
 const prodApiUrl = 'orangeqc.com/api/v4';
 
+// TODO: maybe pull out isStaging from here into the persistentstore
+
 interface Config {
   isDev: boolean;
   isStaging: boolean;

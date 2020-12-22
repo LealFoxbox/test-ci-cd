@@ -10,13 +10,13 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
-import { UserResponse, authenticate } from 'src/services/user';
+import { UserResponse, authenticate } from 'src/services/api/user';
 import config from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { SIGN_IN } from 'src/navigation/screenNames';
 import { AuthNavigatorParamList } from 'src/navigation/AuthNavigator';
 import { PersistentUserStore, loginAction, setStagingAction } from 'src/pullstate/persistentStore';
-import { ApiError } from 'src/services/utils';
+import { ApiError } from 'src/services/api/utils';
 
 import StagingDialog from './StagingDialog';
 import { EasterEgg, FormContainer } from './styles';

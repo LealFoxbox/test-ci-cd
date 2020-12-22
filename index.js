@@ -5,8 +5,7 @@ import Flurry from 'react-native-flurry-sdk';
 import * as Sentry from '@sentry/react-native';
 
 import config from 'src/config';
-
-import App from './src/App';
+import App from 'src/App';
 
 // Init Flurry once as early as possible recommended in index.js.
 // For each platform (Android, iOS) where the app runs you need to acquire a unique Flurry API Key.

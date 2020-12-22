@@ -10,6 +10,10 @@ export function getApiUrl(companyId: string) {
   return `https://${companyId}.${config.BACKEND_API_URL}`;
 }
 
+export function getBaseUrl(companyId: string) {
+  return `https://${companyId}.${config.BACKEND_BASE_URL}`;
+}
+
 export const baseRaxConfig: rax.RaxConfig['raxConfig'] = {
   retryDelay: 200,
   backoffType: 'exponential',

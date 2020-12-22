@@ -21,13 +21,12 @@ export interface FetchStructuresParams {
 export const fetchStructures = (params: FetchStructuresParams) => {
   return axios({
     method: 'get',
-    url: `${getApiUrl(params.companyId)}/downloads/structures?user_credentials=${params.token}&page=${params.page}`,
-    // url: `${getApiUrl(params.companyId)}/downloads/structures`,
+    url: `${getApiUrl(params.companyId)}/downloads/structures`,
     withCredentials: false,
-    /*params: {
+    params: {
       user_credentials: params.token,
       page: params.page,
-    },*/
+    },
     raxConfig: bigDownloadRaxConfig,
     headers: {
       Accept: 'application/json',

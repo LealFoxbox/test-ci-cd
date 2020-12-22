@@ -2,7 +2,7 @@ import { Store } from 'pullstate';
 import { PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
-import { fetchtUser } from 'src/services/user';
+import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
 import { User } from 'src/types';
 
