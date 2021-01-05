@@ -14,6 +14,7 @@ let splashHidden = false;
 function AppNavigator() {
   const status = PersistentUserStore.useState((s) => s.status);
   const userData = PersistentUserStore.useState((s) => s.userData);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const triggerDownload = useDownloader();
 
   UserSessionEffect();
@@ -35,7 +36,7 @@ function AppNavigator() {
 
   if (status === 'shouldLogIn') {
     return <AuthNavigator />;
-  } else if (status === 'loggedIn') {
+  } else if (status === 'loggedIn' && userData) {
     return <MainNavigator user={userData} />;
   } else {
     return <View />;

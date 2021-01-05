@@ -1,5 +1,5 @@
 import Datastore from 'react-native-local-mongodb';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uniqBy } from 'lodash/fp';
 
 import { Assignment, Structure } from 'src/types';
@@ -74,6 +74,11 @@ export const assignmentsDb = createAssignmentDb();
 
 export function isMongoComplete() {
   return structuresDb.isComplete() && assignmentsDb.isComplete();
+}
+
+export function cleanAllData() {
+  structuresDb.clean();
+  assignmentsDb.clean();
 }
 
 /*

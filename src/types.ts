@@ -10,10 +10,16 @@ export interface User {
     inspection_feature: {
       enabled: boolean;
       url: string;
+      private_inspections_enabled: boolean;
     };
     ticket_feature: {
       enabled: boolean;
       url: string;
+      can_view_inspections: boolean;
+      private_tickets_enabled: boolean;
+      can_edit_status: boolean;
+      can_edit_due_dates: boolean;
+      can_edit_assignees: boolean;
     };
     schedule_feature: {
       enabled: boolean;
@@ -24,11 +30,21 @@ export interface User {
   last_name: string;
   login: string;
   settings: {
-    max_line_item_photo_attachments: number;
+    max_attachments_per_inspection: number;
     max_attachments_per_ticket: number;
     display_supervisory_structure_children: boolean;
   };
   single_access_token: string;
+  supervisory_structures: Array<{
+    id: number;
+    active_children_count: number;
+    ancestry: null;
+    display_name: string;
+    location_path: string;
+    notes: null;
+    parent_id: null;
+    updated_at: string;
+  }>;
 }
 
 export interface Assignment {

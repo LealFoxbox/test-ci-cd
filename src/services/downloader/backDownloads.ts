@@ -6,6 +6,7 @@ import { getApiUrl } from '../api/utils';
 
 const dir = RNBackgroundDownloader.directories.documents;
 
+// note: timestamp t is unix time but in full seconds
 function getNow() {
   return format(new Date(), 'yy_MM_dd t');
 }

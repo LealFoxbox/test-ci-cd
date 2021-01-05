@@ -5,6 +5,8 @@ import Geolocation from 'react-native-geolocation-service';
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
 import { User } from 'src/types';
+import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
+import { cleanAllData } from 'src/services/mongodb';
 
 import { initStoreStorage } from '../storeStorage';
 
@@ -46,12 +48,12 @@ export const PersistentUserStore = new Store(initialState);
 
 export const loginAction = (user: User) => {
   PersistentUserStore.update((s) => {
-    s.status = 'loggedIn';
     s.userData = user;
+    s.status = 'loggedIn';
   });
 };
 
-export const logoutAction = () => {
+export const logoutAction = async () => {
   PersistentUserStore.update((s) => {
     for (const key of Object.keys(s)) {
       // @ts-ignore
@@ -60,6 +62,9 @@ export const logoutAction = () => {
     }
     s.status = 'shouldLogIn';
   });
+
+  await deleteAllJSONFiles();
+  cleanAllData();
 
   // TODO: clear db
 };

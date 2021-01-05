@@ -1,2 +1,2 @@
-export * from './Inspections';
-export { default } from './Inspections';
+export * from './InspectionsScreen';
+export { default } from './InspectionsScreen';

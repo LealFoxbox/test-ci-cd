@@ -12,10 +12,10 @@ import { getBaseUrl } from 'src/services/api/utils';
 function getFormUri(user: User, structureId: number, formId: number) {
   return `${getBaseUrl(
     user.account.subdomain,
-  )}/inspect/areas/${structureId}/inspection_forms/${formId}?user_credentials=${user.single_access_token}`;
+  )}/inspect/areas/${structureId}/inspection_forms/${formId}?mobile_app=1&user_credentials=${user.single_access_token}`;
 }
 
-const InspectionFormScreen: React.FC<{}> = () => {
+const EditFormScreen: React.FC<{}> = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
   const {
     params: { formId, structureId },
@@ -25,7 +25,7 @@ const InspectionFormScreen: React.FC<{}> = () => {
     return <View />;
   }
 
-  return <FormScreen source={{ uri: getFormUri(userData, structureId, formId) }} />;
+  return <FormScreen source={{ uri: getFormUri(userData, structureId, formId) }} updateRenderRight={() => null} />;
 };
 
-export default InspectionFormScreen;
+export default EditFormScreen;

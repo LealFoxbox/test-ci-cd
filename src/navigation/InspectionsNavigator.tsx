@@ -2,14 +2,18 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import InspectionsScreen from 'src/screens/Inspections';
-import InspectionFormScreen from 'src/screens/Inspections/InspectionFormScreen';
+import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
+import InspectionFormScreen from 'src/screens/Inspections/EditFormScreen';
 
-import { INSPECTIONS_FORM, INSPECTIONS_HOME } from './screenNames';
+import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
 // type RenderRight = () => React.ReactNode;
 
 export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
+    parentId: null | number;
+  };
+  [INSPECTIONS_FORM_LIST]: {
     parentId: null | number;
   };
   [INSPECTIONS_FORM]: {
@@ -37,10 +41,22 @@ const InspectionsNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen
+        name={INSPECTIONS_FORM_LIST}
+        component={InspectionsFormListScreen}
+        options={{
+          headerTitle: 'Form List',
+          headerTitleStyle: { marginLeft: 15 },
+          // headerRight: renderRight,
+        }}
+        initialParams={{
+          parentId: null,
+        }}
+      />
+      <Stack.Screen
         name={INSPECTIONS_FORM}
         component={InspectionFormScreen}
         options={{
-          headerTitle: 'Inspections',
+          headerTitle: 'Edit Form',
           headerTitleStyle: { marginLeft: 15 },
           // headerRight: renderRight,
         }}

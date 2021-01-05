@@ -18,7 +18,7 @@ describe('WebViewScreen', () => {
       params: { updateRenderRight: () => undefined },
     });
 
-    const result = render(<WebViewScreen source={{ uri: 'https://google.com' }} />);
+    const result = render(<WebViewScreen source={{ uri: 'https://google.com' }} updateRenderRight={() => null} />);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     await act(() => Promise.resolve());

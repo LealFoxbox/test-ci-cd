@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { WebView, WebViewNavigation, WebViewProps } from 'react-native-webview';
 import { IconButton, Title, useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 // @ts-ignore
 import RCTNetworking from 'react-native/Libraries/Network/RCTNetworking';
 
@@ -13,13 +14,18 @@ import ConnectionBanner from '../ConnectionBanner';
 
 import { Container, DisabledOverlay, MessageContainer } from './styles';
 
-function updateRenderRight(cb: any) {}
+interface FormScreen extends WebViewProps {
+  updateRenderRight: (cb: () => React.ReactNode) => void;
+}
 
-const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
+const FormSCreen: React.FC<FormScreen> = ({ style, updateRenderRight, ...props }) => {
   const [showError, setShowError] = useState(false);
+  const [nextScreen, setNextScreen] = useState<'logout' | 'back' | null>(null);
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const { goBack } = useNavigation();
   const theme = useTheme();
 
   const handleReload = () => {
@@ -27,6 +33,14 @@ const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
     setShowError(false);
     updateRenderRight(() => null);
   };
+
+  useEffect(() => {
+    if (nextScreen === 'logout') {
+      void logoutAction();
+    } else if (nextScreen === 'back') {
+      goBack();
+    }
+  }, [nextScreen, goBack]);
 
   useEffect(() => {
     if (!prevConnected && connected && showError) {
@@ -59,7 +73,9 @@ const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             geolocationEnabled
             onNavigationStateChange={({ url }: WebViewNavigation) => {
               if (url.endsWith('.com/login')) {
-                void logoutAction();
+                setNextScreen('logout');
+              } else if (!url.includes('inspection_forms')) {
+                setNextScreen('back');
               }
             }}
             onError={() => {
