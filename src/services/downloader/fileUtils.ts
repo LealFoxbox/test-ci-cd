@@ -9,7 +9,7 @@ import { DownloadType } from './backDownloads';
 
 const dir = RNBackgroundDownloader.directories.documents;
 
-export const EXPIRATION_TIME_SPAN = 60 * 60 * 24; // one day in seconds
+export const EXPIRATION_SECONDS = 60 * 60 * 24; // one day in seconds
 
 export interface MetaFile {
   meta: {
@@ -18,15 +18,35 @@ export interface MetaFile {
   };
 }
 
-function getNow() {
+export function getUnixSeconds() {
   return Date.now() * 0.001;
+}
+// NOTE:
+// file name structure: {type}{page number} - {date in yy_mm_dd} {timestamp of download in unix seconds}.json
+// file name example: 'structures1 - 21_01_05 1609860756.json'
+// the date itself is not used but it's there for human readability
+
+export function getOurFiles(allFiles: ReadDirItem[]) {
+  return sortBy(
+    'name',
+    allFiles.filter(
+      (f) =>
+        f.name.endsWith('.json') &&
+        (f.name.startsWith('structures') || f.name.startsWith('assignments') || f.name.startsWith('ratings')),
+    ),
+  );
+}
+
+export function getOurTypeFiles(allFiles: ReadDirItem[], type: DownloadType) {
+  return sortBy(
+    'name',
+    allFiles.filter((f) => f.name.endsWith('.json') && f.name.startsWith(type)),
+  );
 }
 
 export async function deleteAllJSONFiles() {
   const allFiles = await RNFS.readDir(dir);
-  const ourFiles = allFiles.filter(
-    (f) => f.name.startsWith('structures') || f.name.startsWith('assignments') || f.name.startsWith('ratings'),
-  );
+  const ourFiles = getOurFiles(allFiles);
 
   console.log(
     'DELETE FILES:',
@@ -37,7 +57,6 @@ export async function deleteAllJSONFiles() {
 }
 
 export function getFileTimestamp(fileName: string) {
-  //file name example: 'structures1 - 21_01_05 1609860756.json'
   const timestamp = last(fileName.split(' '));
   if (!timestamp) {
     return null;
@@ -47,7 +66,6 @@ export function getFileTimestamp(fileName: string) {
 }
 
 export function getFilePage(fileName: string) {
-  //file name example: 'structures1 - 21_01_05 1609860756.json'
   const typeAndPage = fileName.split(' ')[0];
   const page = parseInt(typeAndPage.replace(/[^0-9]/g, ''), 10);
 
@@ -59,10 +77,7 @@ export function getFilePage(fileName: string) {
 }
 
 export function findNextPage(allFiles: ReadDirItem[], type: DownloadType) {
-  const sortedFiles = sortBy(
-    'name',
-    allFiles.filter((f) => f.name.startsWith(type)),
-  );
+  const sortedFiles = getOurTypeFiles(allFiles, type);
 
   const foundIndex = sortedFiles.findIndex((f: ReadDirItem, i: number) => {
     return getFilePage(f.name) !== i + 1;
@@ -77,7 +92,7 @@ export function findNextPage(allFiles: ReadDirItem[], type: DownloadType) {
 
 async function isFileValid(file: ReadDirItem) {
   const lastDownloaded = getFileTimestamp(file.name);
-  if (!lastDownloaded || getNow() - lastDownloaded >= EXPIRATION_TIME_SPAN) {
+  if (!lastDownloaded || getUnixSeconds() - lastDownloaded >= EXPIRATION_SECONDS) {
     return false;
   }
 
@@ -103,13 +118,11 @@ async function isFileValid(file: ReadDirItem) {
 
 export async function deleteInvalidFiles() {
   const allFiles = await RNFS.readDir(dir);
-  const ourSortedFiles = allFiles.filter(
-    (f) => f.name.startsWith('structures') || f.name.startsWith('assignments') || f.name.startsWith('ratings'),
-  );
+  const ourFiles = getOurFiles(allFiles);
 
   let i = 0;
-  while (i < ourSortedFiles.length) {
-    const file = ourSortedFiles[i];
+  while (i < ourFiles.length) {
+    const file = ourFiles[i];
 
     const isValid = await isFileValid(file);
     if (!isValid) {
@@ -121,7 +134,9 @@ export async function deleteInvalidFiles() {
 }
 
 export async function findValidFile<T>(type: DownloadType) {
-  const fileList = (await RNFS.readDir(dir)).filter((f) => f.name.startsWith(type)).map((f) => f.path);
+  const allFiles = await RNFS.readDir(dir);
+
+  const fileList = getOurTypeFiles(allFiles, type).map((f) => f.path);
 
   let i = 0;
   while (i < fileList.length) {

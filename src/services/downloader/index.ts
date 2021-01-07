@@ -1,21 +1,30 @@
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable no-console */
 
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef } from 'react';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 import RNFS from 'react-native-fs';
 
 import { Form } from 'src/types';
+import { DownloadStore } from 'src/pullstate/downloadStore';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import timeoutPromise from 'src/utils/timeoutPromise';
+import { useTrigger } from 'src/utils/useTrigger';
 
-import { DownloadStore } from '../../pullstate/downloadStore';
-import { PersistentUserStore } from '../../pullstate/persistentStore';
-import timeoutPromise from '../../utils/timeoutPromise';
 import { fetchForm } from '../api/forms';
-import { assignmentsDb, isMongoComplete } from '../mongodb';
+import { assignmentsDb, selectMongoComplete } from '../mongodb';
 
-import { DownloadType, downloadByTypeAsPromise } from './backDownloads';
+import { DownloadType, downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
 import { refreshDb } from './dbUtils';
-import { EXPIRATION_TIME_SPAN, MetaFile, deleteInvalidFiles, findNextPage, findValidFile } from './fileUtils';
+import {
+  EXPIRATION_SECONDS,
+  MetaFile,
+  deleteAllJSONFiles,
+  deleteInvalidFiles,
+  findNextPage,
+  findValidFile,
+  getUnixSeconds,
+} from './fileUtils';
 
 const dir = RNBackgroundDownloader.directories.documents;
 
@@ -71,10 +80,10 @@ async function updateTotalPages(totalPages: MutableRefObject<TotalPages>, type: 
 }
 
 async function fetchForms(forms: Record<string, Form>, token: string, subdomain: string) {
-  const now = Date.now();
-  const formIds = assignmentsDb
-    .getDistinctFormIds()
-    .filter((id) => !forms[id] || now - forms[id].lastDownloaded >= EXPIRATION_TIME_SPAN);
+  const now = getUnixSeconds();
+  const formIds = (await assignmentsDb.getDistinctFormIds()).filter(
+    (id) => !forms[id] || now - forms[id].lastDownloaded >= EXPIRATION_SECONDS,
+  );
 
   let i = 0;
   while (i < formIds.length) {
@@ -84,7 +93,7 @@ async function fetchForms(forms: Record<string, Form>, token: string, subdomain:
       PersistentUserStore.update((s) => {
         s.forms[data.inspection_form.id] = {
           ...data.inspection_form,
-          lastDownloaded: Date.now(),
+          lastDownloaded: now,
         };
       });
     } catch (e) {
@@ -97,29 +106,19 @@ async function fetchForms(forms: Record<string, Form>, token: string, subdomain:
   }
 }
 
+function setProgress(progress: number) {
+  DownloadStore.update((s) => {
+    s.progress = progress;
+  });
+}
+
 export async function downloadInit(
   token: string,
   subdomain: string,
   totalPages: MutableRefObject<TotalPages>,
   forms: Record<string, Form>,
 ) {
-  const backgroundTasks = await RNBackgroundDownloader.checkForExistingDownloads();
-  await Promise.all(
-    backgroundTasks.map((t) => {
-      return new Promise<void>((resolve, reject) => {
-        t.done(() => {
-          resolve();
-        }).error(() => {
-          reject();
-        });
-      });
-    }),
-  );
-
-  if (backgroundTasks.length > 0) {
-    await timeoutPromise(100);
-  }
-
+  await waitForExistingDownloads();
   await deleteInvalidFiles();
   await updateTotalPages(totalPages, 'structures');
   await updateTotalPages(totalPages, 'assignments');
@@ -127,13 +126,11 @@ export async function downloadInit(
 
   let nextDownload = await getNextDownload(totalPages);
   while (nextDownload) {
-    DownloadStore.update((s) => {
-      // @ts-ignore
-      s.progress = nextDownload.progress;
-    });
+    if (nextDownload) {
+      setProgress(nextDownload.progress);
+    }
 
     // TODO: retry on 1 failure to download and exit with error if it doesn't work
-    // TODO: check for too much difference between file dates to retrigger a whole download
     await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
     await timeoutPromise(100);
 
@@ -143,20 +140,13 @@ export async function downloadInit(
     nextDownload = await getNextDownload(totalPages);
   }
 
-  console.log(
-    'EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT EXIT ',
-  );
-
-  /*
-  nextTask = await downloadRatingsStep(token, subdomain);
-  while (nextTask) {
-    nextTask = await downloadRatingsStep(token, subdomain);
-  }
-*/
+  setProgress(80);
 
   await refreshDb();
 
-  // await deleteAllJSONFiles();
+  await deleteAllJSONFiles();
+
+  setProgress(90);
 
   await fetchForms(forms, token, subdomain);
 
@@ -167,10 +157,11 @@ export async function downloadInit(
 }
 
 export function useDownloader() {
-  const [shouldDownload, setShouldDownload] = useState<number | null>(null);
+  const [shouldTrigger, setShouldTrigger] = useTrigger();
   const token = PersistentUserStore.useState((s) => s.userData?.single_access_token);
   const subdomain = PersistentUserStore.useState((s) => s.userData?.account.subdomain);
   const forms = PersistentUserStore.useState((s) => s.forms);
+  const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
   const totalPages = useRef<TotalPages>({
     structures: null,
     assignments: null,
@@ -178,12 +169,10 @@ export function useDownloader() {
   });
 
   useEffect(() => {
-    if (shouldDownload && token && subdomain && !isMongoComplete()) {
+    if (shouldTrigger && token && subdomain && !isMongoComplete) {
       void downloadInit(token, subdomain, totalPages, forms);
     }
-  }, [shouldDownload, token, subdomain, forms]);
+  }, [shouldTrigger, token, subdomain, forms, isMongoComplete]);
 
-  return useCallback(() => {
-    setShouldDownload((s) => (s ? s + 1 : 1));
-  }, []);
+  return setShouldTrigger;
 }

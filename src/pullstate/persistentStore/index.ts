@@ -6,7 +6,7 @@ import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
 import { User } from 'src/types';
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
-import { cleanAllData } from 'src/services/mongodb';
+import { cleanMongo } from 'src/services/mongodb';
 
 import { initStoreStorage } from '../storeStorage';
 
@@ -54,6 +54,9 @@ export const loginAction = (user: User) => {
 };
 
 export const logoutAction = async () => {
+  await deleteAllJSONFiles();
+  await cleanMongo();
+
   PersistentUserStore.update((s) => {
     for (const key of Object.keys(s)) {
       // @ts-ignore
@@ -62,16 +65,23 @@ export const logoutAction = async () => {
     }
     s.status = 'shouldLogIn';
   });
-
-  await deleteAllJSONFiles();
-  cleanAllData();
-
-  // TODO: clear db
 };
 
 export const setStagingAction = (isStaging: boolean) => {
   PersistentUserStore.update((s) => {
     s.isStaging = isStaging;
+  });
+};
+
+export const updateStructuresMeta = (currentPage: number, totalPages: number) => {
+  PersistentUserStore.update((s) => {
+    s.structuresDbMeta = { currentPage, totalPages };
+  });
+};
+
+export const updateAssignmentsMeta = (currentPage: number, totalPages: number) => {
+  PersistentUserStore.update((s) => {
+    s.assignmentsDbMeta = { currentPage, totalPages };
   });
 };
 

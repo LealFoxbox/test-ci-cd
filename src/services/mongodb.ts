@@ -2,69 +2,110 @@ import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uniqBy } from 'lodash/fp';
 
+import config from 'src/config';
 import { Assignment, Structure } from 'src/types';
-
-const db = new Datastore({ filename: 'asyncStorageKey', storage: AsyncStorage });
-// @ts-ignore
-db.loadDatabase(function (err: Error | null) {
-  if (err) {
-    console.warn('database load error', JSON.stringify(err));
-  }
-});
+import { PersistentState } from 'src/pullstate/persistentStore/initialState';
 
 function createStructureDb() {
-  let data = [] as Structure[];
+  const db = new Datastore({ filename: `${config.APP_NAME}_structures`, storage: AsyncStorage });
+  // @ts-ignore
+  db.loadDatabase(function (err: Error | null) {
+    if (err) {
+      console.warn('structures db load error', JSON.stringify(err));
+    }
+  });
+
   return {
     clean() {
-      data = [];
+      return new Promise<void>((resolve, reject) => {
+        db.remove({}, { multi: true }, function (err) {
+          if (err) {
+            console.warn('structures db clean error', JSON.stringify(err));
+            reject();
+          } else {
+            resolve();
+          }
+        });
+      });
     },
 
     insertPage(page: Structure[]) {
-      data = data.concat(page);
+      return new Promise<void>((resolve, reject) => {
+        db.insert(page, function (err) {
+          if (err) {
+            console.warn('structures db insertPage error', JSON.stringify(err));
+            reject();
+          } else {
+            resolve();
+          }
+        });
+      });
     },
 
     get(id: number) {
-      return data.find((s) => s.id === id);
+      return db.findOne({ id }).exec() as Promise<Structure>;
     },
 
     getBase() {
-      return data.filter((s) => !s.ancestry);
+      return db.find({ ancestry: null }).exec() as Promise<Structure[]>;
     },
 
     getChildren(id: number) {
-      return data.filter((s) => s.parent_id === id);
-    },
-    isComplete() {
-      return data.length > 0;
+      return db.find({ parent_id: id }).exec() as Promise<Structure[]>;
     },
   };
 }
 
 function createAssignmentDb() {
-  let data = [] as Assignment[];
+  const db = new Datastore({ filename: `${config.APP_NAME}_assignments`, storage: AsyncStorage });
+  // @ts-ignore
+  db.loadDatabase(function (err: Error | null) {
+    if (err) {
+      console.warn('assignments db load error', JSON.stringify(err));
+    }
+  });
+
   return {
     clean() {
-      data = [];
+      return new Promise<void>((resolve, reject) => {
+        db.remove({}, { multi: true }, function (err) {
+          if (err) {
+            console.warn('assignments db clean error', JSON.stringify(err));
+            reject();
+          } else {
+            resolve();
+          }
+        });
+      });
     },
 
     insertPage(page: Assignment[]) {
-      data = data.concat(page);
+      return new Promise<void>((resolve, reject) => {
+        db.insert(page, function (err) {
+          if (err) {
+            console.warn('assignments db insertPage error', JSON.stringify(err));
+            reject();
+          } else {
+            resolve();
+          }
+        });
+      });
     },
 
     get(id: number) {
-      return data.find((s) => s.id === id);
-    },
-
-    isComplete() {
-      return data.length > 0;
+      return db.findOne({ id }).exec() as Promise<Assignment>;
     },
 
     getAssignments(id: number) {
-      return data.filter((s) => s.structure_id === id);
+      return db.find({ structure_id: id }).exec() as Promise<Assignment[]>;
     },
 
-    getDistinctFormIds() {
-      return uniqBy('inspection_form_id', data).map((s) => s.inspection_form_id);
+    async getDistinctFormIds() {
+      const results = (await db
+        .find({ inspection_form_id: { $exists: true } }, { inspection_form_id: 1, _id: 0 })
+        .exec()) as { inspection_form_id: number }[];
+
+      return uniqBy('inspection_form_id', results).map((s) => s.inspection_form_id);
     },
   };
 }
@@ -72,42 +113,16 @@ function createAssignmentDb() {
 export const structuresDb = createStructureDb();
 export const assignmentsDb = createAssignmentDb();
 
-export function isMongoComplete() {
-  return structuresDb.isComplete() && assignmentsDb.isComplete();
+export async function cleanMongo() {
+  await structuresDb.clean();
+  await assignmentsDb.clean();
 }
 
-export function cleanAllData() {
-  structuresDb.clean();
-  assignmentsDb.clean();
+export function selectMongoComplete(s: PersistentState) {
+  return (
+    !!s.structuresDbMeta &&
+    s.structuresDbMeta.currentPage === s.structuresDbMeta.totalPages &&
+    !!s.assignmentsDbMeta &&
+    s.assignmentsDbMeta.currentPage === s.assignmentsDbMeta.totalPages
+  );
 }
-
-/*
-const doc = {
-  hello: 'world',
-  n: 5,
-  today: new Date(),
-  'react-native-local-mongodbIsAwesome': true,
-  notthere: null,
-  notToBeSaved: undefined, // Will not be saved,
-  fruits: ['apple', 'orange', 'pear'],
-  infos: { name: 'react-native-local-mongodb' },
-};
-
-db.insert(doc, function (err, newDoc) {
-  // Callback is optional
-  // newDoc is the newly inserted document, including its _id
-  // newDoc has no key called notToBeSaved since its value was undefined
-
-  console.warn('database insert ... error? ', JSON.stringify(err), 'and newDoc: ', JSON.stringify(newDoc));
-});
-
-db.find({ hello: 'world' }, function (err: Error | null, docs: Array<typeof doc>) {
-  console.warn('database find ... error? ', JSON.stringify(err), 'and docs: ', JSON.stringify(docs));
-});
-
-const endpoints = {
-  structures: fetchStructures,
-  ratings: fetchRatings,
-  assignments: fetchAssignments,
-};
- */

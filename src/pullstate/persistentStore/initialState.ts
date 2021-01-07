@@ -8,6 +8,14 @@ export type PersistentState = {
   userData: User | null;
   isStaging: boolean;
   forms: Record<string, Form>;
+  structuresDbMeta: null | {
+    currentPage: number;
+    totalPages: number;
+  };
+  assignmentsDbMeta: null | {
+    currentPage: number;
+    totalPages: number;
+  };
 };
 
 export const initialState: PersistentState = {
@@ -15,4 +23,6 @@ export const initialState: PersistentState = {
   userData: null,
   isStaging: config.isStaging,
   forms: {},
+  structuresDbMeta: null,
+  assignmentsDbMeta: null,
 };

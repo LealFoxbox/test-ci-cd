@@ -8,7 +8,7 @@ import { Text, Title } from 'react-native-paper';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { assignmentsDb, structuresDb } from 'src/services/mongodb';
+import * as dbHooks from 'src/services/mongoHooks';
 import { Form } from 'src/types';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 
@@ -35,8 +35,9 @@ const ItemsTable: React.FC<{}> = () => {
   const {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
-  const structure = !parentId ? null : structuresDb.get(parentId);
-  const assignments = !parentId ? [] : assignmentsDb.getAssignments(parentId);
+  const [structure] = dbHooks.structures.useGet(parentId);
+  const [assignments] = dbHooks.assignments.useGetAssignments(parentId);
+
   const form = PersistentUserStore.useState((s) => s.forms);
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { navigate } = useNavigation();

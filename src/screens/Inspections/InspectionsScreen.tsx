@@ -11,7 +11,7 @@ import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
-import { structuresDb } from 'src/services/mongodb';
+import * as dbHooks from 'src/services/mongoHooks';
 import { Structure } from 'src/types';
 
 import { Container, MessageContainer } from './styles';
@@ -39,8 +39,8 @@ const InspectionsScreen: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => s);
-  const structure = !parentId ? null : structuresDb.get(parentId);
-  const structures = !parentId ? structuresDb.getBase() : structuresDb.getChildren(parentId);
+  const [parentStructure, isLoadingParent] = dbHooks.structures.useGet(parentId);
+  const [structures, isLoadingChildren] = dbHooks.structures.useGetChildren(parentId);
 
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { navigate } = useNavigation();
@@ -57,10 +57,14 @@ const InspectionsScreen: React.FC<{}> = () => {
     );
   }
 
-  if (progress !== 100) {
+  if (progress !== 100 || isLoadingParent || isLoadingChildren) {
     return (
       <MessageContainer>
-        <Title style={{ textAlign: 'center' }}>Downloading, progress is {progress}</Title>
+        {progress === 100 ? (
+          <Title style={{ textAlign: 'center' }}>Processing</Title>
+        ) : (
+          <Title style={{ textAlign: 'center' }}>Downloading, progress is {progress}</Title>
+        )}
       </MessageContainer>
     );
   }
@@ -74,8 +78,8 @@ const InspectionsScreen: React.FC<{}> = () => {
       }}
     >
       <View>
-        <Title>{!structure ? 'Your Areas' : structure.location_path || structure.display_name}</Title>
-        {!!structure?.notes && <Text>{structure?.notes}</Text>}
+        <Title>{!parentStructure ? 'Your Areas' : parentStructure.location_path || parentStructure.display_name}</Title>
+        {!!parentStructure?.notes && <Text>{parentStructure?.notes}</Text>}
       </View>
 
       <FlatList

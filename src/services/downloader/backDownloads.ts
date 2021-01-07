@@ -2,6 +2,8 @@
 import RNBackgroundDownloader from 'react-native-background-downloader';
 import { format } from 'date-fns';
 
+import timeoutPromise from 'src/utils/timeoutPromise';
+
 import { getApiUrl } from '../api/utils';
 
 const dir = RNBackgroundDownloader.directories.documents;
@@ -91,4 +93,27 @@ export function downloadByTypeAsPromise(params: {
         reject(error);
       });
   });
+}
+
+export async function waitForExistingDownloads() {
+  const backgroundTasks = await RNBackgroundDownloader.checkForExistingDownloads();
+  await Promise.all(
+    backgroundTasks.map((t) => {
+      return new Promise<void>((resolve, reject) => {
+        t.done(() => {
+          resolve();
+        }).error(() => {
+          reject();
+        });
+      });
+    }),
+  );
+
+  if (backgroundTasks.length > 0) {
+    // wait for json files to be written to file, just in case
+    // TODO: test if this was necessary
+    await timeoutPromise(100);
+  }
+
+  return backgroundTasks;
 }
