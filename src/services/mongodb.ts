@@ -1,21 +1,106 @@
 import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { uniqBy } from 'lodash/fp';
+import { filter, find, uniqBy } from 'lodash/fp';
 
 import config from 'src/config';
 import { Assignment, Structure } from 'src/types';
-import { PersistentState } from 'src/pullstate/persistentStore/initialState';
 
-function createStructureDb() {
-  const db = new Datastore({ filename: `${config.APP_NAME}_structures`, storage: AsyncStorage });
-  // @ts-ignore
-  db.loadDatabase(function (err: Error | null) {
-    if (err) {
-      console.warn('structures db load error', JSON.stringify(err));
-    }
-  });
+type StructuresDb = ReturnType<typeof createStructureDb>;
+type AssignmentDb = ReturnType<typeof createAssignmentDb>;
+
+export function createStructureMock() {
+  let data: Structure[] = [];
 
   return {
+    loadPromise: Promise.resolve(),
+    clean() {
+      return new Promise<void>((resolve) => {
+        data = [];
+        resolve();
+      });
+    },
+
+    insertPage(page: Structure[]) {
+      return new Promise<void>((resolve) => {
+        data = data.concat(page);
+        resolve();
+      });
+    },
+
+    get(id: number) {
+      return new Promise<Structure | undefined>((resolve) => {
+        resolve(find({ id }, data));
+      });
+    },
+
+    getBase() {
+      return new Promise<Structure[]>((resolve) => {
+        resolve(filter((s) => !s.ancestry, data));
+      });
+    },
+
+    getChildren(id: number) {
+      return new Promise<Structure[]>((resolve) => {
+        resolve(filter((s) => s.parent_id === id, data));
+      });
+    },
+  };
+}
+
+export function createAssignmentMock() {
+  let data: Assignment[] = [];
+
+  return {
+    loadPromise: Promise.resolve(),
+    clean() {
+      return new Promise<void>((resolve) => {
+        data = [];
+        resolve();
+      });
+    },
+
+    insertPage(page: Assignment[]) {
+      return new Promise<void>((resolve) => {
+        data = data.concat(page);
+        resolve();
+      });
+    },
+
+    get(id: number) {
+      return new Promise<Assignment | undefined>((resolve) => {
+        resolve(find({ id }, data));
+      });
+    },
+
+    getAssignments(id: number) {
+      return new Promise<Assignment[]>((resolve) => {
+        resolve(filter((s) => s.structure_id === id, data));
+      });
+    },
+
+    async getDistinctFormIds() {
+      return new Promise<number[]>((resolve) => {
+        resolve(uniqBy('inspection_form_id', data).map((s) => s.inspection_form_id));
+      });
+    },
+  };
+}
+
+export function createStructureDb() {
+  const db = new Datastore({ filename: `${config.APP_NAME}_structures`, storage: AsyncStorage });
+
+  return {
+    loadPromise: new Promise<void>((resolve, reject) => {
+      // @ts-ignore
+      db.loadDatabase(function (err: Error | null) {
+        if (err) {
+          console.warn('structures db load error', JSON.stringify(err));
+          reject();
+        } else {
+          resolve();
+        }
+      });
+    }),
     clean() {
       return new Promise<void>((resolve, reject) => {
         db.remove({}, { multi: true }, function (err) {
@@ -26,6 +111,9 @@ function createStructureDb() {
             resolve();
           }
         });
+      }).then(() => {
+        // @ts-ignore
+        db.persistence.compactDatafile();
       });
     },
 
@@ -43,29 +131,34 @@ function createStructureDb() {
     },
 
     get(id: number) {
-      return db.findOne({ id }).exec() as Promise<Structure>;
+      return db.findOne({ id }).exec() as Promise<Structure | undefined>;
     },
 
     getBase() {
-      return db.find({ ancestry: null }).exec() as Promise<Structure[]>;
+      return db.find({ ancestry: null }).sort({ display_name: 1 }).exec() as Promise<Structure[]>;
     },
 
     getChildren(id: number) {
-      return db.find({ parent_id: id }).exec() as Promise<Structure[]>;
+      return db.find({ parent_id: id }).sort({ display_name: 1 }).exec() as Promise<Structure[]>;
     },
   };
 }
 
-function createAssignmentDb() {
+export function createAssignmentDb() {
   const db = new Datastore({ filename: `${config.APP_NAME}_assignments`, storage: AsyncStorage });
-  // @ts-ignore
-  db.loadDatabase(function (err: Error | null) {
-    if (err) {
-      console.warn('assignments db load error', JSON.stringify(err));
-    }
-  });
 
   return {
+    loadPromise: new Promise<void>((resolve, reject) => {
+      // @ts-ignore
+      db.loadDatabase(function (err: Error | null) {
+        if (err) {
+          console.warn('assignments db load error', JSON.stringify(err));
+          reject();
+        } else {
+          resolve();
+        }
+      });
+    }),
     clean() {
       return new Promise<void>((resolve, reject) => {
         db.remove({}, { multi: true }, function (err) {
@@ -76,6 +169,9 @@ function createAssignmentDb() {
             resolve();
           }
         });
+      }).then(() => {
+        // @ts-ignore
+        db.persistence.compactDatafile();
       });
     },
 
@@ -93,11 +189,11 @@ function createAssignmentDb() {
     },
 
     get(id: number) {
-      return db.findOne({ id }).exec() as Promise<Assignment>;
+      return db.findOne({ id }).exec() as Promise<Assignment | undefined>;
     },
 
     getAssignments(id: number) {
-      return db.find({ structure_id: id }).exec() as Promise<Assignment[]>;
+      return db.find({ structure_id: id }).sort({ display_name: 1 }).exec() as Promise<Assignment[]>;
     },
 
     async getDistinctFormIds() {
@@ -110,19 +206,10 @@ function createAssignmentDb() {
   };
 }
 
-export const structuresDb = createStructureDb();
-export const assignmentsDb = createAssignmentDb();
+export const structuresDb: StructuresDb = !config.MOCKS.DB ? createStructureDb() : createStructureMock();
+export const assignmentsDb: AssignmentDb = !config.MOCKS.DB ? createAssignmentDb() : createAssignmentMock();
 
 export async function cleanMongo() {
   await structuresDb.clean();
   await assignmentsDb.clean();
-}
-
-export function selectMongoComplete(s: PersistentState) {
-  return (
-    !!s.structuresDbMeta &&
-    s.structuresDbMeta.currentPage === s.structuresDbMeta.totalPages &&
-    !!s.assignmentsDbMeta &&
-    s.assignmentsDbMeta.currentPage === s.assignmentsDbMeta.totalPages
-  );
 }

@@ -103,7 +103,7 @@ void init().then(async (state: PersistentState) => {
     );
 
     if (error || !response) {
-      console.warn(JSON.stringify(error));
+      console.warn('fetchtUser error ', JSON.stringify(error));
       if (error?.response?.status === 401) {
         void logoutAction();
       } else {

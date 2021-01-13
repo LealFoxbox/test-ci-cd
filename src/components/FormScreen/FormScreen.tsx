@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { WebView, WebViewNavigation, WebViewProps } from 'react-native-webview';
 import { IconButton, Title, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -14,33 +14,38 @@ import ConnectionBanner from '../ConnectionBanner';
 
 import { Container, DisabledOverlay, MessageContainer } from './styles';
 
-interface FormScreen extends WebViewProps {
-  updateRenderRight: (cb: () => React.ReactNode) => void;
-}
+const EmptyRender = () => null;
 
-const FormSCreen: React.FC<FormScreen> = ({ style, updateRenderRight, ...props }) => {
+const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
+  const [headerRight, setHeaderRight] = useState<() => React.ReactNode>(() => EmptyRender);
   const [showError, setShowError] = useState(false);
   const [nextScreen, setNextScreen] = useState<'logout' | 'back' | null>(null);
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { goBack } = useNavigation();
+  const navigation = useNavigation();
   const theme = useTheme();
 
   const handleReload = () => {
     webRef.current?.reload();
     setShowError(false);
-    updateRenderRight(() => null);
+    setHeaderRight(() => EmptyRender);
   };
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight,
+    });
+  }, [headerRight, navigation]);
+
+  // note: we use nextScreen instead of navigating directly to prevent multiple triggers
   useEffect(() => {
     if (nextScreen === 'logout') {
       void logoutAction();
     } else if (nextScreen === 'back') {
-      goBack();
+      navigation.goBack();
     }
-  }, [nextScreen, goBack]);
+  }, [nextScreen, navigation]);
 
   useEffect(() => {
     if (!prevConnected && connected && showError) {
@@ -81,11 +86,11 @@ const FormSCreen: React.FC<FormScreen> = ({ style, updateRenderRight, ...props }
             onError={() => {
               setShowError(true);
               if (connected) {
-                updateRenderRight(() => (
+                setHeaderRight(() => () => (
                   <IconButton icon="refresh" onPress={handleReload} theme={theme} color={theme.colors.text} size={24} />
                 ));
               } else {
-                updateRenderRight(() => null);
+                setHeaderRight(() => EmptyRender);
               }
             }}
           />

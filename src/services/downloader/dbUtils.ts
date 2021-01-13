@@ -5,9 +5,10 @@ import RNFS from 'react-native-fs';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 
 import { updateAssignmentsMeta, updateStructuresMeta } from 'src/pullstate/persistentStore';
+import config from 'src/config';
 
-import { FetchAssignmentsResponse } from '../api/assignments';
-import { FetchStructuresResponse } from '../api/structures';
+import { FetchAssignmentsResponse, mockAssignmentsPage } from '../api/assignments';
+import { FetchStructuresResponse, mockStructuresPage } from '../api/structures';
 import { assignmentsDb, structuresDb } from '../mongodb';
 
 import { getOurTypeFiles } from './fileUtils';
@@ -33,6 +34,21 @@ export async function refreshDb() {
     i += 1;
   }
 
+  if (config.MOCKS.DATA_STRUCTURES) {
+    updateStructuresMeta(15.777, structuresPathList.length);
+    i = 0;
+    while (i < 20) {
+      try {
+        console.log('MOCKING STRUCTURES ', i);
+        await structuresDb.insertPage(mockStructuresPage());
+      } catch (e) {
+        console.log('refreshDb structures error: ', e);
+      }
+      i += 1;
+    }
+    updateStructuresMeta(structuresPathList.length, structuresPathList.length);
+  }
+
   const assignmentsPathList = getOurTypeFiles(allFiles, 'assignments').map((f) => f.path);
 
   await assignmentsDb.clean();
@@ -48,5 +64,20 @@ export async function refreshDb() {
       console.log('refreshDb assignments error: ', e);
     }
     i += 1;
+  }
+
+  if (config.MOCKS.DATA_ASSIGNMENTS) {
+    updateAssignmentsMeta(15.777, assignmentsPathList.length);
+    i = 0;
+    while (i < 20) {
+      try {
+        console.log('MOCKING ASSIGNMENTS', i);
+        await assignmentsDb.insertPage(mockAssignmentsPage());
+      } catch (e) {
+        console.log('refreshDb assignments error: ', e);
+      }
+      i += 1;
+    }
+    updateAssignmentsMeta(assignmentsPathList.length, assignmentsPathList.length);
   }
 }

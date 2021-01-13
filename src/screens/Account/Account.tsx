@@ -1,13 +1,17 @@
 import React from 'react';
-import { BackHandler } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { Button, Dialog, Divider, Paragraph, Portal, useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { Button, Dialog, Divider, Paragraph, Portal, ProgressBar, useTheme } from 'react-native-paper';
+import { format } from 'date-fns';
 
 import config from 'src/config';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
 import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
+import { initialState } from 'src/pullstate/persistentStore/initialState';
+import { cleanMongo } from 'src/services/mongodb';
+import { DownloadStore } from 'src/pullstate/downloadStore';
+import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
 
 const Container = styled.View`
   flex: 1;
@@ -32,8 +36,11 @@ const metadata = `
 const AccountScreen: React.FC = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
   const isStaging = PersistentUserStore.useState((s) => s.isStaging);
+  const lastUpdated = PersistentUserStore.useState((s) => s.lastUpdated);
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
+  const { progress } = DownloadStore.useState((s) => s);
+  const navigation = useNavigation();
 
   const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
   const emailBody = encodeURIComponent(metadata);
@@ -46,17 +53,22 @@ const AccountScreen: React.FC = () => {
     void logoutAction();
   };
 
-  useFocusEffect(() => {
-    const handleBackButton = () => {
-      return true;
-    };
+  const handleRedownload = async () => {
+    await cleanMongo();
+    DownloadStore.update((s) => {
+      s.progress = 0;
+    });
+    PersistentUserStore.update((s) => {
+      s.forms = initialState.forms;
+      s.assignmentsDbMeta = initialState.assignmentsDbMeta;
+      s.structuresDbMeta = initialState.structuresDbMeta;
+    });
 
-    BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
-    };
-  });
+    navigation.reset({
+      index: 0,
+      routes: [{ name: INSPECTIONS_HOME, params: { parentId: null } }],
+    });
+  };
 
   return (
     <Container>
@@ -69,6 +81,30 @@ const AccountScreen: React.FC = () => {
             icon="logout"
             onPress={showDialog}
           />
+          <Divider />
+          {progress === 100 && lastUpdated && (
+            <Row
+              accessibilityLabel="download"
+              label="Download New Data"
+              value={`Last updated ${format(lastUpdated, 'MM/dd/yyyy hh:mma')}`}
+              icon="cloud-download"
+              onPress={handleRedownload}
+            />
+          )}
+          {(progress !== 100 || !lastUpdated) && (
+            <Row
+              accessibilityLabel="downloading"
+              label="Downloading Data..."
+              value={
+                <ProgressBar
+                  progress={progress / 100}
+                  color={theme.colors.primary}
+                  style={{ maxWidth: 250, marginVertical: 5 }}
+                />
+              }
+              icon="cloud-download"
+            />
+          )}
           <Divider />
           <Row
             accessibilityLabel="support"

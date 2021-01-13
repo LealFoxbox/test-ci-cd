@@ -16,6 +16,7 @@ export type PersistentState = {
     currentPage: number;
     totalPages: number;
   };
+  lastUpdated: null | number;
 };
 
 export const initialState: PersistentState = {
@@ -25,4 +26,5 @@ export const initialState: PersistentState = {
   forms: {},
   structuresDbMeta: null,
   assignmentsDbMeta: null,
+  lastUpdated: null,
 };

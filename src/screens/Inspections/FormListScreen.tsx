@@ -1,72 +1,62 @@
-/* eslint-disable react-native-a11y/has-accessibility-props */
 /* eslint-disable react-native/no-color-literals */
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Text, Title } from 'react-native-paper';
+import { Divider, Paragraph, Text, Title, useTheme } from 'react-native-paper';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import * as dbHooks from 'src/services/mongoHooks';
-import { Form } from 'src/types';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
-
-const FormItem: React.FC<{ item: Form; onPress: () => void }> = ({ item, onPress }) => {
-  return (
-    <TouchableOpacity
-      style={{
-        backgroundColor: '#c88',
-        padding: 20,
-        marginHorizontal: 10,
-        marginBottom: 3.5,
-        flexDirection: 'row',
-      }}
-      onPress={onPress}
-    >
-      <Text>
-        {item.id} - {item.name}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+import NavRow from 'src/components/NavRow';
 
 const ItemsTable: React.FC<{}> = () => {
   const {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
+  const forms = PersistentUserStore.useState((s) => s.forms);
   const [structure] = dbHooks.structures.useGet(parentId);
-  const [assignments] = dbHooks.assignments.useGetAssignments(parentId);
+  const [assignments] = dbHooks.assignments.useGetAssignments(parentId, forms);
+  const theme = useTheme();
 
-  const form = PersistentUserStore.useState((s) => s.forms);
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { navigate } = useNavigation();
+  const navigation = useNavigation();
 
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: '#fff',
         justifyContent: 'center',
       }}
     >
       {!!structure && (
-        <View>
-          <Title>{structure.location_path || structure.display_name}</Title>
+        <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
+          <Title>{structure.display_name}</Title>
+          {!!structure?.location_path && <Text style={{ fontWeight: 'bold' }}>{structure.location_path}</Text>}
+          {(!!structure?.notes && <Paragraph>{structure?.notes}</Paragraph>) || (
+            <Paragraph>
+              This is an example of a note. This is an example of a note. This is an example of a note. This is an
+              example of a note. This is an example of a note. This is an example of a note. This is an example of a
+              note. This is an example of a note.
+            </Paragraph>
+          )}
         </View>
       )}
       <FlatList
         contentContainerStyle={{
-          paddingVertical: 30,
           justifyContent: 'flex-start',
         }}
         data={assignments}
+        ItemSeparatorComponent={Divider}
         renderItem={({ item }) => (
-          <FormItem
-            item={form[item.inspection_form_id]}
-            onPress={() =>
-              navigate(INSPECTIONS_FORM, { formId: item.inspection_form_id, structureId: item.structure_id })
-            }
+          <NavRow
+            label={forms[item.inspection_form_id]?.name || ''}
+            icon="description"
+            onPress={() => {
+              navigation.navigate(INSPECTIONS_FORM, {
+                formId: item.inspection_form_id,
+                structureId: item.structure_id,
+              });
+            }}
           />
         )}
         keyExtractor={(item) => `${item.id}`}

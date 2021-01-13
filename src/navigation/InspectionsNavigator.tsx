@@ -33,8 +33,7 @@ const InspectionsNavigator: React.FC = () => {
         component={InspectionsScreen}
         options={{
           headerTitle: 'Inspections',
-          headerTitleStyle: { marginLeft: 15 },
-          // headerRight: renderRight,
+          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
         }}
         initialParams={{
           parentId: null,
@@ -44,9 +43,8 @@ const InspectionsNavigator: React.FC = () => {
         name={INSPECTIONS_FORM_LIST}
         component={InspectionsFormListScreen}
         options={{
-          headerTitle: 'Form List',
-          headerTitleStyle: { marginLeft: 15 },
-          // headerRight: renderRight,
+          headerTitle: 'Inspections',
+          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
         }}
         initialParams={{
           parentId: null,
@@ -56,9 +54,8 @@ const InspectionsNavigator: React.FC = () => {
         name={INSPECTIONS_FORM}
         component={InspectionFormScreen}
         options={{
-          headerTitle: 'Edit Form',
-          headerTitleStyle: { marginLeft: 15 },
-          // headerRight: renderRight,
+          headerTitle: 'Inspections',
+          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
         }}
         initialParams={{
           formId: null,

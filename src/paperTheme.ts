@@ -7,7 +7,7 @@ const paperTheme = {
     ...DefaultTheme.colors,
     primary: '#FF951F',
     accent: '#F2680E',
-    background: '#FFFFFF',
+    background: '#e9e9e9',
     surface: '#FFFFFF',
     error: '#FF2D55',
     text: '#000000',
