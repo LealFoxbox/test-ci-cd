@@ -8,10 +8,9 @@ import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
 import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
-import { initialState } from 'src/pullstate/persistentStore/initialState';
-import { cleanMongo } from 'src/services/mongodb';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
+import { clearAllData } from 'src/services/downloader';
 
 const Container = styled.View`
   flex: 1;
@@ -54,15 +53,7 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleRedownload = async () => {
-    await cleanMongo();
-    DownloadStore.update((s) => {
-      s.progress = 0;
-    });
-    PersistentUserStore.update((s) => {
-      s.forms = initialState.forms;
-      s.assignmentsDbMeta = initialState.assignmentsDbMeta;
-      s.structuresDbMeta = initialState.structuresDbMeta;
-    });
+    await clearAllData();
 
     navigation.reset({
       index: 0,

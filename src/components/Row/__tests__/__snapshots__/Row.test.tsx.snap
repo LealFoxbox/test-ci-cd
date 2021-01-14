@@ -38,7 +38,9 @@ exports[`Row should render 1`] = `
             "paddingHorizontal": 16,
           },
           undefined,
-          undefined,
+          Object {
+            "flex": 1,
+          },
         ]
       }
     >

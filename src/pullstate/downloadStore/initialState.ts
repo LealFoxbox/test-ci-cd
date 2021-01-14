@@ -1,7 +1,7 @@
 export type DownloadState = {
   progress: number;
   error: string | null;
-  downloading: 'forms' | 'mongo' | null;
+  downloading: 'forms' | 'db' | null;
 };
 
 export const initialState: DownloadState = {

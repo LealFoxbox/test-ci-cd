@@ -12,9 +12,10 @@ import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
 import config from 'src/config';
 import { selectMongoComplete } from 'src/pullstate/selectors';
+import { initialState } from 'src/pullstate/persistentStore/initialState';
 
 import { fetchForm } from '../api/forms';
-import { assignmentsDb } from '../mongodb';
+import { assignmentsDb, cleanMongo } from '../mongodb';
 import { useIsMongoLoaded } from '../mongoHooks';
 
 import { DownloadType, downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
@@ -49,7 +50,7 @@ function setProgress(progress: number) {
   });
 }
 
-function setDownloading(downloading: 'forms' | 'mongo' | null) {
+function setDownloading(downloading: 'forms' | 'db' | null) {
   DownloadStore.update((s) => {
     s.downloading = downloading;
   });
@@ -130,7 +131,7 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
         s.error = `Failed to download form data for ${formId}`;
       });
     }
-    await timeoutPromise(10);
+    await timeoutPromise(200);
     i += 1;
   }
 
@@ -154,7 +155,7 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
           s.error = `Failed to download form data for ${formId}`;
         });
       }
-      await timeoutPromise(10);
+      await timeoutPromise(200);
       i += 1;
     }
   }
@@ -166,9 +167,9 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
   });
 }
 
-export async function mongoDownload(token: string, subdomain: string, totalPages: MutableRefObject<TotalPages>) {
-  console.log('DOWNLOADING MONGO');
-  setDownloading('mongo');
+export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<TotalPages>) {
+  console.log('DOWNLOADING STRUCTURES AND ASSIGNMKENTS');
+  setDownloading('db');
   await waitForExistingDownloads();
   await deleteInvalidFiles();
   await updateTotalPages(totalPages, 'structures');
@@ -182,8 +183,12 @@ export async function mongoDownload(token: string, subdomain: string, totalPages
     }
 
     // TODO: retry on 1 failure to download and exit with error if it doesn't work
-    await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
-    await timeoutPromise(100);
+    try {
+      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
+    } catch (e) {
+      console.warn(nextDownload.type, ' error on page ', nextDownload.page, ' with: ', e);
+    }
+    await timeoutPromise(200);
 
     if (!totalPages.current[nextDownload.type]) {
       await updateTotalPages(totalPages, nextDownload.type);
@@ -229,7 +234,7 @@ export function useDownloader() {
         FLAGS.loggedIn = true;
         if (downloading === null) {
           if (!isMongoComplete) {
-            void mongoDownload(token, subdomain, totalPages);
+            void dbDownload(token, subdomain, totalPages);
           } else {
             const formIds = await getMissingForms(forms);
             if (formIds.length > 0) {
@@ -244,4 +249,17 @@ export function useDownloader() {
   }, [isMongoLoaded, shouldTrigger, token, subdomain, forms, isMongoComplete, downloading]);
 
   return setShouldTrigger;
+}
+
+export async function clearAllData() {
+  await cleanMongo();
+  DownloadStore.update((s) => {
+    s.progress = 0;
+    s.error = null;
+  });
+  PersistentUserStore.update((s) => {
+    s.forms = initialState.forms;
+    s.assignmentsDbMeta = initialState.assignmentsDbMeta;
+    s.structuresDbMeta = initialState.structuresDbMeta;
+  });
 }

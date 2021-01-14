@@ -112,7 +112,7 @@ export async function waitForExistingDownloads() {
   if (backgroundTasks.length > 0) {
     // wait for json files to be written to file, just in case
     // TODO: test if this was necessary
-    await timeoutPromise(100);
+    await timeoutPromise(200);
   }
 
   return backgroundTasks;

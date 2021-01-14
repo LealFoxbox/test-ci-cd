@@ -35,6 +35,7 @@ interface Config {
     DOWNLOAD_STRUCTURES: boolean; // reproduces a huge data download time
     DOWNLOAD_ASSIGNMENTS: boolean; // reproduces a huge data download time
     DOWNLOAD_FORMS: boolean; // reproduces a huge data download time
+    NOTES: boolean; // shows example notes when none are given by the BE
   };
   MOCK_LIMITS: {
     MAX_STRUCTURES: number;
@@ -67,6 +68,7 @@ const config: Config = {
     DOWNLOAD_STRUCTURES: false,
     DOWNLOAD_ASSIGNMENTS: false,
     DOWNLOAD_FORMS: false,
+    NOTES: true,
   },
   MOCK_LIMITS: {
     MAX_STRUCTURES: 100000,

@@ -18,6 +18,14 @@ export interface MetaFile {
   };
 }
 
+async function deleteFile(file: ReadDirItem) {
+  try {
+    await RNFS.unlink(file.path);
+  } catch (e) {
+    console.warn('delete error ', e, ' for file ', file.path);
+  }
+}
+
 export function getUnixSeconds() {
   return Date.now() * 0.001;
 }
@@ -53,7 +61,7 @@ export async function deleteAllJSONFiles() {
     ourFiles.map((f) => f.path),
   );
 
-  return Promise.all(ourFiles.map((f) => RNFS.unlink(f.path)));
+  return Promise.all(ourFiles.map(deleteFile));
 }
 
 export function getFileTimestamp(fileName: string) {
@@ -126,7 +134,7 @@ export async function deleteInvalidFiles() {
 
     const isValid = await isFileValid(file);
     if (!isValid) {
-      await RNFS.unlink(file.path);
+      await deleteFile(file);
     }
 
     i += 1;
@@ -141,8 +149,7 @@ export async function findValidFile<T>(type: DownloadType) {
   let i = 0;
   while (i < fileList.length) {
     try {
-      const downloadedContent = JSON.parse(await RNFS.readFile(fileList[i])) as T;
-      return downloadedContent;
+      return JSON.parse(await RNFS.readFile(fileList[i])) as T;
     } catch (e) {
       i += 1;
     }

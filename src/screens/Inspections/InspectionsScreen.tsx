@@ -1,17 +1,20 @@
 import React from 'react';
-import { Divider, Paragraph, ProgressBar, Text, Title, useTheme } from 'react-native-paper';
+import { Divider, Text, Title, useTheme } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList, View } from 'react-native';
 
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import NavRow from 'src/components/NavRow';
+import Notes from 'src/components/Notes';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 
-import { Container, MessageContainer } from './styles';
+import { Container } from './styles';
+import DownloadingScreen from './DownloadingScreen';
+import ErrorScreen from './ErrorScreen';
 
 const InspectionsScreen: React.FC<{}> = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
@@ -29,22 +32,11 @@ const InspectionsScreen: React.FC<{}> = () => {
   }
 
   if (error) {
-    return (
-      <MessageContainer>
-        <Title style={{ textAlign: 'center' }}>An error ocurred, please reload</Title>
-      </MessageContainer>
-    );
+    return <ErrorScreen />;
   }
 
   if (progress !== 100 || isLoading) {
-    return progress === 100 || progress === 0 ? (
-      <LoadingOverlay />
-    ) : (
-      <MessageContainer>
-        <ProgressBar progress={progress / 100} color={theme.colors.primary} />
-        <Paragraph style={{ textAlign: 'center', marginTop: 20 }}>Downloading account data...</Paragraph>
-      </MessageContainer>
-    );
+    return progress === 100 || progress === 0 ? <LoadingOverlay /> : <DownloadingScreen progress={progress} />;
   }
 
   return (
@@ -52,13 +44,7 @@ const InspectionsScreen: React.FC<{}> = () => {
       <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
         <Title>{!parentId || !parent ? 'Your Areas' : parent.display_name}</Title>
         {!!parent?.location_path && <Text style={{ fontWeight: 'bold' }}>{parent.location_path}</Text>}
-        {(!!parent?.notes && <Paragraph>{parent?.notes}</Paragraph>) || (
-          <Paragraph>
-            This is an example of a note. This is an example of a note. This is an example of a note. This is an example
-            of a note. This is an example of a note. This is an example of a note. This is an example of a note. This is
-            an example of a note.
-          </Paragraph>
-        )}
+        <Notes value={parent?.notes} />
       </View>
       <FlatList
         contentContainerStyle={{

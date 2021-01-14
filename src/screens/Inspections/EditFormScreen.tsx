@@ -25,7 +25,7 @@ const EditFormScreen: React.FC<{}> = () => {
     return <View />;
   }
 
-  return <FormScreen source={{ uri: getFormUri(userData, structureId, formId) }} updateRenderRight={() => null} />;
+  return <FormScreen source={{ uri: getFormUri(userData, structureId, formId) }} />;
 };
 
 export default EditFormScreen;

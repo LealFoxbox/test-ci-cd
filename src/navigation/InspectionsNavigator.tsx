@@ -33,7 +33,7 @@ const InspectionsNavigator: React.FC = () => {
         component={InspectionsScreen}
         options={{
           headerTitle: 'Inspections',
-          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
+          headerTitleStyle: { marginLeft: 5, paddingLeft: 5 },
         }}
         initialParams={{
           parentId: null,
