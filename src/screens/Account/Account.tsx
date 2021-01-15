@@ -11,6 +11,8 @@ import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { clearAllData } from 'src/services/downloader';
+import ConnectionBanner from 'src/components/ConnectionBanner';
+import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 const Container = styled.View`
   flex: 1;
@@ -40,6 +42,7 @@ const AccountScreen: React.FC = () => {
   const theme = useTheme();
   const { progress } = DownloadStore.useState((s) => s);
   const navigation = useNavigation();
+  const connected = useNetworkStatus();
 
   const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
   const emailBody = encodeURIComponent(metadata);
@@ -63,6 +66,7 @@ const AccountScreen: React.FC = () => {
 
   return (
     <Container>
+      <ConnectionBanner connected={connected} />
       {!!userData && (
         <>
           <Row
@@ -80,6 +84,7 @@ const AccountScreen: React.FC = () => {
               value={`Last updated ${format(lastUpdated, 'MM/dd/yyyy hh:mma')}`}
               icon="cloud-download"
               onPress={handleRedownload}
+              disabled={!connected}
             />
           )}
           {(progress !== 100 || !lastUpdated) && (

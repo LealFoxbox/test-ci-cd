@@ -12,9 +12,10 @@ const Container = styled.View`
   padding: 10px;
 `;
 
-const ClickableContainer = styled.TouchableOpacity`
+const ClickableContainer = styled.TouchableOpacity<{ disabled?: boolean }>`
   background-color: white;
   padding: 10px;
+  opacity: ${(p) => (p.disabled ? 0.5 : 1)};
 `;
 
 interface RowProps {
@@ -24,9 +25,10 @@ interface RowProps {
   icon?: string;
   onPress?: () => void;
   spinner?: boolean;
+  disabled?: boolean;
 }
 
-const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, spinner, onPress }) => {
+const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, disabled, spinner, onPress }) => {
   const theme = useTheme();
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
@@ -45,6 +47,7 @@ const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, spinn
       <ClickableContainer
         onPress={onPress}
         accessibilityRole="button"
+        disabled={disabled}
         {...getAccessibilityAndAutomationProps(accessibilityLabel || label)}
       >
         {content}

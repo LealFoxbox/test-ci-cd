@@ -44,7 +44,6 @@ const InspectionsScreen: React.FC<{}> = () => {
       <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
         <Title>{!parentId || !parent ? 'Your Areas' : parent.display_name}</Title>
         {!!parent?.location_path && <Text style={{ fontWeight: 'bold' }}>{parent.location_path}</Text>}
-        <Notes value={parent?.notes} />
       </View>
       <FlatList
         contentContainerStyle={{
@@ -52,6 +51,7 @@ const InspectionsScreen: React.FC<{}> = () => {
         }}
         data={children}
         ItemSeparatorComponent={Divider}
+        ListHeaderComponent={() => <Notes value={parent?.notes} />}
         renderItem={({ item }) => (
           <NavRow
             label={item.display_name}

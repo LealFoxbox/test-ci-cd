@@ -68,7 +68,7 @@ const config: Config = {
     DOWNLOAD_STRUCTURES: false,
     DOWNLOAD_ASSIGNMENTS: false,
     DOWNLOAD_FORMS: false,
-    NOTES: true,
+    NOTES: false,
   },
   MOCK_LIMITS: {
     MAX_STRUCTURES: 100000,

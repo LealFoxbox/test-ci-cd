@@ -32,13 +32,13 @@ const ItemsTable: React.FC<{}> = () => {
         <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
           <Title>{structure.display_name}</Title>
           {!!structure?.location_path && <Text style={{ fontWeight: 'bold' }}>{structure.location_path}</Text>}
-          <Notes value={structure?.notes} />
         </View>
       )}
       <FlatList
         contentContainerStyle={{
           justifyContent: 'flex-start',
         }}
+        ListHeaderComponent={() => <Notes value={structure?.notes} />}
         data={assignments}
         ItemSeparatorComponent={Divider}
         renderItem={({ item }) => (
