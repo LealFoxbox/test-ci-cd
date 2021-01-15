@@ -4,7 +4,7 @@ import { act, render } from 'helpers/testUtils';
 
 import Account from '../Account';
 
-jest.mock('src/contexts/userSession');
+jest.mock('src/pullstate/persistentStore');
 
 describe('AccountScreen', () => {
   beforeEach(() => {

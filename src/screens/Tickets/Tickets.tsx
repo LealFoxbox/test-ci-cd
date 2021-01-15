@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 
 import WebViewScreen from 'src/components/WebViewScreen';
-import { useUserSession } from 'src/contexts/userSession';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { User } from 'src/types';
 
 function getTicketsUri(user: User) {
@@ -10,13 +10,13 @@ function getTicketsUri(user: User) {
 }
 
 const TicketsScreen: React.FC<{}> = () => {
-  const [{ data: user }] = useUserSession();
+  const userData = PersistentUserStore.useState((s) => s.userData);
 
-  if (!user) {
+  if (!userData) {
     return <View />;
   }
 
-  return <WebViewScreen source={{ uri: getTicketsUri(user) }} />;
+  return <WebViewScreen source={{ uri: getTicketsUri(userData) }} />;
 };
 
 export default TicketsScreen;

@@ -1,39 +1,43 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BackHandler } from 'react-native';
 import { WebView, WebViewNavigation, WebViewProps } from 'react-native-webview';
 import { IconButton, Title, useTheme } from 'react-native-paper';
-import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // @ts-ignore
 import RCTNetworking from 'react-native/Libraries/Network/RCTNetworking';
 
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { TicketsNavigatorParamList } from 'src/navigation/TicketsNavigator';
-import { TICKETS_HOME } from 'src/navigation/screenNames';
-import { useUserSession } from 'src/contexts/userSession';
 import usePrevious from 'src/utils/usePrevious';
+import { logoutAction } from 'src/pullstate/persistentStore';
 
 import LoadingOverlay from '../LoadingOverlay';
 import ConnectionBanner from '../ConnectionBanner';
 
 import { Container, DisabledOverlay, MessageContainer } from './styles';
 
+const EmptyRender = () => null;
+
 const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
-  const {
-    params: { updateRenderRight },
-  } = useRoute<RouteProp<TicketsNavigatorParamList, typeof TICKETS_HOME>>();
+  const [headerRight, setHeaderRight] = useState<() => React.ReactNode>(() => EmptyRender);
 
   const [showError, setShowError] = useState(false);
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
-  const [, dispatch] = useUserSession();
   const theme = useTheme();
+  const navigation = useNavigation();
 
   const handleReload = () => {
     webRef.current?.reload();
     setShowError(false);
-    updateRenderRight(() => null);
+    setHeaderRight(() => EmptyRender);
   };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight,
+    });
+  }, [headerRight, navigation]);
 
   useFocusEffect(() => {
     const handleBackButton = () => {
@@ -79,17 +83,17 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             geolocationEnabled
             onNavigationStateChange={({ url }: WebViewNavigation) => {
               if (url.endsWith('.com/login')) {
-                dispatch({ type: 'start_logout' });
+                void logoutAction();
               }
             }}
             onError={() => {
               setShowError(true);
               if (connected) {
-                updateRenderRight(() => (
+                setHeaderRight(() => () => (
                   <IconButton icon="refresh" onPress={handleReload} theme={theme} color={theme.colors.text} size={24} />
                 ));
               } else {
-                updateRenderRight(() => null);
+                setHeaderRight(() => EmptyRender);
               }
             }}
           />

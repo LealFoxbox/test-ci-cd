@@ -1,6 +1,6 @@
 import SInfo from 'react-native-sensitive-info';
 
-import createCache from './cache';
+import createCache from '../utils/cache';
 
 const configName = `OrangeQCRNApp`;
 

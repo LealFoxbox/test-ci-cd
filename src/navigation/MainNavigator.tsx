@@ -28,9 +28,10 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
       inactiveColor={colors.backdrop}
       activeColor={colors.primary}
       barStyle={{
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
       }}
       shifting={false}
+      backBehavior="none"
     >
       {user?.features.inspection_feature.enabled && (
         <Tab.Screen

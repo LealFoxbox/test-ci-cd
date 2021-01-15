@@ -2,9 +2,7 @@ import React from 'react';
 
 import { act, render } from 'helpers/testUtils';
 
-import Inspections from '../Inspections';
-
-jest.mock('src/contexts/userSession');
+import Inspections from '../InspectionsScreen';
 
 describe('InspectionsScreen', () => {
   beforeEach(() => {

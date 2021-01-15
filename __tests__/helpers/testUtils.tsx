@@ -34,24 +34,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
 
-import { UserSessionProvider } from 'src/contexts/userSession';
 import paperTheme from 'src/paperTheme';
 
 const AllTheProviders = ({ children }: { children: ReactNode }): ReactElement => {
   return (
     <NavigationContainer>
-      <UserSessionProvider>
-        <PaperProvider theme={paperTheme}>
-          <SafeAreaProvider
-            initialMetrics={{
-              insets: { top: 0, bottom: 0, right: 0, left: 0 },
-              frame: { width: 0, height: 0, x: 0, y: 0 },
-            }}
-          >
-            {children}
-          </SafeAreaProvider>
-        </PaperProvider>
-      </UserSessionProvider>
+      <PaperProvider theme={paperTheme}>
+        <SafeAreaProvider
+          initialMetrics={{
+            insets: { top: 0, bottom: 0, right: 0, left: 0 },
+            frame: { width: 0, height: 0, x: 0, y: 0 },
+          }}
+        >
+          {children}
+        </SafeAreaProvider>
+      </PaperProvider>
     </NavigationContainer>
   );
 };

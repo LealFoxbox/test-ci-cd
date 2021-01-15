@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavRow should render 1`] = `
+<View
+  accessibilityLabel="label"
+  accessibilityRole="button"
+  accessible={true}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    Array [
+      Object {
+        "backgroundColor": "white",
+        "paddingBottom": 10,
+        "paddingLeft": 10,
+        "paddingRight": 10,
+        "paddingTop": 10,
+      },
+    ]
+  }
+  testID="label"
+>
+  <View
+    style={
+      Object {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "paddingHorizontal": 15,
+        "width": "100%",
+      }
+    }
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        Array [
+          Object {
+            "color": "#6200ee",
+            "fontSize": 24,
+          },
+          undefined,
+          Object {
+            "fontFamily": "Material Icons",
+            "fontStyle": "normal",
+            "fontWeight": "normal",
+          },
+          Object {},
+        ]
+      }
+    >
+      ?
+    </Text>
+    <View
+      style={
+        Array [
+          Object {
+            "paddingHorizontal": 16,
+          },
+          undefined,
+          Object {
+            "flex": 1,
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          Array [
+            Object {
+              "color": "#000000",
+              "fontFamily": "System",
+              "fontWeight": "400",
+              "textAlign": "left",
+            },
+            Array [
+              Object {
+                "color": "rgba(0, 0, 0, 0.87)",
+                "fontFamily": "System",
+                "fontWeight": "500",
+                "textAlign": "left",
+                "writingDirection": "ltr",
+              },
+              Array [
+                Object {
+                  "fontSize": 20,
+                  "letterSpacing": 0.15,
+                  "lineHeight": 30,
+                  "marginVertical": 2,
+                },
+                undefined,
+              ],
+              Array [
+                Object {
+                  "fontSize": 20,
+                  "letterSpacing": 0.15,
+                  "lineHeight": 30,
+                  "marginVertical": 2,
+                },
+                undefined,
+              ],
+            ],
+          ]
+        }
+      >
+        label
+      </Text>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        Array [
+          Object {
+            "color": "rgba(0, 0, 0, 0.54)",
+            "fontSize": 24,
+          },
+          undefined,
+          Object {
+            "fontFamily": "Material Icons",
+            "fontStyle": "normal",
+            "fontWeight": "normal",
+          },
+          Object {},
+        ]
+      }
+    >
+      
+    </Text>
+  </View>
+</View>
+`;

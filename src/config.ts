@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { getBuildNumber, getBundleId, getModel, getUniqueId, getVersion } from 'react-native-device-info';
 import { Locale, getLocales } from 'react-native-localize';
-import { map } from 'lodash/fp';
+import { map, mapValues } from 'lodash/fp';
 
 import { name as appName } from '../app.json';
 
@@ -9,6 +9,8 @@ const stagingBaseurl = 'orangeqc-staging.com';
 const stagingApiUrl = 'orangeqc-staging.com/api/v4';
 const prodBaseUrl = 'orangeqc.com';
 const prodApiUrl = 'orangeqc.com/api/v4';
+
+// TODO: maybe pull out isStaging from here into the persistentstore
 
 interface Config {
   isDev: boolean;
@@ -25,6 +27,22 @@ interface Config {
   PARSED_LOCALES: string;
   BACKEND_BASE_URL: string;
   BACKEND_API_URL: string;
+  MOCKS: {
+    DB: boolean;
+    DATA_STRUCTURES: boolean; // reproduces a huge data load on the app
+    DATA_ASSIGNMENTS: boolean; // reproduces a huge data load on the app
+    DATA_FORMS: boolean; // reproduces a huge data load on the app
+    DOWNLOAD_STRUCTURES: boolean; // reproduces a huge data download time
+    DOWNLOAD_ASSIGNMENTS: boolean; // reproduces a huge data download time
+    DOWNLOAD_FORMS: boolean; // reproduces a huge data download time
+    NOTES: boolean; // shows example notes when none are given by the BE
+  };
+  MOCK_LIMITS: {
+    MAX_STRUCTURES: number;
+    MAX_ASSIGNMENTS: number;
+    MAX_FORMS: number;
+    ITEMS_PER_PAGE: number;
+  };
 }
 
 const config: Config = {
@@ -42,13 +60,30 @@ const config: Config = {
   BACKEND_BASE_URL: '',
   BACKEND_API_URL: '',
   PLATFORM: Platform.OS,
+  MOCKS: {
+    DB: false,
+    DATA_STRUCTURES: false,
+    DATA_ASSIGNMENTS: false,
+    DATA_FORMS: false,
+    DOWNLOAD_STRUCTURES: false,
+    DOWNLOAD_ASSIGNMENTS: false,
+    DOWNLOAD_FORMS: false,
+    NOTES: false,
+  },
+  MOCK_LIMITS: {
+    MAX_STRUCTURES: 100000,
+    MAX_ASSIGNMENTS: 100000,
+    MAX_FORMS: 1000,
+    ITEMS_PER_PAGE: 500,
+  },
 };
 
-export const setEnv = (staging: boolean) => {
-  if (!staging) {
+export const setEnv = (isStaging: boolean) => {
+  if (!isStaging) {
     config.isStaging = false;
     config.BACKEND_BASE_URL = prodBaseUrl;
     config.BACKEND_API_URL = prodApiUrl;
+    config.MOCKS = mapValues(() => false, config.MOCKS) as Config['MOCKS'];
   } else {
     config.isStaging = true;
     config.BACKEND_BASE_URL = stagingBaseurl;

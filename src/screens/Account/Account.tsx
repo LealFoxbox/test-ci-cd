@@ -1,13 +1,18 @@
 import React from 'react';
-import { BackHandler } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { Button, Dialog, Divider, Paragraph, Portal, useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { Button, Dialog, Divider, Paragraph, Portal, ProgressBar, useTheme } from 'react-native-paper';
+import { format } from 'date-fns';
 
 import config from 'src/config';
-import { useUserSession } from 'src/contexts/userSession';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
+import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
+import { DownloadStore } from 'src/pullstate/downloadStore';
+import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
+import { clearAllData } from 'src/services/downloader';
+import ConnectionBanner from 'src/components/ConnectionBanner';
+import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 const Container = styled.View`
   flex: 1;
@@ -30,9 +35,14 @@ const metadata = `
 `;
 
 const AccountScreen: React.FC = () => {
-  const [{ data: user }, dispatch] = useUserSession();
+  const userData = PersistentUserStore.useState((s) => s.userData);
+  const isStaging = PersistentUserStore.useState((s) => s.isStaging);
+  const lastUpdated = PersistentUserStore.useState((s) => s.lastUpdated);
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
+  const { progress } = DownloadStore.useState((s) => s);
+  const navigation = useNavigation();
+  const connected = useNetworkStatus();
 
   const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
   const emailBody = encodeURIComponent(metadata);
@@ -42,32 +52,55 @@ const AccountScreen: React.FC = () => {
   const hideDialog = () => setVisible(false);
 
   const handleLogout = () => {
-    dispatch({ type: 'start_logout' });
+    void logoutAction();
   };
 
-  useFocusEffect(() => {
-    const handleBackButton = () => {
-      return true;
-    };
+  const handleRedownload = async () => {
+    await clearAllData();
 
-    BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
-    };
-  });
+    navigation.reset({
+      index: 0,
+      routes: [{ name: INSPECTIONS_HOME, params: { parentId: null } }],
+    });
+  };
 
   return (
     <Container>
-      {!!user && (
+      <ConnectionBanner connected={connected} />
+      {!!userData && (
         <>
           <Row
             accessibilityLabel="userInfo"
-            label={user.email}
-            value={user.account.name}
+            label={userData.email}
+            value={userData.account.name}
             icon="logout"
             onPress={showDialog}
           />
+          <Divider />
+          {progress === 100 && lastUpdated && (
+            <Row
+              accessibilityLabel="download"
+              label="Download New Data"
+              value={`Last updated ${format(lastUpdated, 'MM/dd/yyyy hh:mma')}`}
+              icon="cloud-download"
+              onPress={handleRedownload}
+              disabled={!connected}
+            />
+          )}
+          {(progress !== 100 || !lastUpdated) && (
+            <Row
+              accessibilityLabel="downloading"
+              label="Downloading Data..."
+              value={
+                <ProgressBar
+                  progress={progress / 100}
+                  color={theme.colors.primary}
+                  style={{ maxWidth: 250, marginVertical: 5 }}
+                />
+              }
+              icon="cloud-download"
+            />
+          )}
           <Divider />
           <Row
             accessibilityLabel="support"
@@ -78,7 +111,7 @@ const AccountScreen: React.FC = () => {
           />
           <Divider />
           <Row label="App version" value={`${config.APP_NAME} ${appVersionAndBuild}`} />
-          {config.isStaging && (
+          {isStaging && (
             <>
               <Divider />
               <Row label="Environment" value="Staging" />

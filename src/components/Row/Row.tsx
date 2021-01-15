@@ -1,7 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Card, Paragraph, Title, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Card, Paragraph, Title, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { isString } from 'lodash/fp';
 
 import { styled } from 'src/paperTheme';
 import { getAccessibilityAndAutomationProps } from 'src/utils/accessibility';
@@ -11,28 +12,32 @@ const Container = styled.View`
   padding: 10px;
 `;
 
-const ClickableContainer = styled.TouchableOpacity`
+const ClickableContainer = styled.TouchableOpacity<{ disabled?: boolean }>`
   background-color: white;
   padding: 10px;
+  opacity: ${(p) => (p.disabled ? 0.5 : 1)};
 `;
 
 interface RowProps {
   label: string;
   accessibilityLabel?: string;
-  value: string;
+  value: React.ReactNode;
   icon?: string;
   onPress?: () => void;
+  spinner?: boolean;
+  disabled?: boolean;
 }
 
-const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, onPress }) => {
+const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, disabled, spinner, onPress }) => {
   const theme = useTheme();
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
-      {icon && <MaterialIcons name={icon} size={24} color={theme.colors.placeholder} />}
-      {!icon && <View style={{ marginRight: 24 }} />}
-      <Card.Content>
+      {spinner && <ActivityIndicator size="small" />}
+      {icon && !spinner && <MaterialIcons name={icon} size={24} color={theme.colors.placeholder} />}
+      {!icon && !spinner && <View style={{ marginRight: 24 }} />}
+      <Card.Content style={{ flex: 1 }}>
         <Title>{label}</Title>
-        <Paragraph>{value}</Paragraph>
+        {isString(value) ? <Paragraph>{value}</Paragraph> : value}
       </Card.Content>
     </View>
   );
@@ -42,6 +47,7 @@ const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, onPre
       <ClickableContainer
         onPress={onPress}
         accessibilityRole="button"
+        disabled={disabled}
         {...getAccessibilityAndAutomationProps(accessibilityLabel || label)}
       >
         {content}

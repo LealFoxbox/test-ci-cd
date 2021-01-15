@@ -4,8 +4,6 @@ import { act, render } from 'helpers/testUtils';
 
 import Schedule from '../Schedule';
 
-jest.mock('src/contexts/userSession');
-
 describe('ScheduleScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

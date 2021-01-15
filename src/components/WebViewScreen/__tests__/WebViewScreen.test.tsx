@@ -7,8 +7,6 @@ import WebViewScreen from '../WebViewScreen';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const { useRoute } = jest.requireMock('@react-navigation/native');
 
-jest.mock('src/contexts/userSession');
-
 describe('WebViewScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
