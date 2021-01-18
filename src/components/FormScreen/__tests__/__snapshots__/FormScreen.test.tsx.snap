@@ -38,6 +38,7 @@ exports[`WebViewScreen should render 1`] = `
       >
         <View
           collapsable={false}
+          enabled={true}
           pointerEvents="auto"
           removeClippedSubviews={false}
           style={
@@ -75,6 +76,7 @@ exports[`WebViewScreen should render 1`] = `
                   Object {
                     "backgroundColor": "rgb(242, 242, 242)",
                   },
+                  undefined,
                 ]
               }
             >
@@ -153,6 +155,7 @@ exports[`WebViewScreen should render 1`] = `
                           ],
                         ]
                       }
+                      updateRenderRight={[Function]}
                       useSharedProcessPool={true}
                     />
                     <View
@@ -170,6 +173,47 @@ exports[`WebViewScreen should render 1`] = `
                             "zIndex": 9999,
                           },
                         ]
+                      }
+                      theme={
+                        Object {
+                          "animation": Object {
+                            "scale": 1,
+                          },
+                          "colors": Object {
+                            "accent": "#F2680E",
+                            "backdrop": "rgba(0, 0, 0, 0.5)",
+                            "background": "#e9e9e9",
+                            "disabled": "rgba(0, 0, 0, 0.26)",
+                            "error": "#FF2D55",
+                            "notification": "#FF951F",
+                            "onBackground": "#000000",
+                            "onSurface": "#FF951F",
+                            "placeholder": "rgba(0, 0, 0, 0.54)",
+                            "primary": "#FF951F",
+                            "surface": "#FFFFFF",
+                            "text": "#000000",
+                          },
+                          "dark": false,
+                          "fonts": Object {
+                            "light": Object {
+                              "fontFamily": "System",
+                              "fontWeight": "300",
+                            },
+                            "medium": Object {
+                              "fontFamily": "System",
+                              "fontWeight": "500",
+                            },
+                            "regular": Object {
+                              "fontFamily": "System",
+                              "fontWeight": "400",
+                            },
+                            "thin": Object {
+                              "fontFamily": "System",
+                              "fontWeight": "100",
+                            },
+                          },
+                          "roundness": 4,
+                        }
                       }
                     >
                       <View

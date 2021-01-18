@@ -5,7 +5,7 @@ import NavRow from '../NavRow';
 
 describe('NavRow', () => {
   it('should render', () => {
-    const result = render(<NavRow label="label" icon="left" onPress={() => undefined} />);
+    const result = render(<NavRow label="label" icon="chevron-left" onPress={() => undefined} />);
 
     expect(result).toMatchSnapshot();
   });

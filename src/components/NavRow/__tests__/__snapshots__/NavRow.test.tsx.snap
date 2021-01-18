@@ -31,7 +31,8 @@ exports[`NavRow should render 1`] = `
       Object {
         "alignItems": "center",
         "flexDirection": "row",
-        "paddingHorizontal": 15,
+        "paddingLeft": 5,
+        "paddingRight": 15,
         "width": "100%",
       }
     }
@@ -44,9 +45,11 @@ exports[`NavRow should render 1`] = `
             "color": "#6200ee",
             "fontSize": 24,
           },
-          undefined,
           Object {
-            "fontFamily": "Material Icons",
+            "marginLeft": 15,
+          },
+          Object {
+            "fontFamily": "Material Design Icons",
             "fontStyle": "normal",
             "fontWeight": "normal",
           },
@@ -54,7 +57,7 @@ exports[`NavRow should render 1`] = `
         ]
       }
     >
-      ?
+      󰅁
     </Text>
     <View
       style={
@@ -78,33 +81,7 @@ exports[`NavRow should render 1`] = `
               "fontWeight": "400",
               "textAlign": "left",
             },
-            Array [
-              Object {
-                "color": "rgba(0, 0, 0, 0.87)",
-                "fontFamily": "System",
-                "fontWeight": "500",
-                "textAlign": "left",
-                "writingDirection": "ltr",
-              },
-              Array [
-                Object {
-                  "fontSize": 20,
-                  "letterSpacing": 0.15,
-                  "lineHeight": 30,
-                  "marginVertical": 2,
-                },
-                undefined,
-              ],
-              Array [
-                Object {
-                  "fontSize": 20,
-                  "letterSpacing": 0.15,
-                  "lineHeight": 30,
-                  "marginVertical": 2,
-                },
-                undefined,
-              ],
-            ],
+            undefined,
           ]
         }
       >
