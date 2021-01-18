@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Text, TextProps, View, ViewStyle } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 
@@ -20,55 +20,48 @@ function nextFrameAsync() {
 
 const ReadMore: React.FC<
   TextProps & {
-    onReady?: () => void;
     containerStyle?: ViewStyle;
+    onReady?: () => void;
   }
-> = ({ numberOfLines, children, onReady, containerStyle, ...props }) => {
+> = ({ numberOfLines, children, containerStyle, onReady, ...props }) => {
   const _text = useRef<View | null>(null);
-  const _isMounted = useRef<boolean>(false);
+  const _fullHeight = useRef<number | null>(null);
   const [measured, setMeasured] = useState<boolean>(false);
-  const [shouldShowReadMore, setShouldShowReadMore] = useState<boolean>(false);
+  const [shouldShowReadMore, setShouldShowReadMore] = useState<boolean | null>(null);
   const [showAllText, setShowAllText] = useState<boolean>(false);
   const theme = useTheme();
 
-  // TODO: refactor this useEffect, it's copypasted and out of date with best practices
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
-      _isMounted.current = true;
-      await nextFrameAsync();
-
-      if (!_isMounted.current) {
-        return;
-      }
-
-      // Get the height of the text with no restriction on number of lines
-      const fullHeight = await measureHeightAsync(_text.current);
-      setMeasured(true);
-      await nextFrameAsync();
-
-      if (!_isMounted.current) {
-        return;
-      }
-
-      // Get the height of the text now that number of lines has been set
-      const limitedHeight = await measureHeightAsync(_text.current);
-
-      if (fullHeight > limitedHeight) {
-        setShouldShowReadMore(true);
-        onReady && onReady();
+      if (!measured) {
+        await nextFrameAsync();
+        // Get the height of the text with no restriction on number of lines
+        _fullHeight.current = await measureHeightAsync(_text.current);
+        setMeasured(true);
       } else {
-        onReady && onReady();
+        if (shouldShowReadMore === null) {
+          await nextFrameAsync();
+          // Get the height of the text now that number of lines has been set
+          const limitedHeight = await measureHeightAsync(_text.current);
+
+          setShouldShowReadMore((_fullHeight.current || 0) > limitedHeight);
+        } else {
+          await nextFrameAsync();
+          onReady && onReady();
+        }
       }
     })();
-
-    return () => {
-      _isMounted.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measured, onReady, shouldShowReadMore]);
 
   return (
-    <View style={containerStyle || {}}>
+    <View
+      style={[
+        containerStyle || {},
+        {
+          opacity: measured && shouldShowReadMore !== null ? 1 : 0,
+        },
+      ]}
+    >
       <Text
         numberOfLines={measured && !showAllText ? numberOfLines : 0}
         ref={(text) => {

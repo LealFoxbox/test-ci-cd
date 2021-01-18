@@ -38,6 +38,7 @@ exports[`ScheduleScreen should render 1`] = `
       >
         <View
           collapsable={false}
+          enabled={true}
           pointerEvents="auto"
           removeClippedSubviews={false}
           style={
@@ -75,6 +76,7 @@ exports[`ScheduleScreen should render 1`] = `
                   Object {
                     "backgroundColor": "rgb(242, 242, 242)",
                   },
+                  undefined,
                 ]
               }
             >

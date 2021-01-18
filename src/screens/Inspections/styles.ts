@@ -18,3 +18,10 @@ export const Container = withTheme(styled.View`
   background-color: ${({ theme }) => theme.colors.background};
   justify-content: center;
 `);
+
+export const BlankContentContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+`;

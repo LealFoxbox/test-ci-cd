@@ -11,10 +11,12 @@ import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
+import { useResult } from 'src/utils/useResult';
 
 import { Container } from './styles';
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
+import BlankScreen from './BlankScreen';
 
 const InspectionsScreen: React.FC<{}> = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
@@ -24,6 +26,7 @@ const InspectionsScreen: React.FC<{}> = () => {
   const { progress, error } = DownloadStore.useState((s) => s);
   const [{ parent, children }, isLoading] = dbHooks.structures.useInspection(parentId);
   const theme = useTheme();
+  const [isReady, onReady] = useResult<undefined>();
 
   const navigation = useNavigation();
 
@@ -41,35 +44,43 @@ const InspectionsScreen: React.FC<{}> = () => {
 
   return (
     <Container>
-      <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-        <Title>{!parentId || !parent ? 'Your Areas' : parent.display_name}</Title>
-        {!!parent?.location_path && <Text style={{ fontWeight: 'bold' }}>{parent.location_path}</Text>}
-      </View>
-      <FlatList
-        contentContainerStyle={{
-          justifyContent: 'flex-start',
-        }}
-        data={children}
-        ItemSeparatorComponent={Divider}
-        ListHeaderComponent={() => <Notes value={parent?.notes} />}
-        renderItem={({ item }) => (
-          <NavRow
-            label={item.display_name}
-            onPress={() => {
-              if (item.active_children_count > 0) {
-                navigation.navigate({
-                  name: INSPECTIONS_HOME,
-                  key: `${parentId || 'base'}`,
-                  params: { parentId: item.id },
-                });
-              } else {
-                navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id });
-              }
+      {children.length === 0 && <BlankScreen />}
+      {children.length > 0 && (
+        <>
+          {!!parentId && !!parent && (
+            <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
+              <Title>{parent.display_name}</Title>
+              {!!parent?.location_path && <Text style={{ fontWeight: 'bold' }}>{parent.location_path}</Text>}
+            </View>
+          )}
+          <FlatList
+            contentContainerStyle={{
+              justifyContent: 'flex-start',
             }}
+            data={children}
+            ItemSeparatorComponent={Divider}
+            ListHeaderComponent={() => <Notes value={parent?.notes} onReady={onReady} />}
+            renderItem={({ item }) => (
+              <NavRow
+                label={item.display_name}
+                onPress={() => {
+                  if (item.active_children_count > 0) {
+                    navigation.navigate({
+                      name: INSPECTIONS_HOME,
+                      key: `${parentId || 'base'}`,
+                      params: { parentId: item.id },
+                    });
+                  } else {
+                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id });
+                  }
+                }}
+              />
+            )}
+            keyExtractor={(item) => `${item.id}`}
           />
-        )}
-        keyExtractor={(item) => `${item.id}`}
-      />
+        </>
+      )}
+      {!isReady && <LoadingOverlay />}
     </Container>
   );
 };
