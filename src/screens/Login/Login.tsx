@@ -80,9 +80,13 @@ const LoginScreen: React.FC<{}> = () => {
       setAuthError('');
 
       if (isStaging) {
-        PersistentUserStore.update((s) => (s.isStaging = false));
+        PersistentUserStore.update((s) => {
+          s.isStaging = false;
+        });
       } else {
-        PersistentUserStore.update((s) => (s.isStaging = true));
+        PersistentUserStore.update((s) => {
+          s.isStaging = true;
+        });
       }
     }
   };
