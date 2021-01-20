@@ -7,6 +7,7 @@ import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
 import { User } from 'src/types';
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
+import { setEnv } from 'src/config';
 
 import { initStoreStorage } from '../storeStorage';
 
@@ -94,6 +95,8 @@ void init().then(async (state: PersistentState) => {
   if (!state.userData) {
     void logoutAction();
   } else {
+    setEnv(state.isStaging);
+
     // refetch user
     const [error, response] = await axiosCatchTo(
       fetchtUser({
