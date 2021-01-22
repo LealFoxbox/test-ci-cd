@@ -13,7 +13,7 @@ exports[`LoadingOverlay should render 1`] = `
         "position": "absolute",
         "right": 0,
         "top": 0,
-        "zIndex": 9999,
+        "zIndex": 1,
       },
     ]
   }

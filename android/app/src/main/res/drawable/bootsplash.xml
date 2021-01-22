@@ -3,6 +3,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
     <item android:drawable="@color/bootsplash_background" />
     <item
+        android:top="-56dp"
         android:left="-56dp"
         android:right="-56dp"
         android:bottom="-4dp"
@@ -10,6 +11,16 @@
         android:layout_height="wrap_content">
         <shape>
             <stroke android:width="56dp" android:color="#FFFFFF" />
+        </shape>
+    </item>
+    <item
+        android:left="-56dp"
+        android:right="-56dp"
+        android:bottom="-56dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <shape>
+            <stroke android:width="56dp" android:color="#FF9400" />
         </shape>
     </item>
 </layer-list>
