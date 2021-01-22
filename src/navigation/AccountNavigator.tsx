@@ -1,24 +1,22 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Platform } from 'react-native';
 
 import AccountScreen from 'src/screens/Account';
+import Header from 'src/components/Header';
 
 import { ACCOUNT_HOME } from './screenNames';
 
 export type AccountNavigatorParamList = {
-  [ACCOUNT_HOME]: undefined;
+  [ACCOUNT_HOME]: {
+    title: string;
+  };
 };
 
 const Stack = createStackNavigator<AccountNavigatorParamList>();
 
 const AccountNavigator: React.FC = () => (
-  <Stack.Navigator headerMode={Platform.select({ android: 'screen', ios: 'float' })}>
-    <Stack.Screen
-      name={ACCOUNT_HOME}
-      component={AccountScreen}
-      options={{ headerTitle: 'Account', headerTitleStyle: { marginLeft: 15 } }}
-    />
+  <Stack.Navigator screenOptions={{ header: Header }}>
+    <Stack.Screen name={ACCOUNT_HOME} component={AccountScreen} initialParams={{ title: 'Account' }} />
   </Stack.Navigator>
 );
 

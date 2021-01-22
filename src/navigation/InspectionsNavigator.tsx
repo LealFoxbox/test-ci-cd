@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
 import InspectionFormScreen from 'src/screens/Inspections/EditFormScreen';
+import Header from 'src/components/Header';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
@@ -12,13 +13,16 @@ import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './scr
 export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
     parentId: null | number;
+    title: string;
   };
   [INSPECTIONS_FORM_LIST]: {
     parentId: null | number;
+    title: string;
   };
   [INSPECTIONS_FORM]: {
     formId: null | number;
     structureId: null | number;
+    title: string;
   };
 };
 
@@ -27,39 +31,30 @@ const Stack = createStackNavigator<InspectionsNavigatorParamList>();
 const InspectionsNavigator: React.FC = () => {
   // use pullstate header store to store the renderRight callback instead of using nav params
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ header: Header }}>
       <Stack.Screen
         name={INSPECTIONS_HOME}
         component={InspectionsScreen}
-        options={{
-          headerTitle: 'Inspections',
-          headerTitleStyle: { marginLeft: 5, paddingLeft: 5 },
-        }}
         initialParams={{
           parentId: null,
+          title: 'Inspections',
         }}
       />
       <Stack.Screen
         name={INSPECTIONS_FORM_LIST}
         component={InspectionsFormListScreen}
-        options={{
-          headerTitle: 'Inspections',
-          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
-        }}
         initialParams={{
           parentId: null,
+          title: 'Inspections',
         }}
       />
       <Stack.Screen
         name={INSPECTIONS_FORM}
         component={InspectionFormScreen}
-        options={{
-          headerTitle: 'Inspections',
-          headerTitleStyle: { marginLeft: 0, paddingLeft: 0 },
-        }}
         initialParams={{
           formId: null,
           structureId: null,
+          title: 'Inspections',
         }}
       />
     </Stack.Navigator>

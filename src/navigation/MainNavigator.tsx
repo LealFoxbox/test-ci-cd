@@ -20,7 +20,7 @@ export type MainTabsNavigatorParamList = {
 
 const Tab = createMaterialBottomTabNavigator<MainTabsNavigatorParamList>();
 
-const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
+const MainNavigator: React.FC<{ features: User['features'] }> = ({ features }) => {
   const { colors } = useTheme();
 
   return (
@@ -33,7 +33,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
       shifting={false}
       backBehavior="none"
     >
-      {user?.features.inspection_feature.enabled && (
+      {features.inspection_feature.enabled && (
         <Tab.Screen
           name={INSPECTIONS_NAVIGATOR}
           component={InspectionsNavigator}
@@ -43,7 +43,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           }}
         />
       )}
-      {user?.features.schedule_feature.enabled && (
+      {features.schedule_feature.enabled && (
         <Tab.Screen
           name={SCHEDULE_NAVIGATOR}
           component={ScheduleNavigator}
@@ -53,7 +53,7 @@ const MainNavigator: React.FC<{ user: User | null }> = ({ user }) => {
           }}
         />
       )}
-      {user?.features.ticket_feature.enabled && (
+      {features.ticket_feature.enabled && (
         <Tab.Screen
           name={TICKETS_NAVIGATOR}
           component={TicketsNavigator}

@@ -1,5 +1,4 @@
 /* eslint-disable import/no-named-as-default-member */
-/* eslint-disable no-console */
 
 import { MutableRefObject, useEffect, useRef } from 'react';
 import RNBackgroundDownloader from 'react-native-background-downloader';
@@ -10,9 +9,9 @@ import { DownloadStore } from 'src/pullstate/downloadStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
-import config from 'src/config';
 import { selectMongoComplete } from 'src/pullstate/selectors';
 import { initialState } from 'src/pullstate/persistentStore/initialState';
+import { hasConnection, useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 import { fetchForm } from '../api/forms';
 import { assignmentsDb, cleanMongo } from '../mongodb';
@@ -112,13 +111,17 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
   console.log('DOWNLOADING FORMS');
   setDownloading('forms');
 
+  let errorsCount = 0;
+  let isConnected = true;
+
   let i = 0;
-  while (i < formIds.length && FLAGS.loggedIn) {
+  while (i < formIds.length && FLAGS.loggedIn && errorsCount < 3 && isConnected) {
     const formId = formIds[i];
     try {
       console.log('fetchForms: form ', i + 1, ' out of ', formIds.length);
 
       const { data } = await fetchForm({ companyId: subdomain, token, formId });
+      errorsCount = 0;
       PersistentUserStore.update((s) => {
         s.forms[data.inspection_form.id] = {
           ...data.inspection_form,
@@ -127,48 +130,34 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
       });
       setProgress(70 + (30 * i) / formIds.length);
     } catch (e) {
-      DownloadStore.update((s) => {
-        s.error = `Failed to download form data for ${formId}`;
-      });
+      errorsCount += 1;
+      // we probably don't have any internet, let's check that
+      isConnected = await hasConnection();
     }
+
     await timeoutPromise(200);
+
     i += 1;
   }
 
-  if (config.MOCKS.DOWNLOAD_FORMS) {
-    setProgress(70.707);
-    i = 0;
-    while (i < config.MOCK_LIMITS.MAX_FORMS && FLAGS.loggedIn) {
-      console.log('fetchForms: mock form ', i + 1, ' out of ', config.MOCK_LIMITS.MAX_FORMS);
-      const formId = formIds[i % formIds.length];
-      try {
-        const { data } = await fetchForm({ companyId: subdomain, token, formId });
-        PersistentUserStore.update((s) => {
-          s.forms[data.inspection_form.id] = {
-            ...data.inspection_form,
-            lastDownloaded: getUnixSeconds(),
-          };
-        });
-        setProgress(70 + (30 * i) / config.MOCK_LIMITS.MAX_FORMS);
-      } catch (e) {
-        DownloadStore.update((s) => {
-          s.error = `Failed to download form data for ${formId}`;
-        });
-      }
-      await timeoutPromise(200);
-      i += 1;
-    }
+  if (!isConnected) {
+    setDownloading(null);
+  } else if (errorsCount >= 3) {
+    DownloadStore.update((s) => {
+      s.error = `Failed to download form data`;
+    });
+  } else {
+    setProgress(100);
+    PersistentUserStore.update((s) => {
+      s.lastUpdated = Date.now();
+    });
   }
 
-  setProgress(100);
   setDownloading(null);
-  PersistentUserStore.update((s) => {
-    s.lastUpdated = Date.now();
-  });
 }
 
 export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<TotalPages>) {
-  console.log('DOWNLOADING STRUCTURES AND ASSIGNMKENTS');
+  console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
   setDownloading('db');
   await waitForExistingDownloads();
   await deleteInvalidFiles();
@@ -177,17 +166,24 @@ export async function dbDownload(token: string, subdomain: string, totalPages: M
   await updateTotalPages(totalPages, 'ratings');
 
   let nextDownload = await getNextDownload(totalPages);
-  while (nextDownload && FLAGS.loggedIn) {
+  let erroredOut = false;
+
+  while (nextDownload && FLAGS.loggedIn && !erroredOut) {
     if (nextDownload) {
       setProgress(nextDownload.progress);
     }
 
-    // TODO: retry on 1 failure to download and exit with error if it doesn't work
     try {
       await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
     } catch (e) {
       console.warn(nextDownload.type, ' error on page ', nextDownload.page, ' with: ', e);
+      erroredOut = true;
+      DownloadStore.update((s) => {
+        s.error = `Failed to download Inspections data`;
+        s.downloading = null;
+      });
     }
+
     await timeoutPromise(200);
 
     if (!totalPages.current[nextDownload.type]) {
@@ -196,29 +192,30 @@ export async function dbDownload(token: string, subdomain: string, totalPages: M
     nextDownload = await getNextDownload(totalPages);
   }
 
-  setProgress(60);
+  if (!erroredOut) {
+    setProgress(60);
 
-  FLAGS.loggedIn && (await refreshDb());
+    FLAGS.loggedIn && (await refreshDb());
 
-  await deleteAllJSONFiles();
+    await deleteAllJSONFiles();
 
-  setProgress(70);
+    setProgress(70);
 
-  setDownloading(null);
-
-  PersistentUserStore.update((s) => {
-    s.lastUpdated = Date.now();
-  });
+    setDownloading(null);
+  }
 }
 
 export function useDownloader() {
   const [shouldTrigger, setShouldTrigger] = useTrigger();
   const token = PersistentUserStore.useState((s) => s.userData?.single_access_token);
+  const inspectionsEnabled = PersistentUserStore.useState((s) => s.userData?.features.inspection_feature.enabled);
   const subdomain = PersistentUserStore.useState((s) => s.userData?.account.subdomain);
   const forms = PersistentUserStore.useState((s) => s.forms);
   const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
   const downloading = DownloadStore.useState((s) => s.downloading);
+  const downloadError = DownloadStore.useState((s) => s.error);
   const isMongoLoaded = useIsMongoLoaded();
+  const connected = useNetworkStatus();
 
   const totalPages = useRef<TotalPages>({
     structures: null,
@@ -232,26 +229,45 @@ export function useDownloader() {
         FLAGS.loggedIn = false;
       } else if (isMongoLoaded && shouldTrigger && subdomain) {
         FLAGS.loggedIn = true;
-        if (downloading === null) {
+        if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
             void dbDownload(token, subdomain, totalPages);
           } else {
-            const formIds = await getMissingForms(forms);
-            if (formIds.length > 0) {
-              void fetchForms(formIds, token, subdomain);
+            if (!connected) {
+              DownloadStore.update((s) => {
+                if (s.progress < 70) {
+                  s.progress = 70;
+                }
+              });
             } else {
-              setProgress(100);
+              const formIds = await getMissingForms(forms);
+              if (formIds.length > 0) {
+                void fetchForms(formIds, token, subdomain);
+              } else {
+                setProgress(100);
+              }
             }
           }
         }
       }
     })();
-  }, [isMongoLoaded, shouldTrigger, token, subdomain, forms, isMongoComplete, downloading]);
+  }, [
+    isMongoLoaded,
+    shouldTrigger,
+    token,
+    subdomain,
+    forms,
+    isMongoComplete,
+    downloading,
+    inspectionsEnabled,
+    downloadError,
+    connected,
+  ]);
 
   return setShouldTrigger;
 }
 
-export async function clearAllData() {
+export async function clearInspectionsData() {
   await cleanMongo();
   DownloadStore.update((s) => {
     s.progress = 0;

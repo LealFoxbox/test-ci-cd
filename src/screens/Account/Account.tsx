@@ -10,7 +10,7 @@ import Row from 'src/components/Row';
 import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
-import { clearAllData } from 'src/services/downloader';
+import { clearInspectionsData } from 'src/services/downloader';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
@@ -56,7 +56,7 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleRedownload = async () => {
-    await clearAllData();
+    await clearInspectionsData();
 
     navigation.reset({
       index: 0,

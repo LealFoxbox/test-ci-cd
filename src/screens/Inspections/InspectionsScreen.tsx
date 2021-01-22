@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Text, Title, useTheme } from 'react-native-paper';
+import { Divider, Title, useTheme } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList, View } from 'react-native';
 
@@ -24,7 +24,7 @@ const InspectionsScreen: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => s);
-  const [{ parent, children }, isLoading] = dbHooks.structures.useInspection(parentId);
+  const [{ parent, children }, isLoading, isComplete] = dbHooks.structures.useInspection(parentId);
   const theme = useTheme();
   const [isReady, onReady] = useResult<undefined>();
 
@@ -38,8 +38,12 @@ const InspectionsScreen: React.FC<{}> = () => {
     return <ErrorScreen />;
   }
 
-  if (progress !== 100 || isLoading) {
-    return progress === 100 || progress === 0 ? <LoadingOverlay /> : <DownloadingScreen progress={progress} />;
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
+
+  if (progress !== 100 || !isComplete) {
+    return <DownloadingScreen progress={progress} />;
   }
 
   return (
@@ -49,8 +53,7 @@ const InspectionsScreen: React.FC<{}> = () => {
         <>
           {!!parentId && !!parent && (
             <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-              <Title>{parent.display_name}</Title>
-              {!!parent?.location_path && <Text style={{ fontWeight: 'bold' }}>{parent.location_path}</Text>}
+              {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
             </View>
           )}
           <FlatList
@@ -68,10 +71,10 @@ const InspectionsScreen: React.FC<{}> = () => {
                     navigation.navigate({
                       name: INSPECTIONS_HOME,
                       key: `${parentId || 'base'}`,
-                      params: { parentId: item.id },
+                      params: { parentId: item.id, title: item.display_name },
                     });
                   } else {
-                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id });
+                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
                   }
                 }}
               />

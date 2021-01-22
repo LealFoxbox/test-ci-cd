@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { TextInput as NativeTextInput, TouchableWithoutFeedback } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { useMutation } from 'react-query';
 import { AxiosResponse } from 'axios';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
@@ -13,8 +13,6 @@ import ConnectionBanner from 'src/components/ConnectionBanner';
 import { UserResponse, authenticate } from 'src/services/api/user';
 import config from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { SIGN_IN } from 'src/navigation/screenNames';
-import { AuthNavigatorParamList } from 'src/navigation/AuthNavigator';
 import { PersistentUserStore, loginAction, setStagingAction } from 'src/pullstate/persistentStore';
 import { ApiError } from 'src/services/api/utils';
 
@@ -40,9 +38,7 @@ const LoginScreen: React.FC<{}> = () => {
   const [authError, setAuthError] = useState('');
   const connected = useNetworkStatus();
   const [visible, setVisible] = React.useState(false);
-  const {
-    params: { updateRenderRight },
-  } = useRoute<RouteProp<AuthNavigatorParamList, typeof SIGN_IN>>();
+  const navigation = useNavigation();
 
   const [mutateSubmit, { isLoading }] = useMutation<AxiosResponse<UserResponse>, ApiError, Form>(authenticate, {
     onMutate: () => {
@@ -61,19 +57,20 @@ const LoginScreen: React.FC<{}> = () => {
       if (err?.message !== 'Network Error') {
         setAuthError(err?.response?.data.message || authenticateError);
       } else if (connected) {
-        // TODO: check if we should use another custom error
         setAuthError(authenticateError);
       }
     },
   });
 
-  useEffect(() => {
-    updateRenderRight(() => (
-      <TouchableWithoutFeedback delayLongPress={4000} accessibilityRole="none" onLongPress={() => setVisible(true)}>
-        <EasterEgg />
-      </TouchableWithoutFeedback>
-    ));
-  }, [updateRenderRight, setVisible]);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: (
+        <TouchableWithoutFeedback delayLongPress={4000} accessibilityRole="none" onLongPress={() => setVisible(true)}>
+          <EasterEgg />
+        </TouchableWithoutFeedback>
+      ),
+    });
+  }, [navigation]);
 
   const handleEasterEgg = () => {
     if (!isLoading) {

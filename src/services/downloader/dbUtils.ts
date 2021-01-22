@@ -1,5 +1,4 @@
 /* eslint-disable import/no-named-as-default-member */
-/* eslint-disable no-console */
 
 import RNFS from 'react-native-fs';
 import RNBackgroundDownloader from 'react-native-background-downloader';

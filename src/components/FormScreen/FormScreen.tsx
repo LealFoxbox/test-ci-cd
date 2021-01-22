@@ -14,22 +14,22 @@ import ConnectionBanner from '../ConnectionBanner';
 
 import { Container, DisabledOverlay, MessageContainer } from './styles';
 
-const EmptyRender = () => null;
+const setEmptyRender = () => null;
 
 const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
-  const [headerRight, setHeaderRight] = useState<() => React.ReactNode>(() => EmptyRender);
+  const [headerRight, setHeaderRight] = useState<() => React.ReactNode>(setEmptyRender);
   const [showError, setShowError] = useState(false);
   const [nextScreen, setNextScreen] = useState<'logout' | 'back' | null>(null);
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
-  const navigation = useNavigation();
   const theme = useTheme();
+  const navigation = useNavigation();
 
   const handleReload = () => {
     webRef.current?.reload();
     setShowError(false);
-    setHeaderRight(() => EmptyRender);
+    setHeaderRight(setEmptyRender);
   };
 
   useLayoutEffect(() => {
@@ -86,11 +86,11 @@ const FormSCreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             onError={() => {
               setShowError(true);
               if (connected) {
-                setHeaderRight(() => () => (
-                  <IconButton icon="refresh" onPress={handleReload} theme={theme} color={theme.colors.text} size={24} />
+                setHeaderRight(() => (
+                  <IconButton icon="refresh" onPress={handleReload} color={theme.colors.surface} size={24} />
                 ));
               } else {
-                setHeaderRight(() => EmptyRender);
+                setHeaderRight(setEmptyRender);
               }
             }}
           />

@@ -32,7 +32,7 @@ export const structures = {
     return [data, isLoading];
   },
 
-  useInspection(parentId: number | null): [InspectionData, boolean] {
+  useInspection(parentId: number | null): [InspectionData, boolean, boolean] {
     const [data, setData] = useState<InspectionData>({ parent: null, children: [] });
     const [isLoading, setIsloading] = useState(true);
     const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
@@ -41,6 +41,8 @@ export const structures = {
       (async () => {
         await structuresDb.loadPromise;
         if (isMongoComplete) {
+          setIsloading(true);
+
           if (parentId) {
             setData({
               parent: (await structuresDb.get(parentId)) || null,
@@ -60,13 +62,12 @@ export const structures = {
               });
             }
           }
-
-          setIsloading(false);
         }
+        setIsloading(false);
       })();
     }, [parentId, isMongoComplete]);
 
-    return [data, isLoading];
+    return [data, isLoading, isMongoComplete];
   },
 };
 

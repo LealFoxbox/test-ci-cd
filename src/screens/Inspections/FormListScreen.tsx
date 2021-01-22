@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Divider, Text, Title, useTheme } from 'react-native-paper';
+import { Divider, Title, useTheme } from 'react-native-paper';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -40,8 +40,7 @@ const ItemsTable: React.FC<{}> = () => {
         <>
           {!!structure && (
             <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-              <Title>{structure.display_name}</Title>
-              {!!structure?.location_path && <Text style={{ fontWeight: 'bold' }}>{structure.location_path}</Text>}
+              {!!structure?.location_path && <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>}
             </View>
           )}
           <FlatList
@@ -51,18 +50,23 @@ const ItemsTable: React.FC<{}> = () => {
             ListHeaderComponent={() => <Notes value={structure?.notes} />}
             data={assignments}
             ItemSeparatorComponent={Divider}
-            renderItem={({ item }) => (
-              <NavRow
-                label={forms[item.inspection_form_id]?.name || ''}
-                icon="file-document-outline"
-                onPress={() => {
-                  navigation.navigate(INSPECTIONS_FORM, {
-                    formId: item.inspection_form_id,
-                    structureId: item.structure_id,
-                  });
-                }}
-              />
-            )}
+            renderItem={({ item }) => {
+              const label = forms[item.inspection_form_id]?.name || '';
+
+              return (
+                <NavRow
+                  label={label}
+                  icon="file-document-outline"
+                  onPress={() => {
+                    navigation.navigate(INSPECTIONS_FORM, {
+                      formId: item.inspection_form_id,
+                      structureId: item.structure_id,
+                      title: label,
+                    });
+                  }}
+                />
+              );
+            }}
             keyExtractor={(item) => `${item.id}`}
           />
         </>
