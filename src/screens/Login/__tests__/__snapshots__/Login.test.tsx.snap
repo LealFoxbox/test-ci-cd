@@ -197,7 +197,7 @@ Array [
                               onLayout={[Function]}
                               style={
                                 Object {
-                                  "color": "#FF951F",
+                                  "color": "#FF9400",
                                   "fontFamily": "System",
                                   "fontSize": 16,
                                   "fontWeight": undefined,
@@ -270,7 +270,7 @@ Array [
                             placeholder=""
                             placeholderTextColor="rgba(0, 0, 0, 0.54)"
                             rejectResponderTermination={true}
-                            selectionColor="#FF951F"
+                            selectionColor="#FF9400"
                             style={
                               Array [
                                 Object {
@@ -402,7 +402,7 @@ Array [
                               onLayout={[Function]}
                               style={
                                 Object {
-                                  "color": "#FF951F",
+                                  "color": "#FF9400",
                                   "fontFamily": "System",
                                   "fontSize": 16,
                                   "fontWeight": undefined,
@@ -475,7 +475,7 @@ Array [
                             placeholder=""
                             placeholderTextColor="rgba(0, 0, 0, 0.54)"
                             rejectResponderTermination={true}
-                            selectionColor="#FF951F"
+                            selectionColor="#FF9400"
                             style={
                               Array [
                                 Object {
@@ -575,7 +575,7 @@ Array [
                               onLayout={[Function]}
                               style={
                                 Object {
-                                  "color": "#FF951F",
+                                  "color": "#FF9400",
                                   "fontFamily": "System",
                                   "fontSize": 16,
                                   "fontWeight": undefined,
@@ -651,7 +651,7 @@ Array [
                             placeholderTextColor="rgba(0, 0, 0, 0.54)"
                             rejectResponderTermination={true}
                             secureTextEntry={true}
-                            selectionColor="#FF951F"
+                            selectionColor="#FF9400"
                             style={
                               Array [
                                 Object {
@@ -692,7 +692,7 @@ Array [
                         style={
                           Object {
                             "alignSelf": "flex-end",
-                            "backgroundColor": "#FF951F",
+                            "backgroundColor": "#FF9400",
                             "borderColor": "transparent",
                             "borderRadius": 4,
                             "borderStyle": "solid",
