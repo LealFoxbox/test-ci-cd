@@ -10,6 +10,7 @@ import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigat
 import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
+import { initFormDraftAction } from 'src/pullstate/actions';
 
 import BlankScreen from './BlankScreen';
 
@@ -18,6 +19,8 @@ const ItemsTable: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
   const forms = PersistentUserStore.useState((s) => s.forms);
+  const drafts = PersistentUserStore.useState((s) => s.drafts);
+  const ratings = PersistentUserStore.useState((s) => s.ratings);
   const [structure] = dbHooks.structures.useGet(parentId);
   const [assignments, isLoading] = dbHooks.assignments.useGetAssignments(parentId, forms);
   const theme = useTheme();
@@ -52,16 +55,19 @@ const ItemsTable: React.FC<{}> = () => {
             ItemSeparatorComponent={Divider}
             renderItem={({ item }) => {
               const label = forms[item.inspection_form_id]?.name || '';
+              const hasDraft = drafts[item.id].isDirty;
 
               return (
                 <NavRow
                   label={label}
-                  icon="file-document-outline"
+                  icon={hasDraft ? 'file-document' : 'file-document-outline'}
                   onPress={() => {
+                    initFormDraftAction(forms[item.inspection_form_id], item, ratings);
+
                     navigation.navigate(INSPECTIONS_FORM, {
                       formId: item.inspection_form_id,
                       structureId: item.structure_id,
-                      title: label,
+                      assignmentId: item.id,
                     });
                   }}
                 />

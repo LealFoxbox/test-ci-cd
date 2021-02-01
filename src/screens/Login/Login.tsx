@@ -13,8 +13,9 @@ import ConnectionBanner from 'src/components/ConnectionBanner';
 import { UserResponse, authenticate } from 'src/services/api/user';
 import config from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { PersistentUserStore, loginAction, setStagingAction } from 'src/pullstate/persistentStore';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { ApiError } from 'src/services/api/utils';
+import { clearInspectionsDataAction, loginAction, setStagingAction } from 'src/pullstate/actions';
 
 import StagingDialog from './StagingDialog';
 import { EasterEgg, FormContainer } from './styles';
@@ -44,10 +45,11 @@ const LoginScreen: React.FC<{}> = () => {
     onMutate: () => {
       setAuthError('');
     },
-    onSuccess: (userData) => {
+    onSuccess: async (userData) => {
       if (userData.status === 200 && userData.data.user) {
         setAuthError('');
         setStagingAction(isStaging);
+        await clearInspectionsDataAction();
         loginAction(userData.data.user);
       } else {
         setAuthError(authenticateError);

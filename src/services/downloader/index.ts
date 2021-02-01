@@ -1,45 +1,36 @@
-/* eslint-disable import/no-named-as-default-member */
-
+/* eslint-disable no-console */
 import { MutableRefObject, useEffect, useRef } from 'react';
-import RNBackgroundDownloader from 'react-native-background-downloader';
-import RNFS from 'react-native-fs';
+import { isEmpty } from 'lodash/fp';
 
-import { Form } from 'src/types';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { selectMongoComplete } from 'src/pullstate/selectors';
 import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
-import { selectMongoComplete } from 'src/pullstate/selectors';
-import { initialState } from 'src/pullstate/persistentStore/initialState';
 import { hasConnection, useNetworkStatus } from 'src/utils/useNetworkStatus';
+import { getUnixSeconds, isSecondsExpired } from 'src/utils/expiration';
+import { isSelectRating } from 'src/utils/ratingHelper';
+import { Form, SelectRating } from 'src/types';
 
 import { fetchForm } from '../api/forms';
-import { assignmentsDb, cleanMongo } from '../mongodb';
+import { fetchRatingChoices, fetchRatings } from '../api/ratings';
+import { assignmentsDb } from '../mongodb';
 import { useIsMongoLoaded } from '../mongoHooks';
 
-import { DownloadType, downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
-import { refreshDb } from './dbUtils';
+import { downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
+import { DbTotalPages, getNextDbDownload, refreshDb, updateDBTotalPages } from './dbUtils';
+import { deleteAllJSONFiles, deleteInvalidFiles } from './fileUtils';
 import {
-  EXPIRATION_SECONDS,
-  MetaFile,
-  deleteAllJSONFiles,
-  deleteInvalidFiles,
-  findNextPage,
-  findValidFile,
-  getUnixSeconds,
-} from './fileUtils';
-
-const dir = RNBackgroundDownloader.directories.documents;
+  cleanExpiredIncompleteRatings,
+  getNextRatingChoicesDownload,
+  selectIsRatingsBaseDownloaded,
+  selectIsRatingsComplete,
+} from './ratingsUtils';
+import { PERCENTAGES } from './percentages';
 
 const FLAGS = {
   loggedIn: false,
 };
-
-interface TotalPages {
-  structures: number | null;
-  assignments: number | null;
-  ratings: number | null;
-}
 
 function setProgress(progress: number) {
   DownloadStore.update((s) => {
@@ -49,68 +40,74 @@ function setProgress(progress: number) {
   });
 }
 
-function setDownloading(downloading: 'forms' | 'db' | null) {
+function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices' | null) {
   DownloadStore.update((s) => {
     s.downloading = downloading;
   });
 }
 
-async function getNextDownload(totalPages: MutableRefObject<TotalPages>) {
-  const allFiles = await RNFS.readDir(dir);
-  const nextStructuresPage = findNextPage(allFiles, 'structures');
-
-  if (!totalPages.current.structures || nextStructuresPage <= totalPages.current.structures) {
-    console.log('getNextDownload: structures ', nextStructuresPage, ' out of ', totalPages.current.structures);
-
-    return {
-      type: 'structures' as DownloadType,
-      page: nextStructuresPage,
-      progress: !totalPages.current.structures
-        ? nextStructuresPage * 2
-        : (30 * nextStructuresPage) / totalPages.current.structures,
-    };
-  }
-
-  const nextAssignmentsPage = findNextPage(allFiles, 'assignments');
-
-  if (!totalPages.current.assignments || nextAssignmentsPage <= totalPages.current.assignments) {
-    console.log('getNextDownload: assignments ', nextAssignmentsPage, ' out of ', totalPages.current.assignments);
-    return {
-      type: 'assignments' as DownloadType,
-      page: nextAssignmentsPage,
-      progress: !totalPages.current.assignments
-        ? 30 + nextAssignmentsPage * 2
-        : 30 + (30 * nextAssignmentsPage) / totalPages.current.assignments,
-    };
-  }
-
-  console.log('getNextDownload: ', null);
-
-  return null;
-}
-
-async function updateTotalPages(totalPages: MutableRefObject<TotalPages>, type: DownloadType) {
-  const validFile = await findValidFile<MetaFile>(type);
-
-  if (validFile) {
-    totalPages.current[type] = validFile.meta.total_pages;
-    return true;
-  }
-
-  return false;
-}
-
 async function getMissingForms(forms: Record<string, Form>) {
-  const now = getUnixSeconds();
-  return (await assignmentsDb.getDistinctFormIds()).filter(
-    (id) => !forms[id] || now - forms[id].lastDownloaded >= EXPIRATION_SECONDS,
-  );
+  const distinctIds = await assignmentsDb.getDistinctFormIds();
+  return distinctIds.filter((id) => !forms[id] || isSecondsExpired(forms[id].lastDownloaded));
 }
 
-async function fetchForms(formIds: number[], token: string, subdomain: string) {
+export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<DbTotalPages>) {
+  console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
+  setDownloading('db');
+  await waitForExistingDownloads();
+  // TODO: if a page was outdated, wouldn't that mean we'd need to redownload EVERYTHING?
+  await deleteInvalidFiles();
+  await updateDBTotalPages(totalPages, 'structures');
+  await updateDBTotalPages(totalPages, 'assignments');
+
+  let nextDownload = await getNextDbDownload(totalPages);
+  let erroredOut = false;
+
+  while (nextDownload && FLAGS.loggedIn && !erroredOut) {
+    if (nextDownload) {
+      setProgress(nextDownload.progress);
+    }
+
+    try {
+      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
+      await timeoutPromise(200);
+
+      if (!totalPages.current[nextDownload.type]) {
+        await updateDBTotalPages(totalPages, nextDownload.type);
+      }
+      nextDownload = await getNextDbDownload(totalPages);
+    } catch (e) {
+      console.warn(nextDownload?.type, ' error on page ', nextDownload?.page, ' with: ', e);
+      erroredOut = true;
+    }
+  }
+
+  if (!erroredOut) {
+    setProgress(PERCENTAGES.dbLoad[0]);
+
+    FLAGS.loggedIn && (await refreshDb());
+
+    setProgress((PERCENTAGES.dbLoad[0] + PERCENTAGES.dbLoad[1]) * 0.5);
+
+    await deleteAllJSONFiles();
+
+    setProgress(PERCENTAGES.dbLoad[1]);
+
+    setDownloading(null);
+  } else {
+    console.warn('DB DOWNLOAD ERRORED OUT');
+    DownloadStore.update((s) => {
+      s.error = `Failed to download Inspections data`;
+      s.downloading = null;
+    });
+  }
+}
+
+async function formsDownload(formIds: number[], token: string, subdomain: string) {
   console.log('DOWNLOADING FORMS');
   setDownloading('forms');
 
+  const [start, end] = PERCENTAGES.forms;
   let errorsCount = 0;
   let isConnected = true;
 
@@ -127,8 +124,11 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
           ...data.inspection_form,
           lastDownloaded: getUnixSeconds(),
         };
+        s.lastUpdated = Date.now();
       });
-      setProgress(70 + (30 * i) / formIds.length);
+      setProgress(start + ((end - start) * i) / formIds.length);
+
+      i += 1;
     } catch (e) {
       errorsCount += 1;
       // we probably don't have any internet, let's check that
@@ -136,73 +136,153 @@ async function fetchForms(formIds: number[], token: string, subdomain: string) {
     }
 
     await timeoutPromise(200);
-
-    i += 1;
   }
 
-  if (!isConnected) {
-    setDownloading(null);
-  } else if (errorsCount >= 3) {
-    DownloadStore.update((s) => {
-      s.error = `Failed to download form data`;
-    });
-  } else {
-    setProgress(100);
+  if (isConnected) {
+    if (errorsCount >= 3) {
+      DownloadStore.update((s) => {
+        s.error = `Failed to download form data`;
+      });
+    } else {
+      setProgress(end);
+    }
+  }
+
+  setDownloading(null);
+}
+
+async function enhancedTryCatch(cb: () => Promise<void>) {
+  let errorsCount = 0;
+  let success = false;
+  let isConnected = true;
+
+  while (!success && errorsCount < 3 && isConnected && FLAGS.loggedIn) {
+    try {
+      await cb();
+      success = true;
+    } catch (e) {
+      errorsCount += 1;
+      // we probably don't have any internet, let's check that
+      isConnected = await hasConnection();
+    }
+  }
+
+  if (!success && isConnected) {
+    return true;
+  }
+
+  return false;
+}
+
+async function ratingsDownload(token: string, subdomain: string) {
+  setDownloading('ratings');
+  console.log('DOWNLOADING RATINGS');
+
+  const [start, end] = PERCENTAGES.ratings;
+
+  setProgress(start);
+  const erroredOut = await enhancedTryCatch(async () => {
+    const { data } = await fetchRatings({ companyId: subdomain, token });
+
     PersistentUserStore.update((s) => {
-      s.lastUpdated = Date.now();
+      for (const key of Object.keys(s.ratings)) {
+        delete s.ratings[key];
+      }
+
+      for (const r of data.ratings) {
+        if (!isSelectRating(r)) {
+          s.ratings[r.id] = r;
+        } else {
+          (s.ratings[r.id] as any) = {
+            ...r,
+            page: null,
+            totalPages: null,
+            lastDownloaded: [],
+          };
+        }
+      }
+      const now = Date.now();
+      s.ratingsDownloaded = now;
+      s.lastUpdated = now;
+    });
+
+    setProgress(end);
+  });
+
+  if (erroredOut) {
+    DownloadStore.update((s) => {
+      s.error = `Failed to download ratings data`;
     });
   }
 
   setDownloading(null);
 }
 
-export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<TotalPages>) {
-  console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
-  setDownloading('db');
-  await waitForExistingDownloads();
-  await deleteInvalidFiles();
-  await updateTotalPages(totalPages, 'structures');
-  await updateTotalPages(totalPages, 'assignments');
-  await updateTotalPages(totalPages, 'ratings');
+async function ratingChoicesDownload(token: string, subdomain: string) {
+  setDownloading('ratingChoices');
+  console.log('DOWNLOADING RATING CHOICES');
 
-  let nextDownload = await getNextDownload(totalPages);
+  cleanExpiredIncompleteRatings();
+
+  const [, end] = PERCENTAGES.ratingChoices;
+
+  let nextDownload = getNextRatingChoicesDownload();
   let erroredOut = false;
 
-  while (nextDownload && FLAGS.loggedIn && !erroredOut) {
-    if (nextDownload) {
-      setProgress(nextDownload.progress);
-    }
+  while (nextDownload && !erroredOut) {
+    erroredOut = await enhancedTryCatch(async () => {
+      if (nextDownload) {
+        console.log(
+          'ratingChoicesDownload: ratingsChoice #',
+          nextDownload.ratingId,
+          ' -> ',
+          nextDownload.page,
+          ' out of ',
+          nextDownload.totalPages,
+        );
 
-    try {
-      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
-    } catch (e) {
-      console.warn(nextDownload.type, ' error on page ', nextDownload.page, ' with: ', e);
-      erroredOut = true;
-      DownloadStore.update((s) => {
-        s.error = `Failed to download Inspections data`;
-        s.downloading = null;
-      });
-    }
+        const { data } = await fetchRatingChoices({
+          companyId: subdomain,
+          token,
+          ratingId: nextDownload.ratingId,
+          page: nextDownload.page,
+        });
+
+        PersistentUserStore.update((s) => {
+          if (nextDownload) {
+            const id = nextDownload.ratingId;
+            // TODO: investigate a way to remove the type casting
+
+            (s.ratings[id] as any) = {
+              ...s.ratings[id],
+              range_choices: (s.ratings[id] as SelectRating).range_choices.concat(data.list_choices),
+              lastDownloaded: (s.ratings[id] as SelectRating).lastDownloaded.concat(Date.now()),
+              page: data.meta.current_page,
+              totalPages: data.meta.total_pages,
+            };
+
+            s.lastUpdated = Date.now();
+          }
+        });
+
+        setProgress(nextDownload.progress);
+
+        nextDownload = getNextRatingChoicesDownload();
+      }
+    });
 
     await timeoutPromise(200);
-
-    if (!totalPages.current[nextDownload.type]) {
-      await updateTotalPages(totalPages, nextDownload.type);
-    }
-    nextDownload = await getNextDownload(totalPages);
   }
 
-  if (!erroredOut) {
-    setProgress(60);
-
-    FLAGS.loggedIn && (await refreshDb());
-
-    await deleteAllJSONFiles();
-
-    setProgress(70);
-
-    setDownloading(null);
+  if (erroredOut) {
+    DownloadStore.update((s) => {
+      s.error = `Failed to download rating choices data`;
+    });
+  } else {
+    setProgress(end);
   }
+
+  setDownloading(null);
 }
 
 export function useDownloader() {
@@ -211,16 +291,18 @@ export function useDownloader() {
   const inspectionsEnabled = PersistentUserStore.useState((s) => s.userData?.features.inspection_feature.enabled);
   const subdomain = PersistentUserStore.useState((s) => s.userData?.account.subdomain);
   const forms = PersistentUserStore.useState((s) => s.forms);
+  const ratings = PersistentUserStore.useState((s) => s.ratings);
+  const isRatingsBaseDownloaded = PersistentUserStore.useState(selectIsRatingsBaseDownloaded);
+  const isRatingsComplete = PersistentUserStore.useState(selectIsRatingsComplete);
   const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
   const downloading = DownloadStore.useState((s) => s.downloading);
   const downloadError = DownloadStore.useState((s) => s.error);
   const isMongoLoaded = useIsMongoLoaded();
   const connected = useNetworkStatus();
 
-  const totalPages = useRef<TotalPages>({
+  const totalPages = useRef<DbTotalPages>({
     structures: null,
     assignments: null,
-    ratings: null,
   });
 
   useEffect(() => {
@@ -233,18 +315,23 @@ export function useDownloader() {
           if (!isMongoComplete) {
             void dbDownload(token, subdomain, totalPages);
           } else {
-            if (!connected) {
-              DownloadStore.update((s) => {
-                if (s.progress < 70) {
-                  s.progress = 70;
-                }
-              });
+            DownloadStore.update((s) => {
+              if (s.progress < PERCENTAGES.forms[0]) {
+                s.progress = PERCENTAGES.forms[0];
+              }
+            });
+            const formIds = await getMissingForms(forms);
+            if (formIds.length > 0) {
+              void formsDownload(formIds, token, subdomain);
             } else {
-              const formIds = await getMissingForms(forms);
-              if (formIds.length > 0) {
-                void fetchForms(formIds, token, subdomain);
-              } else {
-                setProgress(100);
+              if (!isEmpty(forms)) {
+                if (!isRatingsBaseDownloaded) {
+                  void ratingsDownload(token, subdomain);
+                } else if (!isRatingsComplete) {
+                  void ratingChoicesDownload(token, subdomain);
+                } else {
+                  setProgress(100);
+                }
               }
             }
           }
@@ -257,25 +344,15 @@ export function useDownloader() {
     token,
     subdomain,
     forms,
+    ratings,
     isMongoComplete,
     downloading,
     inspectionsEnabled,
     downloadError,
     connected,
+    isRatingsComplete,
+    isRatingsBaseDownloaded,
   ]);
 
   return setShouldTrigger;
-}
-
-export async function clearInspectionsData() {
-  await cleanMongo();
-  DownloadStore.update((s) => {
-    s.progress = 0;
-    s.error = null;
-  });
-  PersistentUserStore.update((s) => {
-    s.forms = initialState.forms;
-    s.assignmentsDbMeta = initialState.assignmentsDbMeta;
-    s.structuresDbMeta = initialState.structuresDbMeta;
-  });
 }

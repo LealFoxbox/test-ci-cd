@@ -4,12 +4,10 @@ import Geolocation from 'react-native-geolocation-service';
 
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo, catchTo } from 'src/utils/catchTo';
-import { User } from 'src/types';
-import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
-import { cleanMongo } from 'src/services/mongodb';
 import { setEnv } from 'src/config';
 
 import { initStoreStorage } from '../storeStorage';
+import { loginAction, logoutAction } from '../actions';
 
 import { PersistentState, initialState } from './initialState';
 
@@ -47,45 +45,7 @@ async function requestLocationPermission() {
 
 export const PersistentUserStore = new Store(initialState);
 
-export const loginAction = (user: User) => {
-  PersistentUserStore.update((s) => {
-    s.userData = user;
-    s.status = 'loggedIn';
-  });
-};
-
-export const logoutAction = async () => {
-  await deleteAllJSONFiles();
-  await cleanMongo();
-
-  PersistentUserStore.update((s) => {
-    for (const key of Object.keys(s)) {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      s[key] = initialState[key];
-    }
-    s.status = 'shouldLogIn';
-  });
-};
-
-export const setStagingAction = (isStaging: boolean) => {
-  PersistentUserStore.update((s) => {
-    s.isStaging = isStaging;
-  });
-};
-
-export const updateStructuresMeta = (currentPage: number, totalPages: number) => {
-  PersistentUserStore.update((s) => {
-    s.structuresDbMeta = { currentPage, totalPages };
-  });
-};
-
-export const updateAssignmentsMeta = (currentPage: number, totalPages: number) => {
-  PersistentUserStore.update((s) => {
-    s.assignmentsDbMeta = { currentPage, totalPages };
-  });
-};
-
+// TODO: we actually need to tie this to the user's account id
 const { init, subscribe } = initStoreStorage('peristentUserStore', PersistentUserStore);
 
 void init().then(async (state: PersistentState) => {

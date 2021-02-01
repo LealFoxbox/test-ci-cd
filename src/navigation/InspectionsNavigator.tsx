@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
-import InspectionFormScreen from 'src/screens/Inspections/EditFormScreen';
+import InspectionFormScreen from 'src/screens/Inspections/Form/FormScreen';
 import Header from 'src/components/Header';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
@@ -22,7 +22,7 @@ export type InspectionsNavigatorParamList = {
   [INSPECTIONS_FORM]: {
     formId: null | number;
     structureId: null | number;
-    title: string;
+    assignmentId: null | number;
   };
 };
 
@@ -54,7 +54,7 @@ const InspectionsNavigator: React.FC = () => {
         initialParams={{
           formId: null,
           structureId: null,
-          title: 'Inspections',
+          assignmentId: null,
         }}
       />
     </Stack.Navigator>

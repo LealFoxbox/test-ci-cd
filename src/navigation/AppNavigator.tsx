@@ -4,7 +4,9 @@ import { hide } from 'react-native-bootsplash';
 
 import { UserSessionEffect } from 'src/pullstate/persistentStore/effectHooks';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { clearInspectionsData, useDownloader } from 'src/services/downloader';
+import { useDownloader } from 'src/services/downloader';
+import { clearInspectionsDataAction } from 'src/pullstate/actions';
+import { useUploader } from 'src/services/uploader';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
@@ -15,6 +17,7 @@ function AppNavigator() {
   const status = PersistentUserStore.useState((s) => s.status);
   const userData = PersistentUserStore.useState((s) => s.userData);
   const triggerDownload = useDownloader();
+  const triggerUpload = useUploader();
 
   UserSessionEffect();
 
@@ -28,10 +31,11 @@ function AppNavigator() {
   useEffect(() => {
     if (userData?.features.inspection_feature.enabled) {
       triggerDownload();
+      triggerUpload();
     } else if (userData?.features.inspection_feature.enabled === false) {
-      void clearInspectionsData();
+      void clearInspectionsDataAction();
     }
-  }, [userData, triggerDownload]);
+  }, [userData, triggerDownload, triggerUpload]);
 
   if (status === 'shouldLogIn') {
     return <AuthNavigator />;
