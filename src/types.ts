@@ -164,11 +164,11 @@ export type Rating = PercentageRating | TextfieldRating | SignatureRating | Numb
 /////// FORM EDITING TYPES ///////////
 
 export interface DraftPhoto {
-  source_type: number; // Provide "1" if the photo was taken directly from within the app as an in-app photo. Provide "2" if the photo was attached from the user's camera roll / Photo Library.
-  temporary_url: string; // he temporary URL of the photo which the app directly uploaded to S3 in an earlier step.
+  isFromGallery: boolean;
+  uri: string;
   latitude: number | null; // Latitude where the inspection was started or first available location coordinates
   longitude: number | null; // Longitude where the inspection was started or first available location coordinates
-  created_at: string; // timestamp in format "2020-01-08T14:52:56-07:00",
+  created_at: number; // timestamp in format "2020-01-08T14:52:56-07:00",
 }
 
 export interface BaseField {
@@ -208,7 +208,7 @@ export interface SignatureField extends BaseField {
 export interface NumberField extends BaseField {
   ratingTypeId: 6;
 
-  number_choice: number | null; // Only provide a value if the user enters a number. Otherwise, client must provide a value of null. Only provide zero if the user explicitly entered 0.
+  number_choice: string | null; // Only provide a value if the user enters a number. Otherwise, client must provide a value of null. Only provide zero if the user explicitly entered 0.
 }
 
 export interface PointsField extends BaseField {
@@ -237,6 +237,9 @@ export interface DraftForm {
   ended_at: number | null;
   guid: string; // random unique token created in the frontend. It's basically `${Date.now()}${uniqueId('')}`
   isDirty: boolean;
+  notes: string | null;
+  categories: Array<{ id: number }>;
+  privateInspection: boolean;
 
   flagged: boolean; // if the user toggles the flagged button
   private: boolean; // if the user toggles the private button or if the origating inspection_form was private

@@ -157,6 +157,10 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     longitude: null,
     fields: sortBy('position', fields),
     isDirty: false,
+
+    notes: form.notes,
+    categories: form.categories,
+    privateInspection: form.private_inspection,
   };
 
   return result;

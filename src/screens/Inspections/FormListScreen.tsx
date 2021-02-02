@@ -54,20 +54,22 @@ const ItemsTable: React.FC<{}> = () => {
             data={assignments}
             ItemSeparatorComponent={Divider}
             renderItem={({ item }) => {
-              const label = forms[item.inspection_form_id]?.name || '';
-              const hasDraft = drafts[item.id].isDirty;
+              const form = forms[item.inspection_form_id];
+              const label = form?.name || '';
+              const hasDraft = !!drafts[item.id] && drafts[item.id].isDirty;
 
               return (
                 <NavRow
                   label={label}
                   icon={hasDraft ? 'file-document' : 'file-document-outline'}
                   onPress={() => {
-                    initFormDraftAction(forms[item.inspection_form_id], item, ratings);
+                    initFormDraftAction(form, item, ratings);
 
                     navigation.navigate(INSPECTIONS_FORM, {
                       formId: item.inspection_form_id,
                       structureId: item.structure_id,
                       assignmentId: item.id,
+                      title: label,
                     });
                   }}
                 />

@@ -20,6 +20,7 @@ export type InspectionsNavigatorParamList = {
     title: string;
   };
   [INSPECTIONS_FORM]: {
+    title: string;
     formId: null | number;
     structureId: null | number;
     assignmentId: null | number;
@@ -55,6 +56,7 @@ const InspectionsNavigator: React.FC = () => {
           formId: null,
           structureId: null,
           assignmentId: null,
+          title: 'Inspections',
         }}
       />
     </Stack.Navigator>
