@@ -4,11 +4,22 @@ import { Divider, Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
+import { directories } from 'react-native-background-downloader';
+import RNFS from 'react-native-fs';
+
+type onTakePhotoType = (uri: string, isFromGallery: boolean) => void;
 
 interface MoreButtonProps {
   onAddComment?: () => void;
-  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
+  onTakePhoto: onTakePhotoType;
   onDelete: () => void;
+}
+
+export async function fileUrlCopy(uri: string, fileName: string) {
+  const destPath = `${directories.documents}/${fileName}`;
+  await RNFS.copyFile(uri, destPath);
+  await RNFS.stat(destPath);
+  return destPath;
 }
 
 async function askCameraPermission() {
@@ -18,8 +29,6 @@ async function askCameraPermission() {
       message: 'We would like to use your camera',
       buttonPositive: 'Okay',
     });
-
-    console.warn('CAMERA PERM RESPONSE', JSON.stringify(response));
 
     return response === PermissionsAndroid.RESULTS.GRANTED;
   } catch (e) {
@@ -35,12 +44,59 @@ async function askStoragePermission() {
       buttonPositive: 'Okay',
     });
 
-    console.warn('STOAGE PERM RESPONSE', JSON.stringify(response));
-
     return response === PermissionsAndroid.RESULTS.GRANTED;
   } catch (e) {
     return false;
   }
+}
+
+function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
+  return async () => {
+    const callback = async (response: ImagePickerResponse) => {
+      console.warn('photo response', JSON.stringify(response));
+      if (!response.didCancel && !response.errorCode) {
+        if (response.uri) {
+          const newUri = await fileUrlCopy(response.uri, response.fileName || `${Date.now()}.jpg`);
+          onTakePhoto(newUri, isAttachment);
+        } else {
+          console.warn('No uri??');
+        }
+      }
+    };
+
+    if (isAttachment) {
+      const hasPermission = await askStoragePermission();
+
+      if (hasPermission) {
+        launchImageLibrary(
+          {
+            mediaType: 'photo',
+            maxWidth: 2000, //	To resize the image
+            maxHeight: 2000, //	To resize the image
+            quality: 0.8, //	0 to 1, photos
+            includeBase64: false,
+          },
+          callback,
+        );
+      }
+    } else {
+      const hasPermission = await askCameraPermission();
+
+      if (hasPermission) {
+        launchCamera(
+          {
+            mediaType: 'photo',
+            maxWidth: 2000, //	To resize the image
+            maxHeight: 2000, //	To resize the image
+            quality: 0.8, //	0 to 1, photos
+            includeBase64: false,
+            saveToPhotos: false, //	saves the image/video file captured to public photo
+          },
+          callback,
+        );
+      }
+    }
+  };
 }
 
 const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDelete }) => {
@@ -51,58 +107,9 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
 
   const closeMenu = () => setVisible(false);
 
-  const handlePhoto = async () => {
-    const callback = (response: ImagePickerResponse) => {
-      console.warn('photo response', JSON.stringify(response));
-      if (response.uri) {
-        onTakePhoto(response.uri, false);
-      } else {
-        console.warn('No uri??');
-      }
-    };
+  const handlePhoto = createAddHandler(onTakePhoto, false);
 
-    const hasPermission = await askCameraPermission();
-
-    if (hasPermission) {
-      launchCamera(
-        {
-          mediaType: 'photo', //	'photo' or 'video'
-          maxWidth: 2000, //	To resize the image
-          maxHeight: 2000, //	To resize the image
-          quality: 0.8, //	0 to 1, photos
-          includeBase64: false, //	If true, creates base64 string of the image (Avoid using on large image files due to performance)
-          saveToPhotos: true, //	(Boolean) Only for launchCamera, saves the image/video file captured to public photo
-        },
-        callback,
-      );
-    }
-  };
-
-  const handleAttach = async () => {
-    const callback = (response: ImagePickerResponse) => {
-      console.warn('photo response', JSON.stringify(response));
-      if (response.uri) {
-        onTakePhoto(response.uri, true);
-      } else {
-        console.warn('No uri??');
-      }
-    };
-
-    const hasPermission = await askStoragePermission();
-
-    if (hasPermission) {
-      launchImageLibrary(
-        {
-          mediaType: 'photo', //	'photo' or 'video'
-          maxWidth: 2000, //	To resize the image
-          maxHeight: 2000, //	To resize the image
-          quality: 0.8, //	0 to 1, photos
-          includeBase64: false,
-        },
-        callback,
-      );
-    }
-  };
+  const handleAttach = createAddHandler(onTakePhoto, true);
 
   return (
     <Menu

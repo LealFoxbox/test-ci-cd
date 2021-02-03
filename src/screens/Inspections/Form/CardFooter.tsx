@@ -1,19 +1,11 @@
 import React from 'react';
-import { directories } from 'react-native-background-downloader';
-import RNFS from 'react-native-fs';
 import { TextInput } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
+import { FlatGrid } from 'react-native-super-grid';
 
 import ImagePickerImage from 'src/components/ImagePickerImage';
 import { styled } from 'src/paperTheme';
 import { DraftPhoto } from 'src/types';
-
-export async function fileUrlCopy(uri: string, fileName: string) {
-  const destPath = `${directories.documents}/${fileName}`;
-  await RNFS.copyFile(uri, destPath);
-  await RNFS.stat(destPath);
-  return destPath;
-}
 
 const Container = styled.View`
   margin: 10px;
@@ -35,9 +27,19 @@ const NumberCard: React.FC<NumberCardProps> = ({ photos, commentInputProps }) =>
         dense
         {...commentInputProps}
       />
-      {photos.map((draftPhoto) => {
-        return <ImagePickerImage uri={draftPhoto.uri} style={{ width: 150, height: 150 }} />;
-      })}
+      <FlatGrid
+        itemDimension={90}
+        data={photos}
+        style={{ flex: 1 }}
+        spacing={5}
+        renderItem={({ item }) => (
+          <ImagePickerImage
+            uri={item.uri}
+            style={{ aspectRatio: 1, borderRadius: 5 }}
+            onError={(e) => console.warn('imagepicker error', JSON.stringify(e))}
+          />
+        )}
+      />
     </Container>
   );
 };
