@@ -1,14 +1,15 @@
+/* eslint-disable no-console */
 /* eslint-disable import/no-named-as-default-member */
 
 import RNFS, { ReadDirItem } from 'react-native-fs';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 import { last, sortBy } from 'lodash/fp';
 
+import { isSecondsExpired } from 'src/utils/expiration';
+
 import { DownloadType } from './backDownloads';
 
 const dir = RNBackgroundDownloader.directories.documents;
-
-export const EXPIRATION_SECONDS = 60 * 60 * 24; // one day in seconds
 
 export interface MetaFile {
   meta: {
@@ -25,9 +26,6 @@ async function deleteFile(file: ReadDirItem) {
   }
 }
 
-export function getUnixSeconds() {
-  return Date.now() * 0.001;
-}
 // NOTE:
 // file name structure: {type}{page number} - {date in yy_mm_dd} {timestamp of download in unix seconds}.json
 // file name example: 'structures1 - 21_01_05 1609860756.json'
@@ -99,7 +97,8 @@ export function findNextPage(allFiles: ReadDirItem[], type: DownloadType) {
 
 async function isFileValid(file: ReadDirItem) {
   const lastDownloaded = getFileTimestamp(file.name);
-  if (!lastDownloaded || getUnixSeconds() - lastDownloaded >= EXPIRATION_SECONDS) {
+
+  if (isSecondsExpired(lastDownloaded)) {
     return false;
   }
 

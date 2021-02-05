@@ -10,6 +10,7 @@ import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigat
 import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
+import { initFormDraftAction } from 'src/pullstate/actions';
 
 import BlankScreen from './BlankScreen';
 
@@ -18,6 +19,8 @@ const ItemsTable: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
   const forms = PersistentUserStore.useState((s) => s.forms);
+  const drafts = PersistentUserStore.useState((s) => s.drafts);
+  const ratings = PersistentUserStore.useState((s) => s.ratings);
   const [structure] = dbHooks.structures.useGet(parentId);
   const [assignments, isLoading] = dbHooks.assignments.useGetAssignments(parentId, forms);
   const theme = useTheme();
@@ -37,39 +40,48 @@ const ItemsTable: React.FC<{}> = () => {
     >
       {assignments.length === 0 && <BlankScreen />}
       {assignments.length > 0 && (
-        <>
-          {!!structure && (
-            <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-              {!!structure?.location_path && <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>}
-            </View>
+        <FlatList
+          contentContainerStyle={{
+            justifyContent: 'flex-start',
+          }}
+          ListHeaderComponent={() => (
+            <>
+              {!!structure && (
+                <View style={{ backgroundColor: theme.colors.surface, paddingTop: 30, paddingHorizontal: 30 }}>
+                  {!!structure?.location_path && (
+                    <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
+                  )}
+                </View>
+              )}
+              <Notes value={structure?.notes} style={{ padding: 30 }} />
+            </>
           )}
-          <FlatList
-            contentContainerStyle={{
-              justifyContent: 'flex-start',
-            }}
-            ListHeaderComponent={() => <Notes value={structure?.notes} />}
-            data={assignments}
-            ItemSeparatorComponent={Divider}
-            renderItem={({ item }) => {
-              const label = forms[item.inspection_form_id]?.name || '';
+          data={assignments}
+          ItemSeparatorComponent={Divider}
+          renderItem={({ item }) => {
+            const form = forms[item.inspection_form_id];
+            const label = form?.name || '';
+            const hasDraft = !!drafts[item.id] && drafts[item.id].isDirty;
 
-              return (
-                <NavRow
-                  label={label}
-                  icon="file-document-outline"
-                  onPress={() => {
-                    navigation.navigate(INSPECTIONS_FORM, {
-                      formId: item.inspection_form_id,
-                      structureId: item.structure_id,
-                      title: label,
-                    });
-                  }}
-                />
-              );
-            }}
-            keyExtractor={(item) => `${item.id}`}
-          />
-        </>
+            return (
+              <NavRow
+                label={label}
+                icon={hasDraft ? 'file-document' : 'file-document-outline'}
+                onPress={() => {
+                  initFormDraftAction(form, item, ratings);
+
+                  navigation.navigate(INSPECTIONS_FORM, {
+                    formId: item.inspection_form_id,
+                    structureId: item.structure_id,
+                    assignmentId: item.id,
+                    title: label,
+                  });
+                }}
+              />
+            );
+          }}
+          keyExtractor={(item) => `${item.id}`}
+        />
       )}
     </View>
   );

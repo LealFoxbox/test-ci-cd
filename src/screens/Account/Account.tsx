@@ -7,12 +7,12 @@ import config from 'src/config';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
-import { PersistentUserStore, logoutAction } from 'src/pullstate/persistentStore';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
-import { clearInspectionsData } from 'src/services/downloader';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
+import { clearInspectionsDataAction, logoutAction } from 'src/pullstate/actions';
 
 const Container = styled.View`
   flex: 1;
@@ -56,7 +56,7 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleRedownload = async () => {
-    await clearInspectionsData();
+    await clearInspectionsDataAction();
 
     navigation.reset({
       index: 0,

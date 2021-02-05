@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable import/no-named-as-default-member */
 import RNBackgroundDownloader from 'react-native-background-downloader';
 import { format } from 'date-fns';
@@ -13,7 +14,7 @@ function getNow() {
   return format(new Date(), 'yy_MM_dd t');
 }
 
-export type DownloadType = 'assignments' | 'structures' | 'ratings';
+export type DownloadType = 'assignments' | 'structures';
 
 export function downloadStructuresPage(params: { subdomain: string; token: string; page: number }) {
   const type = 'structures';
@@ -47,13 +48,13 @@ export function downloadAssignmentsPage(params: { subdomain: string; token: stri
   });
 }
 
-export function downloadRatingsPage(params: { subdomain: string; token: string; page: number }) {
+export function downloadRatings(params: { subdomain: string; token: string }) {
   const type = 'ratings';
-  const id = `${type}${params.page} - ${getNow()}`;
+  const id = `${type} - ${getNow()}`;
 
   return RNBackgroundDownloader.download({
     id,
-    url: `${getApiUrl(params.subdomain)}/downloads/ratings?user_credentials=${params.token}&page=${params.page}`,
+    url: `${getApiUrl(params.subdomain)}/downloads/ratings?user_credentials=${params.token}`,
     destination: `${dir}/${id}.json`,
     headers: {
       Accept: 'application/json',
@@ -68,8 +69,6 @@ export function downloadByType(params: { type: DownloadType; subdomain: string; 
       return downloadStructuresPage(params);
     case 'assignments':
       return downloadAssignmentsPage(params);
-    case 'ratings':
-      return downloadRatingsPage(params);
   }
 }
 

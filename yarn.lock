@@ -8817,7 +8817,7 @@ prompts@2.3.2, prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -8990,6 +8990,11 @@ react-native-gesture-handler@^1.8.0:
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
+react-native-image-picker@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-3.1.4.tgz#99cd18074fbfe1d70e8281040df201d31005577d"
+  integrity sha512-5pRmrBx+vZcf/UH6n95gxnBq5B7tRDZWIDnhvM4JxlthOChuvEEiShN+MMs7ue+lK26RXws5BOgKGd6MtQI/LQ==
+
 react-native-iphone-x-helper@^1.0.3:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.0.tgz#84fd13e6b89cc3aa4daa80ec514bf15cb724d86d"
@@ -9067,6 +9072,13 @@ react-native-sensitive-info@^5.5.8:
   version "5.5.8"
   resolved "https://registry.yarnpkg.com/react-native-sensitive-info/-/react-native-sensitive-info-5.5.8.tgz#6ebb67eed83d1c2867bd435630ef2c41eef204ed"
   integrity sha512-p99oaEW4QG1RdUNrkvd/c6Qdm856dQw/Rk81f9fA6Y3DlPs6ADNdU+jbPuTz3CcOUJwuKBDNenX6LR9KfmGFEg==
+
+react-native-super-grid@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-super-grid/-/react-native-super-grid-4.1.1.tgz#54da8fe6d716edf1c87d158c5cc61cd449c20ab7"
+  integrity sha512-rJQI2zfnqZ409V7i/2MpdQjtfs52lfZ9lILFbIojYI428sP4XRgoqUcKjjL9sRr2w/X7eK4EjJ/RnCw/shVxxQ==
+  dependencies:
+    prop-types "^15.6.0"
 
 react-native-vector-icons@^7.1.0:
   version "7.1.0"
