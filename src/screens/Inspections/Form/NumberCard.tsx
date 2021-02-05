@@ -50,6 +50,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
             subtitleNumberOfLines={0}
             title={name}
             subtitle={description}
+            subtitleStyle={{ fontSize: 14 }}
           />
           <MoreButton
             onTakePhoto={onTakePhoto}

@@ -15,7 +15,6 @@ interface MoreButtonProps {
   onDelete: () => void;
 }
 
-// TODO: erase old picture
 export async function fileUrlCopy(uri: string, fileName: string) {
   const destPath = `${directories.documents}/${fileName}`;
   await RNFS.copyFile(uri, destPath);
@@ -54,7 +53,6 @@ async function askStoragePermission() {
 function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
   return async () => {
     const callback = async (response: ImagePickerResponse) => {
-      console.warn('photo response', JSON.stringify(response));
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
           const newUri = await fileUrlCopy(response.uri, response.fileName || `${Date.now()}.jpg`);

@@ -38,11 +38,12 @@ const TextCard: React.FC<TextCardProps> = ({
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingVertical: 10 }}>
           <Card.Title
-            style={{ flex: 1, marginRight: 10 }}
-            titleNumberOfLines={0}
-            subtitleNumberOfLines={0}
             title={name}
             subtitle={description}
+            titleNumberOfLines={0}
+            subtitleNumberOfLines={0}
+            style={{ flex: 1, marginRight: 10 }}
+            subtitleStyle={{ fontSize: 14, margin: 0, padding: 0 }}
           />
           <MoreButton
             onTakePhoto={onTakePhoto}

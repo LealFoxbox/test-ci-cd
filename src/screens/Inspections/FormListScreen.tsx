@@ -40,44 +40,48 @@ const ItemsTable: React.FC<{}> = () => {
     >
       {assignments.length === 0 && <BlankScreen />}
       {assignments.length > 0 && (
-        <>
-          {!!structure && (
-            <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-              {!!structure?.location_path && <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>}
-            </View>
+        <FlatList
+          contentContainerStyle={{
+            justifyContent: 'flex-start',
+          }}
+          ListHeaderComponent={() => (
+            <>
+              {!!structure && (
+                <View style={{ backgroundColor: theme.colors.surface, paddingTop: 30, paddingHorizontal: 30 }}>
+                  {!!structure?.location_path && (
+                    <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
+                  )}
+                </View>
+              )}
+              <Notes value={structure?.notes} style={{ padding: 30 }} />
+            </>
           )}
-          <FlatList
-            contentContainerStyle={{
-              justifyContent: 'flex-start',
-            }}
-            ListHeaderComponent={() => <Notes value={structure?.notes} />}
-            data={assignments}
-            ItemSeparatorComponent={Divider}
-            renderItem={({ item }) => {
-              const form = forms[item.inspection_form_id];
-              const label = form?.name || '';
-              const hasDraft = !!drafts[item.id] && drafts[item.id].isDirty;
+          data={assignments}
+          ItemSeparatorComponent={Divider}
+          renderItem={({ item }) => {
+            const form = forms[item.inspection_form_id];
+            const label = form?.name || '';
+            const hasDraft = !!drafts[item.id] && drafts[item.id].isDirty;
 
-              return (
-                <NavRow
-                  label={label}
-                  icon={hasDraft ? 'file-document' : 'file-document-outline'}
-                  onPress={() => {
-                    initFormDraftAction(form, item, ratings);
+            return (
+              <NavRow
+                label={label}
+                icon={hasDraft ? 'file-document' : 'file-document-outline'}
+                onPress={() => {
+                  initFormDraftAction(form, item, ratings);
 
-                    navigation.navigate(INSPECTIONS_FORM, {
-                      formId: item.inspection_form_id,
-                      structureId: item.structure_id,
-                      assignmentId: item.id,
-                      title: label,
-                    });
-                  }}
-                />
-              );
-            }}
-            keyExtractor={(item) => `${item.id}`}
-          />
-        </>
+                  navigation.navigate(INSPECTIONS_FORM, {
+                    formId: item.inspection_form_id,
+                    structureId: item.structure_id,
+                    assignmentId: item.id,
+                    title: label,
+                  });
+                }}
+              />
+            );
+          }}
+          keyExtractor={(item) => `${item.id}`}
+        />
       )}
     </View>
   );

@@ -50,38 +50,40 @@ const InspectionsScreen: React.FC<{}> = () => {
     <Container>
       {children.length === 0 && <BlankScreen />}
       {children.length > 0 && (
-        <>
-          {!!parentId && !!parent && (
-            <View style={{ backgroundColor: theme.colors.surface, padding: 30 }}>
-              {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
-            </View>
+        <FlatList
+          contentContainerStyle={{
+            justifyContent: 'flex-start',
+          }}
+          data={children}
+          ItemSeparatorComponent={Divider}
+          ListHeaderComponent={() => (
+            <>
+              {!!parentId && !!parent && (
+                <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
+                  {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
+                </View>
+              )}
+              <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
+            </>
           )}
-          <FlatList
-            contentContainerStyle={{
-              justifyContent: 'flex-start',
-            }}
-            data={children}
-            ItemSeparatorComponent={Divider}
-            ListHeaderComponent={() => <Notes value={parent?.notes} onReady={onReady} />}
-            renderItem={({ item }) => (
-              <NavRow
-                label={item.display_name}
-                onPress={() => {
-                  if (item.active_children_count > 0) {
-                    navigation.navigate({
-                      name: INSPECTIONS_HOME,
-                      key: `${parentId || 'base'}`,
-                      params: { parentId: item.id, title: item.display_name },
-                    });
-                  } else {
-                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
-                  }
-                }}
-              />
-            )}
-            keyExtractor={(item) => `${item.id}`}
-          />
-        </>
+          renderItem={({ item }) => (
+            <NavRow
+              label={item.display_name}
+              onPress={() => {
+                if (item.active_children_count > 0) {
+                  navigation.navigate({
+                    name: INSPECTIONS_HOME,
+                    key: `${parentId || 'base'}`,
+                    params: { parentId: item.id, title: item.display_name },
+                  });
+                } else {
+                  navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
+                }
+              }}
+            />
+          )}
+          keyExtractor={(item) => `${item.id}`}
+        />
       )}
       {!isReady && <LoadingOverlay />}
     </Container>
