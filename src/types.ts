@@ -176,14 +176,14 @@ export interface BaseField {
   ratingTypeId: 1 | 3 | 5 | 6 | 7 | 8 | 9;
 
   rating_id: number;
-  line_item_id: number; // the inspection_form_item.id
+  formFieldId: number;
   weight: number; // Reference to the inspection_form_item.weight.
   position: number; // Reference to the inspection_form_item.position. This represents render order.
   description: string | null;
   category_id: number | null;
   comment: string | null; //  If the user adds a comment to a line item, then clients should send the comment as a string. Otherwise, set as null. Ratings of type Textfield will save their result to the comment field.
 
-  inspection_item_photos: DraftPhoto[]; // maybe it's not common? examples say it is
+  photos: DraftPhoto[]; // maybe it's not common? examples say it is
 }
 
 export interface PercentageField extends BaseField {

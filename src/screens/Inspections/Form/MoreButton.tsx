@@ -15,11 +15,12 @@ interface MoreButtonProps {
   onDelete: () => void;
 }
 
+// TODO: erase old picture
 export async function fileUrlCopy(uri: string, fileName: string) {
   const destPath = `${directories.documents}/${fileName}`;
   await RNFS.copyFile(uri, destPath);
-  await RNFS.stat(destPath);
-  return destPath;
+  const statResult = await RNFS.stat(destPath);
+  return statResult.path;
 }
 
 async function askCameraPermission() {

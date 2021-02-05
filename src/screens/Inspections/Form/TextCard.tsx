@@ -15,14 +15,24 @@ const Container = styled.View`
 `;
 
 interface TextCardProps {
+  id: number;
   name: string;
   description: string | null;
   commentInputProps: TextInputProps;
-  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
   photos: DraftPhoto[];
+  onTapPhoto: (index: number) => void;
+  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
 }
 
-const TextCard: React.FC<TextCardProps> = ({ name, description, commentInputProps, onTakePhoto, photos }) => {
+const TextCard: React.FC<TextCardProps> = ({
+  id,
+  name,
+  description,
+  commentInputProps,
+  photos,
+  onTapPhoto,
+  onTakePhoto,
+}) => {
   return (
     <Container>
       <Card>
@@ -41,7 +51,7 @@ const TextCard: React.FC<TextCardProps> = ({ name, description, commentInputProp
             }}
           />
         </View>
-        <CardFooter commentInputProps={commentInputProps} photos={photos} />
+        <CardFooter id={id} commentInputProps={commentInputProps} photos={photos} onTapPhoto={onTapPhoto} />
       </Card>
     </Container>
   );

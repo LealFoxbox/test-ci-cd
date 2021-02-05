@@ -88,13 +88,13 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
       name: field.display_name,
 
       rating_id: rating.id,
-      line_item_id: field.id,
+      formFieldId: field.id,
       weight: field.weight,
       position: field.position,
       description: field.description,
       category_id: field.category_id,
       comment: '',
-      inspection_item_photos: [],
+      photos: [],
 
       ratingTypeId: rating.rating_type_id,
     };

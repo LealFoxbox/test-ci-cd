@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { FlatGrid } from 'react-native-super-grid';
@@ -13,11 +14,13 @@ const Container = styled.View`
 `;
 
 interface NumberCardProps {
+  id: number;
   photos: DraftPhoto[];
   commentInputProps: TextInputProps;
+  onTapPhoto: (index: number) => void;
 }
 
-const NumberCard: React.FC<NumberCardProps> = ({ photos, commentInputProps }) => {
+const NumberCard: React.FC<NumberCardProps> = ({ id, photos, commentInputProps, onTapPhoto }) => {
   return (
     <Container>
       <TextInput
@@ -31,13 +34,16 @@ const NumberCard: React.FC<NumberCardProps> = ({ photos, commentInputProps }) =>
         itemDimension={90}
         data={photos}
         style={{ flex: 1 }}
+        listKey={`${id}`}
         spacing={5}
         renderItem={({ item }) => (
-          <ImagePickerImage
-            uri={item.uri}
-            style={{ aspectRatio: 1, borderRadius: 5 }}
-            onError={(e) => console.warn('imagepicker error', JSON.stringify(e))}
-          />
+          <TouchableOpacity accessibilityRole="imagebutton" onPress={() => onTapPhoto(photos.indexOf(item))}>
+            <ImagePickerImage
+              uri={`file://${item.uri}`}
+              style={{ aspectRatio: 1, borderRadius: 5 }}
+              onError={(e) => console.warn('imagepicker error: ', e.nativeEvent.error)}
+            />
+          </TouchableOpacity>
         )}
       />
     </Container>

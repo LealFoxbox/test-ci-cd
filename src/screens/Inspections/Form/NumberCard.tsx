@@ -15,23 +15,27 @@ const Container = styled.View`
 `;
 
 interface NumberCardProps {
+  id: number;
   name: string;
   description: string | null;
   rating: Rating;
   numberInputProps: TextInputProps;
   commentInputProps: TextInputProps;
-  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
   photos: DraftPhoto[];
+  onTapPhoto: (index: number) => void;
+  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
 }
 
 const NumberCard: React.FC<NumberCardProps> = ({
+  id,
   name,
   description,
   rating,
-  onTakePhoto,
   photos,
   numberInputProps,
   commentInputProps,
+  onTapPhoto,
+  onTakePhoto,
 }) => {
   const prefix = Math.random() < 0.5 ? 'The room had' : rating.prefix;
   const suffix = Math.random() < 0.5 ? 'issues' : rating.suffix;
@@ -64,7 +68,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
             {...numberInputProps}
           />
           {!!suffix && <Text>{suffix}</Text>}
-          <CardFooter commentInputProps={commentInputProps} photos={photos} />
+          <CardFooter id={id} commentInputProps={commentInputProps} photos={photos} onTapPhoto={onTapPhoto} />
         </Card.Content>
       </Card>
     </Container>
