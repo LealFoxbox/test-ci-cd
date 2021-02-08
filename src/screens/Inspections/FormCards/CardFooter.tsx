@@ -8,28 +8,36 @@ import ImagePickerImage from 'src/components/ImagePickerImage';
 import { styled } from 'src/paperTheme';
 import { DraftPhoto } from 'src/types';
 
+export interface CommentInputProps extends Omit<TextInputProps, 'value'> {
+  value: string | null;
+}
+
 const Container = styled.View`
-  margin: 10px;
+  margin-top: 10px;
   padding-top: 10px;
 `;
 
 interface NumberCardProps {
   id: number;
   photos: DraftPhoto[];
-  commentInputProps: TextInputProps;
+  commentInputProps: CommentInputProps;
   onTapPhoto: (index: number) => void;
+  showComment: boolean;
 }
 
-const NumberCard: React.FC<NumberCardProps> = ({ id, photos, commentInputProps, onTapPhoto }) => {
+const CardFooter: React.FC<NumberCardProps> = ({ id, photos, commentInputProps, showComment, onTapPhoto }) => {
   return (
     <Container>
-      <TextInput
-        style={{ marginBottom: 10 }}
-        keyboardType="numeric"
-        autoCapitalize="none"
-        dense
-        {...commentInputProps}
-      />
+      {showComment && (
+        <TextInput
+          style={{ marginBottom: 10 }}
+          keyboardType="default"
+          autoCapitalize="none"
+          dense
+          {...commentInputProps}
+          value={commentInputProps.value || ''}
+        />
+      )}
       <FlatGrid
         itemDimension={90}
         data={photos}
@@ -50,4 +58,4 @@ const NumberCard: React.FC<NumberCardProps> = ({ id, photos, commentInputProps, 
   );
 };
 
-export default NumberCard;
+export default CardFooter;

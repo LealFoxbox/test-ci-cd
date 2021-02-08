@@ -6,7 +6,7 @@ import { TextInputProps } from 'react-native-paper/lib/typescript/src/components
 import { styled } from 'src/paperTheme';
 import { DraftPhoto, Rating } from 'src/types';
 
-import CardFooter from './CardFooter';
+import CardFooter, { CommentInputProps } from './CardFooter';
 import MoreButton from './MoreButton';
 
 const Container = styled.View`
@@ -20,10 +20,12 @@ interface NumberCardProps {
   description: string | null;
   rating: Rating;
   numberInputProps: TextInputProps;
-  commentInputProps: TextInputProps;
+  commentInputProps: CommentInputProps;
   photos: DraftPhoto[];
   onTapPhoto: (index: number) => void;
   onTakePhoto: (uri: string, isFromGallery: boolean) => void;
+  onAddComment: () => void;
+  showComment: boolean;
 }
 
 const NumberCard: React.FC<NumberCardProps> = ({
@@ -36,10 +38,9 @@ const NumberCard: React.FC<NumberCardProps> = ({
   commentInputProps,
   onTapPhoto,
   onTakePhoto,
+  onAddComment,
+  showComment,
 }) => {
-  const prefix = Math.random() < 0.5 ? 'The room had' : rating.prefix;
-  const suffix = Math.random() < 0.5 ? 'issues' : rating.suffix;
-
   return (
     <Container>
       <Card>
@@ -54,13 +55,15 @@ const NumberCard: React.FC<NumberCardProps> = ({
           />
           <MoreButton
             onTakePhoto={onTakePhoto}
+            onAddComment={onAddComment}
             onDelete={() => {
               /* TODO: this */
             }}
+            showCommentOption={!showComment}
           />
         </View>
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-          {!!prefix && <Text>{prefix}</Text>}
+          {!!rating.prefix && <Text>{rating.prefix}</Text>}
           <TextInput
             style={{ marginBottom: 10, flex: 1, marginHorizontal: 5 }}
             keyboardType="numeric"
@@ -68,8 +71,16 @@ const NumberCard: React.FC<NumberCardProps> = ({
             dense
             {...numberInputProps}
           />
-          {!!suffix && <Text>{suffix}</Text>}
-          <CardFooter id={id} commentInputProps={commentInputProps} photos={photos} onTapPhoto={onTapPhoto} />
+          {!!rating.suffix && <Text>{rating.suffix}</Text>}
+        </Card.Content>
+        <Card.Content>
+          <CardFooter
+            id={id}
+            commentInputProps={commentInputProps}
+            photos={photos}
+            onTapPhoto={onTapPhoto}
+            showComment={showComment}
+          />
         </Card.Content>
       </Card>
     </Container>

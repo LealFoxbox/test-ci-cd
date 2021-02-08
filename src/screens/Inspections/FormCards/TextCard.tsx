@@ -1,12 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Card } from 'react-native-paper';
-import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 
 import { styled } from 'src/paperTheme';
 import { DraftPhoto } from 'src/types';
 
-import CardFooter from './CardFooter';
+import CardFooter, { CommentInputProps } from './CardFooter';
 import MoreButton from './MoreButton';
 
 const Container = styled.View`
@@ -18,7 +17,7 @@ interface TextCardProps {
   id: number;
   name: string;
   description: string | null;
-  commentInputProps: TextInputProps;
+  commentInputProps: CommentInputProps;
   photos: DraftPhoto[];
   onTapPhoto: (index: number) => void;
   onTakePhoto: (uri: string, isFromGallery: boolean) => void;
@@ -50,9 +49,18 @@ const TextCard: React.FC<TextCardProps> = ({
             onDelete={() => {
               /* TODO: this */
             }}
+            showCommentOption={false}
           />
         </View>
-        <CardFooter id={id} commentInputProps={commentInputProps} photos={photos} onTapPhoto={onTapPhoto} />
+        <Card.Content>
+          <CardFooter
+            id={id}
+            showComment
+            commentInputProps={commentInputProps}
+            photos={photos}
+            onTapPhoto={onTapPhoto}
+          />
+        </Card.Content>
       </Card>
     </Container>
   );

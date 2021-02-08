@@ -13,6 +13,7 @@ interface MoreButtonProps {
   onAddComment?: () => void;
   onTakePhoto: onTakePhotoType;
   onDelete: () => void;
+  showCommentOption: boolean;
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
@@ -50,7 +51,7 @@ async function askStoragePermission() {
   }
 }
 
-function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
+function createAddHandler(onTakePhoto: onTakePhotoType, closeMenu: () => void, isAttachment: boolean) {
   return async () => {
     const callback = async (response: ImagePickerResponse) => {
       if (!response.didCancel && !response.errorCode) {
@@ -95,10 +96,12 @@ function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
         );
       }
     }
+
+    closeMenu();
   };
 }
 
-const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDelete }) => {
+const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDelete, showCommentOption }) => {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
 
@@ -106,9 +109,19 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
 
   const closeMenu = () => setVisible(false);
 
-  const handlePhoto = createAddHandler(onTakePhoto, false);
+  const handlePhoto = createAddHandler(onTakePhoto, closeMenu, false);
 
-  const handleAttach = createAddHandler(onTakePhoto, true);
+  const handleAttach = createAddHandler(onTakePhoto, closeMenu, true);
+
+  const handleDelete = () => {
+    closeMenu();
+    onDelete();
+  };
+
+  const handleAddComment = () => {
+    closeMenu();
+    onAddComment && onAddComment();
+  };
 
   return (
     <Menu
@@ -120,11 +133,13 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
         </TouchableOpacity>
       }
     >
-      {!!onAddComment && <Menu.Item onPress={onAddComment} title="Add Comment" />}
       <Menu.Item onPress={handlePhoto} title="Take Photo" />
-      <Menu.Item onPress={handleAttach} title="Attach Gallery Photo" />
       <Divider />
-      <Menu.Item onPress={onDelete} title="Mark as N/A" />
+      <Menu.Item onPress={handleAttach} title="Choose Photo" />
+      <Divider />
+      {!!showCommentOption && <Menu.Item onPress={handleAddComment} title="Add Comment" />}
+      {!!showCommentOption && <Divider />}
+      <Menu.Item onPress={handleDelete} title="Not Applicable" />
     </Menu>
   );
 };

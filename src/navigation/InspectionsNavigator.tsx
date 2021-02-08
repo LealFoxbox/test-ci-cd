@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
-import InspectionFormScreen from 'src/screens/Inspections/Form/FormScreen';
+import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import Header from 'src/components/Header';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
