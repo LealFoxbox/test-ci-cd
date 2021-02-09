@@ -9,11 +9,12 @@ import RNFS from 'react-native-fs';
 
 type onTakePhotoType = (uri: string, isFromGallery: boolean) => void;
 
-interface MoreButtonProps {
+export interface MoreButtonProps {
   onAddComment?: () => void;
-  onTakePhoto: onTakePhotoType;
+  onTakePhoto?: onTakePhotoType;
   onDelete: () => void;
   showCommentOption: boolean;
+  allowPhotos: boolean;
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
@@ -51,13 +52,13 @@ async function askStoragePermission() {
   }
 }
 
-function createAddHandler(onTakePhoto: onTakePhotoType, closeMenu: () => void, isAttachment: boolean) {
+function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: () => void, isAttachment: boolean) {
   return async () => {
     const callback = async (response: ImagePickerResponse) => {
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
-          const newUri = await fileUrlCopy(response.uri, response.fileName || `${Date.now()}.jpg`);
-          onTakePhoto(newUri, isAttachment);
+          const newUri = await fileUrlCopy(response.uri, `photo - ${Date.now()}.jpg`);
+          onTakePhoto && onTakePhoto(newUri, isAttachment);
         } else {
           console.warn('No uri??');
         }
@@ -101,7 +102,13 @@ function createAddHandler(onTakePhoto: onTakePhotoType, closeMenu: () => void, i
   };
 }
 
-const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDelete, showCommentOption }) => {
+const MoreButton: React.FC<MoreButtonProps> = ({
+  onAddComment,
+  onTakePhoto,
+  onDelete,
+  showCommentOption,
+  allowPhotos,
+}) => {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
 
@@ -133,12 +140,20 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
         </TouchableOpacity>
       }
     >
-      <Menu.Item onPress={handlePhoto} title="Take Photo" />
-      <Divider />
-      <Menu.Item onPress={handleAttach} title="Choose Photo" />
-      <Divider />
-      {!!showCommentOption && <Menu.Item onPress={handleAddComment} title="Add Comment" />}
-      {!!showCommentOption && <Divider />}
+      {allowPhotos && (
+        <>
+          <Menu.Item onPress={handlePhoto} title="Take Photo" />
+          <Divider />
+          <Menu.Item onPress={handleAttach} title="Choose Photo" />
+          <Divider />
+        </>
+      )}
+      {showCommentOption && (
+        <>
+          <Menu.Item onPress={handleAddComment} title="Add Comment" />
+          <Divider />
+        </>
+      )}
       <Menu.Item onPress={handleDelete} title="Not Applicable" />
     </Menu>
   );

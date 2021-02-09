@@ -3,20 +3,15 @@ import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { Formik } from 'formik';
-import { fromPairs, memoize } from 'lodash/fp';
+import { sortBy } from 'lodash/fp';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
+import { INSPECTIONS_FORM, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
-import { DraftForm } from 'src/types';
 
 import { createRenderCard } from './createRenderCard';
-
-const getInitialValues = memoize((draft: DraftForm) => {
-  return fromPairs(draft.fields.map((field) => [field.formFieldId, field]));
-});
 
 const EditFormScreen: React.FC<{}> = () => {
   const {
@@ -38,14 +33,16 @@ const EditFormScreen: React.FC<{}> = () => {
     return <View />;
   }
 
-  const initialValues = getInitialValues(draft);
-
   const submit = () => {
     PersistentUserStore.update((s) => {
       s.pendingUploads.push(s.drafts[assignmentId]);
       delete s.drafts[assignmentId];
     });
     navigation.goBack();
+  };
+
+  const goToSignature = (formFieldId: number) => {
+    navigation.navigate(SIGNATURE_MODAL, { assignmentId, formFieldId });
   };
 
   return (
@@ -64,7 +61,7 @@ const EditFormScreen: React.FC<{}> = () => {
           </View>
         )}
       />
-      <Formik initialValues={initialValues} onSubmit={submit}>
+      <Formik initialValues={draft.fields} onSubmit={submit}>
         {(formikProps) => (
           <FlatList
             contentContainerStyle={{
@@ -81,9 +78,15 @@ const EditFormScreen: React.FC<{}> = () => {
                 Submit
               </Button>
             )}
-            data={draft.fields}
+            data={sortBy('position', Object.values(draft.fields))}
             keyExtractor={(item) => `${item.formFieldId}`}
-            renderItem={createRenderCard(formikProps, { setExpandedPhoto, assignmentId, ratings, theme })}
+            renderItem={createRenderCard(formikProps, {
+              setExpandedPhoto,
+              assignmentId,
+              ratings,
+              theme,
+              goToSignature,
+            })}
           />
         )}
       </Formik>

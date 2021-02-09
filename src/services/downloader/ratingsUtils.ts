@@ -4,9 +4,12 @@ import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { PersistentState } from 'src/pullstate/persistentStore/initialState';
 import { Rating, SelectRating } from 'src/types';
 import { isMilisecondsExpired } from 'src/utils/expiration';
-import { isSelectRating } from 'src/utils/ratingHelper';
 
 import { PERCENTAGES } from './percentages';
+
+export function isSelectRating(rating: Rating) {
+  return rating.rating_type_id === 8 || rating.rating_type_id === 9;
+}
 
 export const isRatingExpired = (selectRating: SelectRating) => {
   return Object.values(selectRating.lastDownloaded).some(isMilisecondsExpired);

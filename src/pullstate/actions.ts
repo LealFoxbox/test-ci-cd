@@ -1,17 +1,16 @@
-import { compose, set, sortBy, uniqueId } from 'lodash/fp';
+import { compose, fromPairs, mapValues, set, uniqueId } from 'lodash/fp';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
 import {
   Assignment,
-  BaseField,
   DraftField,
   DraftForm,
   Form,
   NumberField,
-  PercentageField,
   PointsField,
   Rating,
+  ScoreField,
   SelectField,
   SignatureField,
   TextField,
@@ -84,7 +83,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
   const fields = form.inspection_form_items.map((field) => {
     const rating = ratings[field.rating_id];
 
-    const baseField: BaseField = {
+    const baseField = {
       name: field.display_name,
 
       rating_id: rating.id,
@@ -109,7 +108,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
           range_choice_min_position: null,
           score: null,
           deficient: null,
-        } as PercentageField;
+        } as ScoreField;
 
       case 3:
         return { ...baseField, comment: '' } as TextField;
@@ -155,7 +154,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     private: form.private_inspection || false,
     latitude: null,
     longitude: null,
-    fields: sortBy('position', fields),
+    fields: fromPairs(fields.map((field) => [field.formFieldId, field])),
     isDirty: false,
 
     notes: form.notes,
@@ -182,14 +181,10 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
 
     const fieldsSetter = set(
       `drafts.${assignmentId}.fields`,
-      Object.values(formValues).map((field) => {
-        const newValue = set('comment', field.comment || null, field);
-        console.warn(JSON.stringify(newValue));
-        return newValue;
-      }),
+      mapValues((field) => set('comment', field.comment || null, field), formValues),
     );
 
-    // we are intentionally changing the state object reference so that the FlatList notices changes annd rerenders
+    // we are intentionally changing the state object reference so that the FlatList notices changes and rerenders
     // seems like immerJs does not play well with the virtualization
     return compose([isDirtySetter, fieldsSetter])(s) as PersistentState;
   });

@@ -9,7 +9,7 @@ import { clearInspectionsDataAction } from 'src/pullstate/actions';
 import { useUploader } from 'src/services/uploader';
 
 import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
+import MainStackNavigator from './MainStackNavigator';
 
 let splashHidden = false;
 
@@ -40,7 +40,7 @@ function AppNavigator() {
   if (status === 'shouldLogIn') {
     return <AuthNavigator />;
   } else if (status === 'loggedIn' && userData) {
-    return <MainNavigator features={userData.features || {}} />;
+    return <MainStackNavigator />;
   } else {
     return <View />;
   }

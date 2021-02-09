@@ -2,15 +2,16 @@ import React from 'react';
 import { ListRenderItem } from 'react-native';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { FormikProps } from 'formik';
-import { set } from 'lodash/fp';
+import { find, set } from 'lodash/fp';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
-import { DraftField, DraftPhoto, PointsRating, Rating } from 'src/types';
+import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating } from 'src/types';
 
 import TextCard from '../FormCards/TextCard';
 import NumberCard from '../FormCards/NumberCard';
-import PointsCard from '../FormCards/PointsCard';
 import { CommentInputProps } from '../FormCards/CardFooter';
+import RangeCard from '../FormCards/RangeCard';
+import SignatureCard from '../FormCards/SignatureCard';
 
 export const createRenderCard = (
   { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
@@ -19,11 +20,13 @@ export const createRenderCard = (
     assignmentId,
     ratings,
     theme,
+    goToSignature,
   }: {
     setExpandedPhoto: React.Dispatch<React.SetStateAction<{ photos: string[]; index: number }>>;
     assignmentId: number;
     ratings: Record<string, Rating>;
     theme: ReactNativePaper.Theme;
+    goToSignature: (formFieldId: number) => void;
   },
 ): ListRenderItem<DraftField> => {
   return ({ item: draftField }) => {
@@ -41,13 +44,16 @@ export const createRenderCard = (
         created_at: Date.now(), // timestamp in format "2020-01-08T14:52:56-07:00",
       };
 
-      setFieldValue(`${fieldValue.formFieldId}`, set('photos', fieldValue.photos.concat([newPhoto]), fieldValue));
-
       const newValues = set(`${draftField.formFieldId}.photos`, fieldValue.photos.concat([newPhoto]), values);
+
+      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
     const handleAddComment = () => {
       setFieldValue(`${fieldValue.formFieldId}`, set('comment', '', fieldValue));
+    };
+    const handleDelete = () => {
+      // TODO:
     };
 
     const commentInputProps: CommentInputProps = {
@@ -60,8 +66,25 @@ export const createRenderCard = (
       theme,
     };
 
+    const textCardProps = {
+      id: fieldValue.formFieldId,
+      key: fieldValue.formFieldId,
+      name: fieldValue.name,
+      description: fieldValue.description,
+      commentInputProps: commentInputProps,
+      photos: fieldValue.photos,
+      onTapPhoto: handleTapPhoto,
+      onTakePhoto: handleTakePhoto,
+      onDelete: handleDelete,
+    };
+
+    const baseCardProps = {
+      ...textCardProps,
+      onAddComment: handleAddComment,
+      showComment: fieldValue.comment !== null,
+    };
+
     if (fieldValue.ratingTypeId === 6) {
-      // NumberCard
       const numberInputProps: TextInputProps = {
         value: fieldValue.number_choice || '',
         onChangeText: (value) => {
@@ -75,61 +98,47 @@ export const createRenderCard = (
         theme,
       };
 
-      return (
-        <NumberCard
-          id={fieldValue.formFieldId}
-          key={fieldValue.formFieldId}
-          rating={rating}
-          name={fieldValue.name}
-          description={fieldValue.description}
-          commentInputProps={commentInputProps}
-          numberInputProps={numberInputProps}
-          photos={fieldValue.photos}
-          onTapPhoto={handleTapPhoto}
-          onTakePhoto={handleTakePhoto}
-          onAddComment={handleAddComment}
-          showComment={fieldValue.comment !== null}
-        />
-      );
+      return <NumberCard {...baseCardProps} rating={rating as NumberRating} numberInputProps={numberInputProps} />;
     }
 
-    if (fieldValue.ratingTypeId === 7) {
+    if (fieldValue.ratingTypeId === 5) {
+      return <SignatureCard {...baseCardProps} onOpen={() => goToSignature(fieldValue.formFieldId)} />;
+    }
+
+    if (fieldValue.ratingTypeId === 7 || fieldValue.ratingTypeId === 1) {
+      const rangeChoices = rating.range_choices as RangeChoice[];
+      let selectedRangeChoice: RangeChoice | undefined;
+      if (fieldValue.ratingTypeId === 7) {
+        selectedRangeChoice =
+          fieldValue.points !== null
+            ? find({ points: fieldValue.points }, rangeChoices)
+            : find({ default: true }, rangeChoices);
+      } else {
+        selectedRangeChoice =
+          fieldValue.score !== null
+            ? find({ score: fieldValue.score }, rangeChoices)
+            : find({ default: true }, rangeChoices);
+      }
+
       return (
-        <PointsCard
-          id={fieldValue.formFieldId}
-          key={fieldValue.formFieldId}
-          name={fieldValue.name}
-          description={fieldValue.description}
-          commentInputProps={commentInputProps}
-          photos={fieldValue.photos}
-          onTapPhoto={handleTapPhoto}
-          onTakePhoto={handleTakePhoto}
-          points={fieldValue.points}
-          rating={rating as PointsRating}
+        <RangeCard
+          {...baseCardProps}
+          selectedRangeChoice={selectedRangeChoice || null}
+          deficient={fieldValue.deficient}
+          rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
-            setFieldValue(`${fieldValue.formFieldId}`, {
-              ...fieldValue,
-              points: choice.points,
-            });
+            const newValues =
+              fieldValue.ratingTypeId === 7
+                ? set(`${draftField.formFieldId}.points`, choice.points, values)
+                : set(`${draftField.formFieldId}.score`, choice.score, values);
+
+            setFieldValue(`${fieldValue.formFieldId}`, newValues[draftField.formFieldId]);
+            updateDraftFieldsAction(assignmentId, newValues);
           }}
-          onAddComment={handleAddComment}
-          showComment={fieldValue.comment !== null}
         />
       );
     }
 
-    // TextCard
-    return (
-      <TextCard
-        id={fieldValue.formFieldId}
-        key={fieldValue.formFieldId}
-        name={fieldValue.name}
-        description={fieldValue.description}
-        commentInputProps={commentInputProps}
-        photos={fieldValue.photos}
-        onTapPhoto={handleTapPhoto}
-        onTakePhoto={handleTakePhoto}
-      />
-    );
+    return <TextCard {...textCardProps} />;
   };
 };

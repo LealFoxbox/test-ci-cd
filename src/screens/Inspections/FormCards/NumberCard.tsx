@@ -1,31 +1,22 @@
 import React from 'react';
-import { View } from 'react-native';
 import { Card, Text, TextInput } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 
 import { styled } from 'src/paperTheme';
-import { DraftPhoto, Rating } from 'src/types';
+import { NumberRating } from 'src/types';
 
-import CardFooter, { CommentInputProps } from './CardFooter';
-import MoreButton from './MoreButton';
+import CardFooter from './CardFooter';
+import CardHeader from './CardHeader';
+import { BaseCardProps } from './propTypes';
 
 const Container = styled.View`
   margin: 10px;
   padding-top: 10px;
 `;
 
-interface NumberCardProps {
-  id: number;
-  name: string;
-  description: string | null;
-  rating: Rating;
+interface NumberCardProps extends BaseCardProps {
+  rating: NumberRating;
   numberInputProps: TextInputProps;
-  commentInputProps: CommentInputProps;
-  photos: DraftPhoto[];
-  onTapPhoto: (index: number) => void;
-  onTakePhoto: (uri: string, isFromGallery: boolean) => void;
-  onAddComment: () => void;
-  showComment: boolean;
 }
 
 const NumberCard: React.FC<NumberCardProps> = ({
@@ -39,29 +30,21 @@ const NumberCard: React.FC<NumberCardProps> = ({
   onTapPhoto,
   onTakePhoto,
   onAddComment,
+  onDelete,
   showComment,
 }) => {
   return (
     <Container>
       <Card>
-        <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingVertical: 10 }}>
-          <Card.Title
-            style={{ flex: 1, marginRight: 10 }}
-            titleNumberOfLines={0}
-            subtitleNumberOfLines={0}
-            title={name}
-            subtitle={description}
-            subtitleStyle={{ fontSize: 14 }}
-          />
-          <MoreButton
-            onTakePhoto={onTakePhoto}
-            onAddComment={onAddComment}
-            onDelete={() => {
-              /* TODO: this */
-            }}
-            showCommentOption={!showComment}
-          />
-        </View>
+        <CardHeader
+          name={name}
+          description={description}
+          onTakePhoto={onTakePhoto}
+          onAddComment={onAddComment}
+          onDelete={onDelete}
+          showCommentOption={!showComment}
+          allowPhotos
+        />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
           {!!rating.prefix && <Text>{rating.prefix}</Text>}
           <TextInput
@@ -73,15 +56,13 @@ const NumberCard: React.FC<NumberCardProps> = ({
           />
           {!!rating.suffix && <Text>{rating.suffix}</Text>}
         </Card.Content>
-        <Card.Content>
-          <CardFooter
-            id={id}
-            commentInputProps={commentInputProps}
-            photos={photos}
-            onTapPhoto={onTapPhoto}
-            showComment={showComment}
-          />
-        </Card.Content>
+        <CardFooter
+          id={id}
+          commentInputProps={commentInputProps}
+          photos={photos}
+          onTapPhoto={onTapPhoto}
+          showComment={showComment}
+        />
       </Card>
     </Container>
   );

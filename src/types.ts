@@ -1,3 +1,5 @@
+export type Modify<T, R> = Omit<T, keyof R> & R;
+
 export interface Assignment {
   id: number;
   inspection_form_id: number;
@@ -89,7 +91,7 @@ export interface RangeChoice {
   label: string;
   points: number | null;
   position: number;
-  score: string; // number between 0 and 1
+  score: string | null; // number between 0 and 1
 }
 
 export interface SelectRatingChoice {
@@ -100,66 +102,61 @@ export interface SelectRatingChoice {
 
 /////// RATING TYPES ///////////
 
-export interface PercentageRating {
+interface BaseRating {
   id: number;
   name: string;
   prefix: null;
-  rating_type_id: 1;
-  range_choices: RangeChoice[];
   suffix: null;
+  range_choices: [];
 }
 
-export interface TextfieldRating {
-  id: number;
-  name: string;
-  prefix: null;
+export type ScoreRating = Modify<
+  BaseRating,
+  {
+    rating_type_id: 1;
+    range_choices: RangeChoice[];
+  }
+>;
+
+export interface TextfieldRating extends BaseRating {
   rating_type_id: 3;
-  range_choices: [];
-  suffix: null;
 }
 
-export interface SignatureRating {
-  id: number;
-  name: string;
-  prefix: null;
+export interface SignatureRating extends BaseRating {
   rating_type_id: 5;
-  range_choices: [];
-  suffix: null;
 }
 
-export interface NumberRating {
-  id: number;
-  name: string;
-  prefix: string | null;
-  rating_type_id: 6;
-  range_choices: [];
-  suffix: string | null;
-}
+export type NumberRating = Modify<
+  BaseRating,
+  {
+    rating_type_id: 6;
+    prefix: string | null;
+    suffix: string | null;
+  }
+>;
 
-export interface PointsRating {
-  id: number;
-  name: string;
-  prefix: null;
-  rating_type_id: 7;
-  range_choices: RangeChoice[];
-  suffix: null;
-}
+export type PointsRating = Modify<
+  BaseRating,
+  {
+    rating_type_id: 7;
+    range_choices: RangeChoice[];
+  }
+>;
 
-export interface SelectRating {
-  id: number;
-  name: string;
-  prefix: null;
-  rating_type_id: 8 | 9; // 8 is a simple select, 9 is for multi-select
-  range_choices: SelectRatingChoice[]; // TODO: this needs to be filled in by the backend separately
-  suffix: null;
+export type SelectRating = Modify<
+  BaseRating,
+  {
+    rating_type_id: 8 | 9; // 8 is a simple select, 9 is for multi-select
+    range_choices: SelectRatingChoice[]; // TODO: this needs to be filled in by the backend separately
 
-  // added by us
-  page: number | null;
-  totalPages: number | null;
-  lastDownloaded: number[];
-}
+    // added by us
+    page: number | null;
+    totalPages: number | null;
+    lastDownloaded: number[];
+  }
+>;
 
-export type Rating = PercentageRating | TextfieldRating | SignatureRating | NumberRating | PointsRating | SelectRating;
+export type Rating = ScoreRating | TextfieldRating | SignatureRating | NumberRating | PointsRating | SelectRating;
 
 /////// FORM EDITING TYPES ///////////
 
@@ -171,9 +168,8 @@ export interface DraftPhoto {
   created_at: number; // timestamp in format "2020-01-08T14:52:56-07:00",
 }
 
-export interface BaseField {
+interface BaseField {
   name: string;
-  ratingTypeId: 1 | 3 | 5 | 6 | 7 | 8 | 9;
 
   rating_id: number;
   formFieldId: number;
@@ -186,14 +182,14 @@ export interface BaseField {
   photos: DraftPhoto[]; // maybe it's not common? examples say it is
 }
 
-export interface PercentageField extends BaseField {
+export interface ScoreField extends BaseField {
   ratingTypeId: 1;
 
   range_choice_label: string | null; // The selected range_choice.label.
   range_choice_position: number | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
   range_choice_max_position: number | null; // The max value of range_choices.position
   range_choice_min_position: number | null; // The minimum value of range_choices.position
-  score: number | null; // The select range_choice.score. For example, '0.70'. Note that these are decimal values so 0.70 is what the client app should provide, not 70.
+  score: string | null; // The select range_choice.score. For example, '0.70'. Note that these are decimal values so 0.70 is what the client app should provide, not 70.
   deficient: boolean | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
 }
 
@@ -226,7 +222,7 @@ export interface SelectField extends BaseField {
   list_choice_ids: number[]; // Only provide a value if the user makes a selection from the list picker. Please note that multiple choice list pickers could contain multiple integers in an array. A single choice list picker would contain an array of one integer. If no selection was made, client must provide null or empty array.
 }
 
-export type DraftField = PercentageField | TextField | SignatureField | NumberField | PointsField | SelectField;
+export type DraftField = ScoreField | TextField | SignatureField | NumberField | PointsField | SelectField;
 
 export interface DraftForm {
   name: string;
@@ -245,5 +241,5 @@ export interface DraftForm {
   private: boolean; // if the user toggles the private button or if the origating inspection_form was private
   latitude: number | null;
   longitude: number | null;
-  fields: DraftField[];
+  fields: Record<string, DraftField>; // formFieldId is the key
 }

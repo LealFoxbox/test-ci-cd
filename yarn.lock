@@ -2157,6 +2157,14 @@
   resolved "https://registry.yarnpkg.com/@types/react-native-background-downloader/-/react-native-background-downloader-2.3.3.tgz#7a53f13814b877351b8b4ce08c77e9cc9c4d318e"
   integrity sha512-lXK9Zb0RCfYa5wi0wEkDa0ritjcmhnNZDzHNQmh6gYo6UUUFnbFH8S5Vuv6tYhDu3mm5VuaQkKNUoHWvj9LLdg==
 
+"@types/react-native-signature-capture@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@types/react-native-signature-capture/-/react-native-signature-capture-0.4.1.tgz#04e6e07cbef69a3a3339e5f01ee868639f0bc81e"
+  integrity sha512-BCOwwvXVXYWlzWd4KMrKJku+MNLCXmOro54jbwAiy0jVkWsQankrC8m006jg5kNw7DT8LIAcWTWSZbcG1wNN4w==
+  dependencies:
+    "@types/react" "*"
+    "@types/react-native" "*"
+
 "@types/react-native-vector-icons@^6.4.6":
   version "6.4.6"
   resolved "https://registry.yarnpkg.com/@types/react-native-vector-icons/-/react-native-vector-icons-6.4.6.tgz#848e3b14572def56212cafbf5cb1254b445bfb41"
@@ -8817,7 +8825,7 @@ prompts@2.3.2, prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -9072,6 +9080,13 @@ react-native-sensitive-info@^5.5.8:
   version "5.5.8"
   resolved "https://registry.yarnpkg.com/react-native-sensitive-info/-/react-native-sensitive-info-5.5.8.tgz#6ebb67eed83d1c2867bd435630ef2c41eef204ed"
   integrity sha512-p99oaEW4QG1RdUNrkvd/c6Qdm856dQw/Rk81f9fA6Y3DlPs6ADNdU+jbPuTz3CcOUJwuKBDNenX6LR9KfmGFEg==
+
+react-native-signature-capture@^0.4.11:
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/react-native-signature-capture/-/react-native-signature-capture-0.4.11.tgz#131e50bab96701611e314f70892bd80f21ec9202"
+  integrity sha512-vDyTso6zAbSaGXxgethR3vE6d14ehpt6C4Q3GWkcobMI27jYESbrL7QuGjiyFSGIeDnkLNNB9fAky9Jcw+MzsA==
+  dependencies:
+    prop-types "^15.5.10"
 
 react-native-super-grid@^4.1.1:
   version "4.1.1"
