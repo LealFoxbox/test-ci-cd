@@ -14,9 +14,10 @@ const Container = styled.View`
 
 interface SignatureCardProps extends BaseCardProps {
   onOpen: () => void;
+  ratingName: string;
 }
 
-const SignatureCard: React.FC<SignatureCardProps> = ({
+const ListCard: React.FC<SignatureCardProps> = ({
   id,
   name,
   description,
@@ -24,9 +25,11 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   photos,
   onOpen,
   onTapPhoto,
+  onTakePhoto,
   onDelete,
   onAddComment,
   showComment,
+  ratingName,
 }) => {
   return (
     <Container>
@@ -35,13 +38,14 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
           name={name}
           description={description}
           onAddComment={onAddComment}
+          onTakePhoto={onTakePhoto}
           onDelete={onDelete}
           showCommentOption={!showComment}
-          allowPhotos={false}
+          allowPhotos
         />
         <Card.Content>
           <Button onPress={onOpen} mode="contained" dark>
-            Tap to sign
+            {ratingName}
           </Button>
         </Card.Content>
         <CardFooter
@@ -56,4 +60,4 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
     </Container>
   );
 };
-export default SignatureCard;
+export default ListCard;

@@ -12,22 +12,20 @@ import NumberCard from '../FormCards/NumberCard';
 import { CommentInputProps } from '../FormCards/CardFooter';
 import RangeCard from '../FormCards/RangeCard';
 import SignatureCard from '../FormCards/SignatureCard';
+import ListCard from '../FormCards/ListCard';
+
+interface CreateRenderCardParams {
+  setExpandedPhoto: React.Dispatch<React.SetStateAction<{ photos: string[]; index: number }>>;
+  assignmentId: number;
+  ratings: Record<string, Rating>;
+  theme: ReactNativePaper.Theme;
+  goToSignature: (formFieldId: number) => void;
+  goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
+}
 
 export const createRenderCard = (
   { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
-  {
-    setExpandedPhoto,
-    assignmentId,
-    ratings,
-    theme,
-    goToSignature,
-  }: {
-    setExpandedPhoto: React.Dispatch<React.SetStateAction<{ photos: string[]; index: number }>>;
-    assignmentId: number;
-    ratings: Record<string, Rating>;
-    theme: ReactNativePaper.Theme;
-    goToSignature: (formFieldId: number) => void;
-  },
+  { setExpandedPhoto, assignmentId, ratings, theme, goToSignature, goToRatingChoices }: CreateRenderCardParams,
 ): ListRenderItem<DraftField> => {
   return ({ item: draftField }) => {
     const fieldValue = values[draftField.formFieldId];
@@ -94,7 +92,6 @@ export const createRenderCard = (
           });
         },
         onBlur: handleBlur,
-        label: fieldValue.name,
         theme,
       };
 
@@ -102,7 +99,26 @@ export const createRenderCard = (
     }
 
     if (fieldValue.ratingTypeId === 5) {
-      return <SignatureCard {...baseCardProps} onOpen={() => goToSignature(fieldValue.formFieldId)} />;
+      return (
+        <SignatureCard
+          {...baseCardProps}
+          onOpen={() => {
+            goToSignature(fieldValue.formFieldId);
+          }}
+        />
+      );
+    }
+
+    if (fieldValue.ratingTypeId === 8 || fieldValue.ratingTypeId === 9) {
+      return (
+        <ListCard
+          {...baseCardProps}
+          ratingName={rating.name}
+          onOpen={() =>
+            goToRatingChoices({ title: rating.name, ratingId: rating.id, formFieldId: fieldValue.formFieldId })
+          }
+        />
+      );
     }
 
     if (fieldValue.ratingTypeId === 7 || fieldValue.ratingTypeId === 1) {

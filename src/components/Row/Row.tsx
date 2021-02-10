@@ -21,7 +21,7 @@ const ClickableContainer = styled.TouchableOpacity<{ disabled?: boolean }>`
 interface RowProps {
   label: string;
   accessibilityLabel?: string;
-  value: React.ReactNode;
+  value?: React.ReactNode;
   icon?: string;
   onPress?: () => void;
   spinner?: boolean;
@@ -57,4 +57,9 @@ const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, disab
 
   return <Container>{content}</Container>;
 };
+
+Row.defaultProps = {
+  value: null,
+};
+
 export default Row;

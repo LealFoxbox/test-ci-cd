@@ -142,19 +142,24 @@ const MoreButton: React.FC<MoreButtonProps> = ({
     >
       {allowPhotos && (
         <>
-          <Menu.Item onPress={handlePhoto} title="Take Photo" />
+          <Menu.Item icon="camera-outline" onPress={handlePhoto} title="Take Photo" />
           <Divider />
-          <Menu.Item onPress={handleAttach} title="Choose Photo" />
+          <Menu.Item icon="image-multiple-outline" onPress={handleAttach} title="Choose Photo" />
           <Divider />
         </>
       )}
       {showCommentOption && (
         <>
-          <Menu.Item onPress={handleAddComment} title="Add Comment" />
+          <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />
           <Divider />
         </>
       )}
-      <Menu.Item onPress={handleDelete} title="Not Applicable" />
+      <Menu.Item
+        icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
+        onPress={handleDelete}
+        title="Not Applicable"
+        titleStyle={{ color: theme.colors.deficient }}
+      />
     </Menu>
   );
 };

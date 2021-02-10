@@ -5,6 +5,7 @@ import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
 import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import Header from 'src/components/Header';
+import { RangeChoice } from 'src/types';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
@@ -24,6 +25,11 @@ export type InspectionsNavigatorParamList = {
     formId: null | number;
     structureId: null | number;
     assignmentId: null | number;
+    newPhoto?: { path: string; formFieldId: number };
+    rangeChoicesSelection?: {
+      listChoiceIds: RangeChoice[];
+      formFieldId: number;
+    };
   };
 };
 

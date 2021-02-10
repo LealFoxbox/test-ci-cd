@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Card, Menu } from 'react-native-paper';
+import { Button, Card, Menu, useTheme } from 'react-native-paper';
 import { sortBy } from 'lodash/fp';
 
 import { styled } from 'src/paperTheme';
@@ -43,6 +43,8 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
 
   const closeMenu = () => setVisible(false);
 
+  const theme = useTheme();
+
   return (
     <Container>
       <Card>
@@ -60,7 +62,12 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             visible={visible}
             onDismiss={closeMenu}
             anchor={
-              <Button onPress={openMenu} mode="contained" dark>
+              <Button
+                onPress={openMenu}
+                mode="contained"
+                dark
+                color={selectedRangeChoice?.deficient ? theme.colors.deficient : theme.colors.primary}
+              >
                 {selectedRangeChoice?.label}
               </Button>
             }
@@ -73,6 +80,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
                   onChoicePress(choice);
                 }}
                 title={choice.label}
+                titleStyle={{ color: choice.deficient ? theme.colors.deficient : theme.colors.text }}
               />
             ))}
           </Menu>

@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
+import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
 import InspectionsNavigator from './InspectionsNavigator';
@@ -15,6 +16,7 @@ import AccountNavigator from './AccountNavigator';
 import {
   ACCOUNT_NAVIGATOR,
   INSPECTIONS_NAVIGATOR,
+  RATING_CHOICES_MODAL,
   SCHEDULE_NAVIGATOR,
   SIGNATURE_MODAL,
   TAB_STACK_NAVIGATOR,
@@ -31,6 +33,7 @@ export type MainTabsNavigatorParamList = {
 export type MainNavigatorParamList = {
   [TAB_STACK_NAVIGATOR]: undefined;
   [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number };
+  [RATING_CHOICES_MODAL]: { title: string; assignmentId: number; ratingId: number; formFieldId: number };
 };
 
 const TabStack = createMaterialBottomTabNavigator<MainTabsNavigatorParamList>();
@@ -102,6 +105,7 @@ const MainStackNavigator: React.FC = () => (
   <MainStack.Navigator mode="modal" screenOptions={{ header: Header }}>
     <MainStack.Screen name={TAB_STACK_NAVIGATOR} component={TabStackNavigator} options={{ headerShown: false }} />
     <MainStack.Screen name={SIGNATURE_MODAL} component={SignatureScreen} initialParams={{ title: 'Signature' }} />
+    <MainStack.Screen name={RATING_CHOICES_MODAL} component={RatingChoicesScreen} />
   </MainStack.Navigator>
 );
 

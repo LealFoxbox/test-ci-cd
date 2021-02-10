@@ -13,6 +13,7 @@ export const TICKETS_HOME = 'TICKETS_HOME';
 export const ACCOUNT_HOME = 'ACCOUNT_HOME';
 
 export const SIGNATURE_MODAL = 'SIGNATURE_MODAL';
+export const RATING_CHOICES_MODAL = 'RATING_CHOICES_MODAL';
 
 // This type is a fix for adding nested navigators https://github.com/react-navigation/react-navigation/issues/6931#issuecomment-643392469
 export type NestedNavigatorParams<ParamList> = {

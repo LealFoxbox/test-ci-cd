@@ -51,6 +51,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
             style={{ marginBottom: 10, flex: 1, marginHorizontal: 5 }}
             keyboardType="numeric"
             autoCapitalize="none"
+            placeholder="Enter a number"
             dense
             {...numberInputProps}
           />
