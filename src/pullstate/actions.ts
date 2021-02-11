@@ -1,17 +1,16 @@
-import { sortBy, uniqueId } from 'lodash/fp';
+import { compose, fromPairs, mapValues, set, uniqueId } from 'lodash/fp';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
 import {
   Assignment,
-  BaseField,
   DraftField,
   DraftForm,
   Form,
   NumberField,
-  PercentageField,
   PointsField,
   Rating,
+  ScoreField,
   SelectField,
   SignatureField,
   TextField,
@@ -19,7 +18,7 @@ import {
 } from 'src/types';
 
 import { DownloadStore } from './downloadStore';
-import { initialState } from './persistentStore/initialState';
+import { PersistentState, initialState } from './persistentStore/initialState';
 import { PersistentUserStore } from './persistentStore';
 
 export const loginAction = (user: User) => {
@@ -84,8 +83,9 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
   const fields = form.inspection_form_items.map((field) => {
     const rating = ratings[field.rating_id];
 
-    const baseField: BaseField = {
+    const baseField = {
       name: field.display_name,
+      deleted: false,
 
       rating_id: rating.id,
       formFieldId: field.id,
@@ -93,7 +93,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
       position: field.position,
       description: field.description,
       category_id: field.category_id,
-      comment: '',
+      comment: null,
       photos: [],
 
       ratingTypeId: rating.rating_type_id,
@@ -109,10 +109,10 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
           range_choice_min_position: null,
           score: null,
           deficient: null,
-        } as PercentageField;
+        } as ScoreField;
 
       case 3:
-        return baseField as TextField;
+        return { ...baseField, comment: '' } as TextField;
 
       case 5:
         return baseField as SignatureField;
@@ -139,7 +139,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
         } as SelectField;
 
       default:
-        return baseField as TextField;
+        return { ...baseField, comment: '' } as TextField;
     }
   });
 
@@ -155,7 +155,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     private: form.private_inspection || false,
     latitude: null,
     longitude: null,
-    fields: sortBy('position', fields),
+    fields: fromPairs(fields.map((field) => [field.formFieldId, field])),
     isDirty: false,
 
     notes: form.notes,
@@ -169,14 +169,24 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
 export const initFormDraftAction = (form: Form, assignment: Assignment, ratings: Record<string, Rating>) => {
   PersistentUserStore.update((s) => {
     if (!s.drafts[assignment.id]) {
-      s.drafts[assignment.id] = createEmptyDraftForm(form, assignment, ratings);
+      return set(`drafts.${assignment.id}`, createEmptyDraftForm(form, assignment, ratings), s);
     }
+
+    return s;
   });
 };
 
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
   PersistentUserStore.update((s) => {
-    s.drafts[assignmentId].fields = Object.values(formValues);
-    s.drafts[assignmentId].isDirty = true;
+    const isDirtySetter = set(`drafts.${assignmentId}.isDirty`, true);
+
+    const fieldsSetter = set(
+      `drafts.${assignmentId}.fields`,
+      mapValues((field) => set('comment', field.comment || null, field), formValues),
+    );
+
+    // we are intentionally changing the state object reference so that the FlatList notices changes and rerenders
+    // seems like immerJs does not play well with the virtualization
+    return compose([isDirtySetter, fieldsSetter])(s) as PersistentState;
   });
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Divider, Menu, useTheme } from 'react-native-paper';
+import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
@@ -9,10 +9,13 @@ import RNFS from 'react-native-fs';
 
 type onTakePhotoType = (uri: string, isFromGallery: boolean) => void;
 
-interface MoreButtonProps {
+export interface MoreButtonProps {
   onAddComment?: () => void;
-  onTakePhoto: onTakePhotoType;
+  onTakePhoto?: onTakePhotoType;
   onDelete: () => void;
+  showCommentOption: boolean;
+  allowPhotos: boolean;
+  allowDelete: boolean;
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
@@ -50,13 +53,13 @@ async function askStoragePermission() {
   }
 }
 
-function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
+function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: () => void, isAttachment: boolean) {
   return async () => {
     const callback = async (response: ImagePickerResponse) => {
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
-          const newUri = await fileUrlCopy(response.uri, response.fileName || `${Date.now()}.jpg`);
-          onTakePhoto(newUri, isAttachment);
+          const newUri = await fileUrlCopy(response.uri, `photo - ${Date.now()}.jpg`);
+          onTakePhoto && onTakePhoto(newUri, isAttachment);
         } else {
           console.warn('No uri??');
         }
@@ -95,10 +98,19 @@ function createAddHandler(onTakePhoto: onTakePhotoType, isAttachment: boolean) {
         );
       }
     }
+
+    closeMenu();
   };
 }
 
-const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDelete }) => {
+const MoreButton: React.FC<MoreButtonProps> = ({
+  onAddComment,
+  onTakePhoto,
+  onDelete,
+  showCommentOption,
+  allowPhotos,
+  allowDelete,
+}) => {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
 
@@ -106,9 +118,23 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
 
   const closeMenu = () => setVisible(false);
 
-  const handlePhoto = createAddHandler(onTakePhoto, false);
+  const handlePhoto = createAddHandler(onTakePhoto, closeMenu, false);
 
-  const handleAttach = createAddHandler(onTakePhoto, true);
+  const handleAttach = createAddHandler(onTakePhoto, closeMenu, true);
+
+  const handleDelete = () => {
+    closeMenu();
+    onDelete();
+  };
+
+  const handleAddComment = () => {
+    closeMenu();
+    onAddComment && onAddComment();
+  };
+
+  if (!allowPhotos && !showCommentOption && !allowDelete) {
+    return null;
+  }
 
   return (
     <Menu
@@ -120,11 +146,21 @@ const MoreButton: React.FC<MoreButtonProps> = ({ onAddComment, onTakePhoto, onDe
         </TouchableOpacity>
       }
     >
-      {!!onAddComment && <Menu.Item onPress={onAddComment} title="Add Comment" />}
-      <Menu.Item onPress={handlePhoto} title="Take Photo" />
-      <Menu.Item onPress={handleAttach} title="Attach Gallery Photo" />
-      <Divider />
-      <Menu.Item onPress={onDelete} title="Mark as N/A" />
+      {allowPhotos && (
+        <>
+          <Menu.Item icon="camera-outline" onPress={handlePhoto} title="Take Photo" />
+          <Menu.Item icon="image-multiple-outline" onPress={handleAttach} title="Choose Photo" />
+        </>
+      )}
+      {showCommentOption && <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />}
+      {allowDelete && (
+        <Menu.Item
+          icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
+          onPress={handleDelete}
+          title="Not Applicable"
+          titleStyle={{ color: theme.colors.deficient }}
+        />
+      )}
     </Menu>
   );
 };

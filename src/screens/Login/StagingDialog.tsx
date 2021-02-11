@@ -22,24 +22,22 @@ const StagingDialog: React.FC<StagingDialog> = ({ onConfirm, visible, hideDialog
   };
 
   return (
-    <>
-      <Portal>
-        <Dialog visible={visible} onDismiss={hideDialog}>
-          <Dialog.Title>Alert</Dialog.Title>
-          <Dialog.Content>
-            <Paragraph>Are you sure you want to change environments?</Paragraph>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <NoButton color={theme.colors.placeholder} onPress={hideDialog}>
-              Cancel
-            </NoButton>
-            <Button color={theme.colors.accent} onPress={handleConfirm}>
-              Yes
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </>
+    <Portal>
+      <Dialog visible={visible} onDismiss={hideDialog}>
+        <Dialog.Title>Alert</Dialog.Title>
+        <Dialog.Content>
+          <Paragraph>Are you sure you want to change environments?</Paragraph>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <NoButton color={theme.colors.placeholder} onPress={hideDialog}>
+            Cancel
+          </NoButton>
+          <Button color={theme.colors.accent} onPress={handleConfirm}>
+            Yes
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
   );
 };
 export default StagingDialog;

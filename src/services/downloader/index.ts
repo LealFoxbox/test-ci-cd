@@ -9,7 +9,6 @@ import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
 import { hasConnection, useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { getUnixSeconds, isSecondsExpired } from 'src/utils/expiration';
-import { isSelectRating } from 'src/utils/ratingHelper';
 import { Form, SelectRating } from 'src/types';
 
 import { fetchForm } from '../api/forms';
@@ -23,6 +22,7 @@ import { deleteAllJSONFiles, deleteInvalidFiles } from './fileUtils';
 import {
   cleanExpiredIncompleteRatings,
   getNextRatingChoicesDownload,
+  isSelectRating,
   selectIsRatingsBaseDownloaded,
   selectIsRatingsComplete,
 } from './ratingsUtils';

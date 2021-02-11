@@ -94,21 +94,6 @@ export const assignments = {
 
     return [data, isLoading];
   },
-  /* useGetDistinctFormIds(): [number[], boolean, TriggerFn] {
-    const [data, setData] = useState<number[]>([]);
-    const [isLoading, setIsloading] = useState(true);
-    const [trigger, triggerFn] = useTrigger();
-
-    useEffect(() => {
-      (async () => {
-        await assignmentsDb.loadPromise;
-        setData(await assignmentsDb.getDistinctFormIds());
-        setIsloading(false);
-      })();
-    }, [trigger]);
-
-    return [data, isLoading, triggerFn];
-  }, */
 };
 
 export function useIsMongoLoaded() {

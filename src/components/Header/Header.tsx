@@ -6,12 +6,16 @@ type Params = undefined | { title: string };
 
 const Header: React.FC<StackHeaderProps> = ({ navigation, previous, scene }) => {
   const params = scene.route.params as Params;
+  const left = scene.descriptor.options.headerLeft || null;
+  const right = scene.descriptor.options.headerRight || null;
 
   return (
     <Appbar.Header dark>
-      {!!previous && <Appbar.BackAction onPress={() => navigation.goBack()} />}
+      {typeof left === 'function'
+        ? left({})
+        : left || (!!previous && <Appbar.BackAction onPress={() => navigation.goBack()} />)}
       <Appbar.Content title={params?.title} />
-      {scene.descriptor.options.headerRight || null}
+      {typeof right === 'function' ? right({}) : right}
     </Appbar.Header>
   );
 };

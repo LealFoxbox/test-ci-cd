@@ -3,12 +3,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
-import InspectionFormScreen from 'src/screens/Inspections/Form/FormScreen';
+import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import Header from 'src/components/Header';
+import { RangeChoice } from 'src/types';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
-
-// type RenderRight = () => React.ReactNode;
 
 export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
@@ -24,13 +23,17 @@ export type InspectionsNavigatorParamList = {
     formId: null | number;
     structureId: null | number;
     assignmentId: null | number;
+    newPhoto?: { path: string; formFieldId: number };
+    rangeChoicesSelection?: {
+      listChoiceIds: RangeChoice[];
+      formFieldId: number;
+    };
   };
 };
 
 const Stack = createStackNavigator<InspectionsNavigatorParamList>();
 
 const InspectionsNavigator: React.FC = () => {
-  // use pullstate header store to store the renderRight callback instead of using nav params
   return (
     <Stack.Navigator screenOptions={{ header: Header }}>
       <Stack.Screen

@@ -3,12 +3,11 @@ import { BackHandler } from 'react-native';
 import { WebView, WebViewNavigation, WebViewProps } from 'react-native-webview';
 import { IconButton, Title, useTheme } from 'react-native-paper';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-// @ts-ignore
 import RCTNetworking from 'react-native/Libraries/Network/RCTNetworking';
 
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import usePrevious from 'src/utils/usePrevious';
-import { logoutAction } from 'src/pullstate/persistentStore';
+import { logoutAction } from 'src/pullstate/actions';
 
 import LoadingOverlay from '../LoadingOverlay';
 import ConnectionBanner from '../ConnectionBanner';

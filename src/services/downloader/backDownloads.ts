@@ -1,13 +1,11 @@
-/* eslint-disable no-console */
-/* eslint-disable import/no-named-as-default-member */
-import RNBackgroundDownloader from 'react-native-background-downloader';
+import { checkForExistingDownloads, directories, download } from 'react-native-background-downloader';
 import { format } from 'date-fns';
 
 import timeoutPromise from 'src/utils/timeoutPromise';
 
 import { getApiUrl } from '../api/utils';
 
-const dir = RNBackgroundDownloader.directories.documents;
+const dir = directories.documents;
 
 // note: timestamp t is unix time but in full seconds
 function getNow() {
@@ -20,7 +18,7 @@ export function downloadStructuresPage(params: { subdomain: string; token: strin
   const type = 'structures';
   const id = `${type}${params.page} - ${getNow()}`;
 
-  return RNBackgroundDownloader.download({
+  return download({
     id,
     url: `${getApiUrl(params.subdomain)}/downloads/structures?user_credentials=${params.token}&page=${params.page}`,
     destination: `${dir}/${id}.json`,
@@ -35,7 +33,7 @@ export function downloadAssignmentsPage(params: { subdomain: string; token: stri
   const type = 'assignments';
   const id = `${type}${params.page} - ${getNow()}`;
 
-  return RNBackgroundDownloader.download({
+  return download({
     id,
     url: `${getApiUrl(params.subdomain)}/downloads/inspection_form_assignments?user_credentials=${params.token}&page=${
       params.page
@@ -52,7 +50,7 @@ export function downloadRatings(params: { subdomain: string; token: string }) {
   const type = 'ratings';
   const id = `${type} - ${getNow()}`;
 
-  return RNBackgroundDownloader.download({
+  return download({
     id,
     url: `${getApiUrl(params.subdomain)}/downloads/ratings?user_credentials=${params.token}`,
     destination: `${dir}/${id}.json`,
@@ -95,7 +93,7 @@ export function downloadByTypeAsPromise(params: {
 }
 
 export async function waitForExistingDownloads() {
-  const backgroundTasks = await RNBackgroundDownloader.checkForExistingDownloads();
+  const backgroundTasks = await checkForExistingDownloads();
   await Promise.all(
     backgroundTasks.map((t) => {
       return new Promise<void>((resolve, reject) => {
