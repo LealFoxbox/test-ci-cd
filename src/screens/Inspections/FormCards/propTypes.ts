@@ -11,6 +11,7 @@ export interface TextCardProps {
   onTapPhoto: (index: number) => void;
   onTakePhoto: (uri: string, isFromGallery: boolean) => void;
   onDelete: () => void;
+  allowDelete: boolean;
 }
 
 export interface BaseCardProps extends TextCardProps {

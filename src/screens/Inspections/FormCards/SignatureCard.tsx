@@ -27,6 +27,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   onDelete,
   onAddComment,
   showComment,
+  allowDelete,
 }) => {
   return (
     <Container>
@@ -38,6 +39,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
           onDelete={onDelete}
           showCommentOption={!showComment}
           allowPhotos={false}
+          allowDelete={allowDelete}
         />
         <Card.Content>
           <Button onPress={onOpen} mode="contained" dark>

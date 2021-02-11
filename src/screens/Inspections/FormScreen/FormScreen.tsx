@@ -15,7 +15,7 @@ import { DraftField, DraftPhoto, SelectField } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
 
-import { createRenderCard } from './createRenderCard';
+import { createRenderCard } from '../FormCards/createRenderCard';
 
 const EditFormScreen: React.FC<{}> = () => {
   const {
@@ -120,6 +120,11 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
   };
 
+  const fields = sortBy(
+    'position',
+    Object.values(draft.fields).filter((f) => !f.deleted),
+  );
+
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
@@ -153,7 +158,7 @@ const EditFormScreen: React.FC<{}> = () => {
                 Submit
               </Button>
             )}
-            data={sortBy('position', Object.values(draft.fields))}
+            data={fields}
             keyExtractor={(item) => `${item.formFieldId}`}
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,

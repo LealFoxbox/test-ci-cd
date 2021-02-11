@@ -32,6 +32,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
   onAddComment,
   onDelete,
   showComment,
+  allowDelete,
 }) => {
   return (
     <Container>
@@ -44,12 +45,13 @@ const NumberCard: React.FC<NumberCardProps> = ({
           onDelete={onDelete}
           showCommentOption={!showComment}
           allowPhotos
+          allowDelete={allowDelete}
         />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
           {!!rating.prefix && <Text>{rating.prefix}</Text>}
           <TextInput
             style={{ marginBottom: 10, flex: 1, marginHorizontal: 5 }}
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
             autoCapitalize="none"
             placeholder="Enter a number"
             dense

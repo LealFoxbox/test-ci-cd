@@ -102,7 +102,7 @@ export interface SelectRatingChoice {
 
 /////// RATING TYPES ///////////
 
-interface BaseRating {
+export interface BaseRating {
   id: number;
   name: string;
   prefix: null;
@@ -170,6 +170,7 @@ export interface DraftPhoto {
 
 interface BaseField {
   name: string;
+  deleted: boolean;
 
   rating_id: number;
   formFieldId: number;

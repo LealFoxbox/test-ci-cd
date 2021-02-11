@@ -14,20 +14,18 @@ const Container = styled.View`
   padding-top: 10px;
 `;
 
-interface ScoreCardProps extends BaseCardProps {
+interface RangeCardProps extends BaseCardProps {
   selectedRangeChoice: RangeChoice | null;
-  deficient: boolean | null;
   rangeChoices: RangeChoice[];
   onChoicePress: (choice: RangeChoice) => void;
 }
 
-const ScoreCard: React.FC<ScoreCardProps> = ({
+const RangeCard: React.FC<RangeCardProps> = ({
   id,
   name,
   description,
   photos,
   selectedRangeChoice,
-  // deficient,
   rangeChoices,
   commentInputProps,
   onChoicePress,
@@ -36,6 +34,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
   onAddComment,
   onDelete,
   showComment,
+  allowDelete,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -56,6 +55,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
           onDelete={onDelete}
           showCommentOption={!showComment}
           allowPhotos
+          allowDelete={allowDelete}
         />
         <Card.Content>
           <Menu
@@ -96,4 +96,4 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
     </Container>
   );
 };
-export default ScoreCard;
+export default RangeCard;

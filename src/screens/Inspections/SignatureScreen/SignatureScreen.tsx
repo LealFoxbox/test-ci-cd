@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, ScaledSize } from 'react-native';
 import { Button } from 'react-native-paper';
 import SignatureCapture from 'react-native-signature-capture';
 import RNFS from 'react-native-fs';
@@ -30,10 +31,25 @@ const ButtonsContainer = styled.View`
 const SignatureScreen: React.FC = () => {
   const signatureRef = useRef<SignatureCapture>(null);
   const [userHasSigned, setUserHasSigned] = useState(false);
+  const dim = Dimensions.get('window');
+
+  const [isPortrait, setIsPortrait] = useState(dim.height > dim.width);
   const {
     params: { formFieldId },
   } = useRoute<RouteProp<MainNavigatorParamList, typeof SIGNATURE_MODAL>>();
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const onChangeDimension = ({ window }: { window: ScaledSize }) => {
+      setIsPortrait(window.height > window.width);
+    };
+
+    Dimensions.addEventListener('change', onChangeDimension);
+
+    return () => {
+      Dimensions.removeEventListener('change', onChangeDimension);
+    };
+  }, []);
 
   return (
     <Container>
@@ -59,7 +75,7 @@ const SignatureScreen: React.FC = () => {
         showNativeButtons={false}
         showTitleLabel={false}
         showBorder={false}
-        viewMode="portrait"
+        viewMode={isPortrait ? 'portrait' : 'landscape'}
       />
       <ButtonsContainer>
         <Button

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Divider, Menu, useTheme } from 'react-native-paper';
+import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
@@ -15,6 +15,7 @@ export interface MoreButtonProps {
   onDelete: () => void;
   showCommentOption: boolean;
   allowPhotos: boolean;
+  allowDelete: boolean;
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
@@ -108,6 +109,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   onDelete,
   showCommentOption,
   allowPhotos,
+  allowDelete,
 }) => {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
@@ -130,6 +132,10 @@ const MoreButton: React.FC<MoreButtonProps> = ({
     onAddComment && onAddComment();
   };
 
+  if (!allowPhotos && !showCommentOption && !allowDelete) {
+    return null;
+  }
+
   return (
     <Menu
       visible={visible}
@@ -143,23 +149,18 @@ const MoreButton: React.FC<MoreButtonProps> = ({
       {allowPhotos && (
         <>
           <Menu.Item icon="camera-outline" onPress={handlePhoto} title="Take Photo" />
-          <Divider />
           <Menu.Item icon="image-multiple-outline" onPress={handleAttach} title="Choose Photo" />
-          <Divider />
         </>
       )}
-      {showCommentOption && (
-        <>
-          <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />
-          <Divider />
-        </>
+      {showCommentOption && <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />}
+      {allowDelete && (
+        <Menu.Item
+          icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
+          onPress={handleDelete}
+          title="Not Applicable"
+          titleStyle={{ color: theme.colors.deficient }}
+        />
       )}
-      <Menu.Item
-        icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
-        onPress={handleDelete}
-        title="Not Applicable"
-        titleStyle={{ color: theme.colors.deficient }}
-      />
     </Menu>
   );
 };

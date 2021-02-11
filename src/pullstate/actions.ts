@@ -85,6 +85,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
 
     const baseField = {
       name: field.display_name,
+      deleted: false,
 
       rating_id: rating.id,
       formFieldId: field.id,

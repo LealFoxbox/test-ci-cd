@@ -30,6 +30,7 @@ const ListCard: React.FC<SignatureCardProps> = ({
   onAddComment,
   showComment,
   ratingName,
+  allowDelete,
 }) => {
   return (
     <Container>
@@ -42,6 +43,7 @@ const ListCard: React.FC<SignatureCardProps> = ({
           onDelete={onDelete}
           showCommentOption={!showComment}
           allowPhotos
+          allowDelete={allowDelete}
         />
         <Card.Content>
           <Button onPress={onOpen} mode="contained" dark>

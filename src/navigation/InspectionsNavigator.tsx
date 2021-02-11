@@ -9,8 +9,6 @@ import { RangeChoice } from 'src/types';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
-// type RenderRight = () => React.ReactNode;
-
 export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
     parentId: null | number;
@@ -36,7 +34,6 @@ export type InspectionsNavigatorParamList = {
 const Stack = createStackNavigator<InspectionsNavigatorParamList>();
 
 const InspectionsNavigator: React.FC = () => {
-  // use pullstate header store to store the renderRight callback instead of using nav params
   return (
     <Stack.Navigator screenOptions={{ header: Header }}>
       <Stack.Screen

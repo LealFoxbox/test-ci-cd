@@ -5,14 +5,14 @@ import { FormikProps } from 'formik';
 import { find, set } from 'lodash/fp';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
-import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating } from 'src/types';
+import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 
-import TextCard from '../FormCards/TextCard';
-import NumberCard from '../FormCards/NumberCard';
-import { CommentInputProps } from '../FormCards/CardFooter';
-import RangeCard from '../FormCards/RangeCard';
-import SignatureCard from '../FormCards/SignatureCard';
-import ListCard from '../FormCards/ListCard';
+import TextCard from './TextCard';
+import NumberCard from './NumberCard';
+import { CommentInputProps } from './CardFooter';
+import RangeCard from './RangeCard';
+import SignatureCard from './SignatureCard';
+import ListCard from './ListCard';
 
 interface CreateRenderCardParams {
   setExpandedPhoto: React.Dispatch<React.SetStateAction<{ photos: string[]; index: number }>>;
@@ -21,6 +21,22 @@ interface CreateRenderCardParams {
   theme: ReactNativePaper.Theme;
   goToSignature: (formFieldId: number) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
+}
+
+function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
+  const { length } = listChoiceIds;
+
+  if (length > 1) {
+    return `${length} Selected`;
+  }
+
+  if (length === 0) {
+    return rating.name;
+  }
+
+  const choice = find({ id: listChoiceIds[0] }, rating.range_choices);
+
+  return choice?.name || 'Error in selection';
 }
 
 export const createRenderCard = (
@@ -51,8 +67,14 @@ export const createRenderCard = (
       setFieldValue(`${fieldValue.formFieldId}`, set('comment', '', fieldValue));
     };
     const handleDelete = () => {
-      // TODO:
+      const newValues = set(`${draftField.formFieldId}.deleted`, true, values);
+
+      // prevented the user from deleting every single field
+      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      updateDraftFieldsAction(assignmentId, newValues);
     };
+
+    const allowDelete = Object.values(values).filter((v) => !v.deleted).length > 1;
 
     const commentInputProps: CommentInputProps = {
       value: fieldValue.comment,
@@ -74,6 +96,7 @@ export const createRenderCard = (
       onTapPhoto: handleTapPhoto,
       onTakePhoto: handleTakePhoto,
       onDelete: handleDelete,
+      allowDelete,
     };
 
     const baseCardProps = {
@@ -113,7 +136,7 @@ export const createRenderCard = (
       return (
         <ListCard
           {...baseCardProps}
-          ratingName={rating.name}
+          ratingName={getListCardButtonName(fieldValue.list_choice_ids, rating as SelectRating)}
           onOpen={() =>
             goToRatingChoices({ title: rating.name, ratingId: rating.id, formFieldId: fieldValue.formFieldId })
           }
@@ -140,7 +163,6 @@ export const createRenderCard = (
         <RangeCard
           {...baseCardProps}
           selectedRangeChoice={selectedRangeChoice || null}
-          deficient={fieldValue.deficient}
           rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
             const newValues =
