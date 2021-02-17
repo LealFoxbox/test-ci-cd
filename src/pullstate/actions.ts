@@ -151,7 +151,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     isDirty: false,
 
     notes: form.notes,
-    categories: form.categories,
+    categories: fromPairs(form.categories.map((c) => [c.id, c.name])),
     privateInspection: form.private_inspection,
   };
 

@@ -3,7 +3,7 @@ import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Card, Chip, useTheme } from 'react-native-paper';
 import { Formik, FormikProps } from 'formik';
-import { set, sortBy } from 'lodash/fp';
+import { groupBy, isString, set, sortBy, toPairs } from 'lodash/fp';
 import RNFS from 'react-native-fs';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
@@ -120,10 +120,17 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
   };
 
-  const fields = sortBy(
-    'position',
-    Object.values(draft.fields).filter((f) => !f.deleted),
-  );
+  const fields = toPairs(
+    groupBy(
+      'category_id',
+      Object.values(draft.fields).filter((f) => !f.deleted),
+    ),
+  )
+    .flatMap(([catId, values]) => [
+      catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
+      sortBy('position', values),
+    ])
+    .flat();
 
   const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
 
@@ -149,7 +156,7 @@ const EditFormScreen: React.FC<{}> = () => {
                 <Notes value={draft.notes} isCard />
                 {deletedFields.length > 0 && (
                   <Card style={{ margin: 10 }}>
-                    <Card.Title title="Not Applicable fields"></Card.Title>
+                    <Card.Title title="Not Applicable fields" />
                     <Card.Content style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                       {deletedFields.map((f) => (
                         <Chip key={f.name} style={{ marginRight: 5, marginBottom: 5 }}>
@@ -172,7 +179,7 @@ const EditFormScreen: React.FC<{}> = () => {
               </Button>
             )}
             data={fields}
-            keyExtractor={(item) => `${item.formFieldId}`}
+            keyExtractor={(item) => (isString(item) ? item : `${item.formFieldId}`)}
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,
               assignmentId,

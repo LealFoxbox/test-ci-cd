@@ -1,5 +1,10 @@
 export type Modify<T, R> = Omit<T, keyof R> & R;
 
+export interface Category {
+  id: number;
+  name: string;
+}
+
 export interface Assignment {
   id: number;
   inspection_form_id: number;
@@ -20,7 +25,7 @@ export interface FormItem {
 
 export interface Form {
   id: number;
-  categories: Array<{ id: number }>;
+  categories: Category[];
   inspection_form_items: FormItem[];
   name: string;
   notes: string | null;
@@ -227,7 +232,7 @@ export interface DraftForm {
   guid: string; // random unique token created in the frontend. It's basically `${Date.now()}${uniqueId('')}`
   isDirty: boolean;
   notes: string | null;
-  categories: Array<{ id: number }>;
+  categories: Record<string, string>; // key is categoryId, values is the name
   privateInspection: boolean;
 
   flagged: boolean; // if the user toggles the flagged button

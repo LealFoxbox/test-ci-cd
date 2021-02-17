@@ -4,6 +4,7 @@ import { TextInputProps } from 'react-native-paper/lib/typescript/src/components
 import { FormikProps } from 'formik';
 import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
+import { Title } from 'react-native-paper';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
@@ -43,8 +44,16 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
 export const createRenderCard = (
   { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
   { setExpandedPhoto, assignmentId, ratings, theme, goToSignature, goToRatingChoices }: CreateRenderCardParams,
-): ListRenderItem<DraftField> => {
+): ListRenderItem<DraftField | string> => {
   return ({ item: draftField }) => {
+    if (typeof draftField === 'string') {
+      if (!draftField) {
+        return null;
+      }
+
+      return <Title style={{ marginLeft: 10 }}>{draftField}</Title>;
+    }
+
     const fieldValue = values[draftField.formFieldId];
     const rating = ratings[fieldValue.rating_id];
 
