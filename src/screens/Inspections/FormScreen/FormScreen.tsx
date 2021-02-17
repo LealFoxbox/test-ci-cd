@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Button, Card, Chip, Text, useTheme } from 'react-native-paper';
+import { Button, Card, Chip, useTheme } from 'react-native-paper';
 import { Formik, FormikProps } from 'formik';
 import { set, sortBy } from 'lodash/fp';
 import RNFS from 'react-native-fs';
@@ -130,19 +130,14 @@ const EditFormScreen: React.FC<{}> = () => {
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
-        images={expandedPhoto.photos.map((uri, index) => ({
-          source: { uri: `file://${uri}` },
-          index,
+        images={expandedPhoto.photos.map((uri) => ({
+          uri: `file://${uri}`,
         }))}
         imageIndex={expandedPhoto.index !== -1 ? expandedPhoto.index : 0}
-        isVisible={expandedPhoto.index !== -1}
-        onClose={() => setExpandedPhoto((s) => ({ ...s, index: -1 }))}
-        renderFooter={(_currentImage: any) => (
-          <View>
-            <Text>.</Text>
-          </View>
-        )}
+        visible={expandedPhoto.index !== -1}
+        onRequestClose={() => setExpandedPhoto((s) => ({ ...s, index: -1 }))}
       />
+
       <Formik initialValues={draft.fields} onSubmit={submit} innerRef={formikBagRef}>
         {(formikProps) => (
           <FlatList
@@ -157,7 +152,9 @@ const EditFormScreen: React.FC<{}> = () => {
                     <Card.Title title="Not Applicable fields"></Card.Title>
                     <Card.Content style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                       {deletedFields.map((f) => (
-                        <Chip style={{ marginRight: 5, marginBottom: 5 }}>{f.name}</Chip>
+                        <Chip key={f.name} style={{ marginRight: 5, marginBottom: 5 }}>
+                          {f.name}
+                        </Chip>
                       ))}
                     </Card.Content>
                   </Card>

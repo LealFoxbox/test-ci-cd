@@ -1,750 +1,182 @@
-import React, { Component, ComponentType } from 'react';
-import {
-  ActivityIndicator,
-  Animated,
-  Dimensions,
-  FlatList,
-  GestureResponderEvent,
-  Modal,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  NativeTouchEvent,
-  PanResponderGestureState,
-  PanResponderInstance,
-  Platform,
-  SafeAreaView,
-  View,
-} from 'react-native';
+/* eslint-disable react-native/no-color-literals */
+/**
+ * Copyright (c) JOB TODAY S.A. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
 
-import {
-  ControlType,
-  ControlsType,
-  DimensionsType,
-  ImageSizeType,
-  ImageType,
-  TouchType,
-  TransitionType,
-  TranslateType,
-} from './types';
-import {
-  addIndexesToImages,
-  calculateInitialTranslate,
-  fetchImageSize,
-  generatePanHandlers,
-  getDistance,
-  getImagesWithoutSize,
-  getInitialParams,
-  getScale,
-  hexToRgb,
-  isHex,
-  scalesAreEqual,
-} from './utils';
-import createStyles from './createStyles';
-import Close from './controls/Close';
-import Next from './controls/Next';
-import Prev from './controls/Prev';
+import React, { ComponentType, useCallback, useEffect } from 'react';
+import { Animated, Modal, ModalProps, StyleSheet, View, VirtualizedList } from 'react-native';
 
-const IMAGE_SPEED_FOR_CLOSE = 1.1;
-const SCALE_MAXIMUM = 5;
-const HEADER_HEIGHT = 60;
-const SCALE_MAX_MULTIPLIER = 3;
-const FREEZE_SCROLL_DISTANCE = 15;
-const BACKGROUND_OPACITY_MULTIPLIER = 0.003;
-const defaultBackgroundColor = [0, 0, 0];
+import ImageItem from './components/ImageItem/ImageItem';
+import ImageDefaultHeader from './components/ImageDefaultHeader';
+import StatusBarManager from './components/StatusBarManager';
+import useAnimatedComponents from './hooks/useAnimatedComponents';
+import useImageIndexChange from './hooks/useImageIndexChange';
+import useRequestClose from './hooks/useRequestClose';
+import { Dimensions, ImageSource } from './types';
 
-const getScreenDimensions = () => ({
-  screenWidth: Dimensions.get('window').width,
-  screenHeight: Dimensions.get('window').height,
+type Props = {
+  images: ImageSource[];
+  imageIndex: number;
+  visible: boolean;
+  onRequestClose: () => void;
+  onLongPress?: (image: ImageSource) => void;
+  onImageIndexChange?: (imageIndex: number) => void;
+  presentationStyle?: ModalProps['presentationStyle'];
+  animationType?: ModalProps['animationType'];
+  backgroundColor?: string;
+  swipeToCloseEnabled?: boolean;
+  doubleTapToZoomEnabled?: boolean;
+  delayLongPress?: number;
+  HeaderComponent?: ComponentType<{ imageIndex: number }>;
+  FooterComponent?: ComponentType<{ imageIndex: number }>;
+};
+
+const DEFAULT_ANIMATION_TYPE = 'fade';
+const DEFAULT_BG_COLOR = '#000';
+const DEFAULT_DELAY_LONG_PRESS = 800;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  header: {
+    position: 'absolute',
+    width: '100%',
+    zIndex: 1,
+    top: 0,
+  },
+  footer: {
+    position: 'absolute',
+    width: '100%',
+    zIndex: 1,
+    bottom: 0,
+  },
 });
 
-let styles = createStyles(getScreenDimensions());
+function ExpandedGallery({
+  images,
+  imageIndex,
+  visible,
+  onRequestClose,
+  onLongPress = () => {
+    /* */
+  },
+  onImageIndexChange,
+  animationType = DEFAULT_ANIMATION_TYPE,
+  backgroundColor = DEFAULT_BG_COLOR,
+  presentationStyle,
+  swipeToCloseEnabled,
+  doubleTapToZoomEnabled,
+  delayLongPress = DEFAULT_DELAY_LONG_PRESS,
+  HeaderComponent,
+  FooterComponent,
+}: Props) {
+  const imageListRef = React.createRef<VirtualizedList<ImageSource>>();
+  const [opacity, onRequestCloseEnhanced] = useRequestClose(onRequestClose);
+  const [layout, setLayout] = React.useState<Dimensions>({ width: 0, height: 0 });
+  const [currentImageIndex, onScroll] = useImageIndexChange(imageIndex, layout);
+  const [headerTransform, footerTransform, toggleBarsVisible] = useAnimatedComponents();
 
-type PropsType = {
-  animationType?: 'none' | 'fade' | 'slide';
-  backgroundColor?: string;
-  glideAlways?: boolean;
-  glideAlwaysDelay?: number;
-  images: ImageType[];
-  imageIndex?: number;
-  isVisible: boolean;
-  isTapZoomEnabled?: boolean;
-  isPinchZoomEnabled?: boolean;
-  isSwipeCloseEnabled?: boolean;
-  onClose: () => void;
-  onImageChange?: (arg0: number) => {};
-  renderFooter?: (arg0: ImageType) => {};
-  controls?: {
-    close?: ComponentType<ControlType> | boolean;
-    next?: ComponentType<ControlType> | boolean;
-    prev?: ComponentType<ControlType> | boolean;
-  };
-};
-
-export type StateType = {
-  images: ImageType[];
-  isVisible: boolean;
-  imageIndex: number;
-  imageScale: number;
-  imageTranslate: { x: number; y: number };
-  scrollEnabled: boolean;
-  panelsVisible: boolean;
-  isFlatListRerendered: boolean;
-  screenDimensions: { screenWidth: number; screenHeight: number };
-};
-
-export default class ImageView extends Component<PropsType, StateType> {
-  static defaultProps = {
-    isTapZoomEnabled: true,
-    isPinchZoomEnabled: true,
-    isSwipeCloseEnabled: true,
-    glideAlways: false,
-    glideAlwaysDelay: 75,
-    controls: { prev: null, next: null },
-  };
-
-  constructor(props: PropsType) {
-    super(props);
-
-    // calculate initial scale and translate for images
-    const initialScreenDimensions = getScreenDimensions();
-    this.imageInitialParams = props.images.map((image) => getInitialParams(image, initialScreenDimensions));
-
-    this.state = {
-      images: props.images,
-      isVisible: props.isVisible,
-      imageIndex: props.imageIndex || 0,
-      imageScale: 1,
-      imageTranslate: { x: 0, y: 0 },
-      scrollEnabled: true,
-      panelsVisible: true,
-      isFlatListRerendered: false,
-      screenDimensions: initialScreenDimensions,
-    };
-    this.glideAlwaysTimer = null;
-    this.listRef = null;
-    this.isScrolling = false;
-    this.footerHeight = 0;
-    this.initialTouches = [];
-    this.currentTouchesNum = 0;
-    this.doubleTapTimer = null;
-    this.modalAnimation = new Animated.Value(0);
-    this.modalBackgroundOpacity = new Animated.Value(0);
-
-    this.headerTranslateValue = new Animated.ValueXY();
-    this.footerTranslateValue = new Animated.ValueXY();
-
-    this.imageScaleValue = new Animated.Value(this.getInitialScale());
-    const { x, y } = this.getInitialTranslate();
-    this.imageTranslateValue = new Animated.ValueXY({ x, y });
-
-    this.panResponder = generatePanHandlers(
-      (event: GestureResponderEvent) => {
-        this.onGestureStart(event.nativeEvent);
-        return;
-      },
-      (event: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-        this.onGestureMove(event.nativeEvent, gestureState);
-      },
-      (event: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-        this.onGestureRelease(event.nativeEvent, gestureState);
-      },
-    );
-
-    const imagesWithoutSize = getImagesWithoutSize(addIndexesToImages(props.images));
-
-    if (imagesWithoutSize.length) {
-      void Promise.all(fetchImageSize(imagesWithoutSize)).then(this.setSizeForImages);
+  useEffect(() => {
+    if (onImageIndexChange) {
+      onImageIndexChange(currentImageIndex);
     }
-  }
+  }, [currentImageIndex, onImageIndexChange]);
 
-  componentDidMount() {
-    styles = createStyles(this.state.screenDimensions);
-    Dimensions.addEventListener('change', this.onChangeDimension);
-  }
+  useEffect(() => {
+    imageListRef.current?.scrollToIndex({ index: currentImageIndex, animated: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
 
-  componentDidUpdate() {
-    const { images, imageIndex, isVisible } = this.state;
-
-    if (typeof this.props.isVisible !== 'undefined' && this.props.isVisible !== isVisible) {
-      this.onNextImagesReceived(this.props.images, this.props.imageIndex);
-
-      if (images !== this.props.images || imageIndex !== this.props.imageIndex) {
-        const imagesWithoutSize = getImagesWithoutSize(addIndexesToImages(this.props.images));
-
-        if (imagesWithoutSize.length) {
-          void Promise.all(fetchImageSize(imagesWithoutSize)).then((updatedImages) =>
-            this.onNextImagesReceived(this.setSizeForImages(updatedImages), this.props.imageIndex),
-          );
-        }
-      }
-
-      this.setState({
-        isVisible: this.props.isVisible,
-        isFlatListRerendered: false,
-      });
-
-      this.modalBackgroundOpacity.setValue(0);
-
-      if (this.props.isVisible) {
-        Animated.timing(this.modalAnimation, {
-          duration: 400,
-          toValue: 1,
-          useNativeDriver: false,
-        }).start();
-      }
-    }
-  }
-
-  componentWillUnmount() {
-    Dimensions.removeEventListener('change', this.onChangeDimension);
-
-    if (this.glideAlwaysTimer) {
-      clearTimeout(this.glideAlwaysTimer);
-    }
-  }
-
-  onChangeDimension = ({ window }: { window: DimensionsType }) => {
-    const screenDimensions = {
-      screenWidth: window.width,
-      screenHeight: window.height,
-    };
-
-    this.setState({ screenDimensions });
-    styles = createStyles(screenDimensions);
-
-    this.onNextImagesReceived(this.props.images, this.state.imageIndex);
-  };
-
-  onNextImagesReceived(images: Array<ImageType>, imageIndex = 0) {
-    this.imageInitialParams = images.map((image) => getInitialParams(image, this.state.screenDimensions));
-    const { scale, translate } = this.imageInitialParams[imageIndex] || {
-      scale: 1,
-      translate: {},
-    };
-
-    this.setState({
-      images,
-      imageIndex,
-      imageScale: scale,
-      imageTranslate: translate,
-      isFlatListRerendered: false,
-    });
-
-    // TODO: when changing orientation this crashes the app
-    this.imageScaleValue.setValue(scale);
-    this.imageTranslateValue.setValue(translate);
-  }
-
-  // $FlowFixMe
-  onFlatListRender = (flatListRef: FlatList<ImageType> | null) => {
-    const { images, imageIndex, isFlatListRerendered } = this.state;
-
-    if (flatListRef && !isFlatListRerendered) {
-      this.listRef = flatListRef;
-      this.setState({
-        isFlatListRerendered: true,
-      });
-
-      // Fix for android https://github.com/facebook/react-native/issues/13202
-      if (images.length > 0) {
-        const nextTick = new Promise<void>((resolve) => setTimeout(resolve, 0));
-        void nextTick.then(() => {
-          flatListRef.scrollToIndex({
-            index: imageIndex,
-            animated: false,
-          });
-        });
-      }
-    }
-  };
-
-  onNextImage = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { imageIndex } = this.state;
-    const { x } = event.nativeEvent.contentOffset || { x: 0 };
-
-    const nextImageIndex = Math.round(x / this.state.screenDimensions.screenWidth);
-
-    this.isScrolling = Math.ceil(x) % this.state.screenDimensions.screenWidth > 10;
-
-    if (imageIndex !== nextImageIndex && nextImageIndex >= 0) {
-      const nextImageScale = this.getInitialScale(nextImageIndex);
-      const nextImageTranslate = this.getInitialTranslate(nextImageIndex);
-
-      this.setState({
-        imageIndex: nextImageIndex,
-        imageScale: nextImageScale,
-        imageTranslate: nextImageTranslate,
-      });
-
-      this.imageScaleValue.setValue(nextImageScale);
-      this.imageTranslateValue.setValue(nextImageTranslate);
-
-      if (typeof this.props.onImageChange === 'function') {
-        this.props.onImageChange(nextImageIndex);
-      }
-    }
-  };
-
-  onGestureStart(event: NativeTouchEvent) {
-    this.initialTouches = event.touches;
-    this.currentTouchesNum = event.touches.length;
-  }
-
-  /**
-   * If image is moved from its original position
-   * then disable scroll (for ScrollView)
-   */
-  onGestureMove(event: NativeTouchEvent, gestureState: PanResponderGestureState) {
-    if (this.isScrolling && this.state.scrollEnabled) {
-      return;
-    }
-
-    if (this.currentTouchesNum === 1 && event.touches.length === 2) {
-      this.initialTouches = event.touches;
-    }
-
-    const { isSwipeCloseEnabled, isPinchZoomEnabled } = this.props;
-
-    const { images, imageIndex, imageScale, imageTranslate, screenDimensions } = this.state;
-    const { screenHeight } = screenDimensions;
-    const { touches } = event;
-    const { x, y } = imageTranslate;
-    const { dx, dy } = gestureState;
-    const imageInitialScale = this.getInitialScale();
-    const height = images[imageIndex]?.height || 0;
-
-    if (imageScale !== imageInitialScale) {
-      this.imageTranslateValue.x.setValue(x + dx);
-    }
-
-    // Do not allow to move image vertically until it fits to the screen
-    if (imageScale * height > screenHeight) {
-      this.imageTranslateValue.y.setValue(y + dy);
-    }
-
-    // if image not scaled and fits to the screen
-    if (
-      isSwipeCloseEnabled &&
-      scalesAreEqual(imageScale, imageInitialScale) &&
-      height * imageInitialScale < screenHeight
-    ) {
-      const backgroundOpacity = Math.abs(dy * BACKGROUND_OPACITY_MULTIPLIER);
-
-      this.imageTranslateValue.y.setValue(y + dy);
-      this.modalBackgroundOpacity.setValue(backgroundOpacity > 1 ? 1 : backgroundOpacity);
-    }
-
-    const currentDistance = getDistance(touches);
-    const initialDistance = getDistance(this.initialTouches);
-
-    const scrollEnabled = Math.abs(dy) < FREEZE_SCROLL_DISTANCE;
-    this.setState({ scrollEnabled });
-
-    if (!initialDistance) {
-      return;
-    }
-
-    if (!isPinchZoomEnabled || touches.length < 2) {
-      return;
-    }
-
-    let nextScale = getScale(currentDistance, initialDistance) * imageScale;
-
-    if (nextScale < imageInitialScale) {
-      nextScale = imageInitialScale;
-    } else if (nextScale > SCALE_MAXIMUM) {
-      nextScale = SCALE_MAXIMUM;
-    }
-
-    this.imageScaleValue.setValue(nextScale);
-    this.currentTouchesNum = event.touches.length;
-  }
-
-  onGestureRelease(event: NativeTouchEvent, gestureState: PanResponderGestureState) {
-    if (this.glideAlwaysTimer) {
-      clearTimeout(this.glideAlwaysTimer);
-    }
-
-    if (this.props.glideAlways && Platform.OS === 'android') {
-      this.glideAlwaysTimer = setTimeout(() => {
-        this.glideAlwaysTimer = null;
-        // If standard glide is not triggered then emulate it
-        // $FlowFixMe
-        if (this.listRef && this.listRef.scrollToIndex) {
-          this.listRef.scrollToIndex({
-            index: this.state.imageIndex,
-            animated: true,
-          });
-        }
-      }, this.props.glideAlwaysDelay);
-    }
-
-    if (this.isScrolling) {
-      return;
-    }
-
-    const { imageScale } = this.state;
-    const { isSwipeCloseEnabled, isTapZoomEnabled } = this.props;
-
-    let { _value: scale } = (this.imageScaleValue as unknown) as { _value: number };
-    const { _value: modalBackgroundOpacity } = (this.modalBackgroundOpacity as unknown) as { _value: number };
-
-    const { dx, dy, vy } = gestureState;
-    const imageInitialScale = this.getInitialScale();
-    const imageInitialTranslate = this.getInitialTranslate();
-
-    // Position haven't changed, so it just tap
-    if (event && !dx && !dy && scalesAreEqual(imageScale, scale)) {
-      // Double tap timer is launched, its double tap
-
-      if (isTapZoomEnabled && this.doubleTapTimer) {
-        clearTimeout(this.doubleTapTimer);
-        this.doubleTapTimer = null;
-
-        scale = scalesAreEqual(imageInitialScale, scale) ? scale * SCALE_MAX_MULTIPLIER : imageInitialScale;
-
-        Animated.timing(this.imageScaleValue, {
-          toValue: scale,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
-
-        this.togglePanels(scale === imageInitialScale);
-      } else {
-        this.doubleTapTimer = setTimeout(() => {
-          this.togglePanels();
-          this.doubleTapTimer = null;
-        }, 200);
-      }
-    }
-
-    const { x, y } = this.calculateNextTranslate(dx, dy, scale);
-    const scrollEnabled =
-      scale === this.getInitialScale() && x === imageInitialTranslate.x && y === imageInitialTranslate.y;
-
-    Animated.parallel(
+  const onZoom = useCallback(
+    (isScaled: boolean) => {
       // @ts-ignore
-      [
-        modalBackgroundOpacity > 0
-          ? Animated.timing(this.modalBackgroundOpacity, {
-              toValue: 0,
-              duration: 100,
-              useNativeDriver: false,
-            })
-          : null,
-        Animated.timing(this.imageTranslateValue.x, {
-          toValue: x,
-          duration: 100,
-          useNativeDriver: false,
-        }),
-        Animated.timing(this.imageTranslateValue.y, {
-          toValue: y,
-          duration: 100,
-          useNativeDriver: false,
-        }),
-      ].filter(Boolean),
-    ).start();
+      imageListRef?.current?.setNativeProps({ scrollEnabled: !isScaled });
+      toggleBarsVisible(!isScaled);
+    },
+    [imageListRef, toggleBarsVisible],
+  );
 
-    // Close modal with animation if image not scaled and high vertical gesture speed
-    if (isSwipeCloseEnabled && scale === imageInitialScale && Math.abs(vy) >= IMAGE_SPEED_FOR_CLOSE) {
-      Animated.timing(this.imageTranslateValue.y, {
-        toValue: y + 400 * vy,
-        duration: 150,
-        useNativeDriver: false,
-      }).start(this.close);
-    }
-
-    this.setState({
-      imageScale: scale,
-      imageTranslate: { x, y },
-      scrollEnabled,
-    });
+  if (!visible) {
+    return null;
   }
 
-  onImageLoaded(index: number) {
-    const { images } = this.state;
-
-    images[index] = { ...images[index], loaded: true };
-
-    this.setState({ images });
-  }
-
-  onMomentumScrollBegin = () => {
-    this.isScrolling = true;
-    if (this.glideAlwaysTimer) {
-      // If FlatList started gliding then prevent glideAlways scrolling
-      clearTimeout(this.glideAlwaysTimer);
-    }
-  };
-
-  onMomentumScrollEnd = () => {
-    this.isScrolling = false;
-  };
-
-  getItemLayout = (_: any, index: number) => {
-    const { screenWidth } = this.state.screenDimensions;
-
-    return { length: screenWidth, offset: screenWidth * index, index };
-  };
-
-  getInitialScale(index?: number) {
-    const imageIndex = index !== undefined ? index : this.state.imageIndex;
-    const imageParams = this.imageInitialParams[imageIndex];
-
-    return imageParams ? imageParams.scale : 1;
-  }
-
-  getInitialTranslate(index?: number): TranslateType {
-    const imageIndex = index !== undefined ? index : this.state.imageIndex;
-    const imageParams = this.imageInitialParams[imageIndex];
-
-    return imageParams ? imageParams.translate : { x: 0, y: 0 };
-  }
-
-  getImageStyle(
-    image: ImageType,
-    index: number,
-  ): { width?: number; height?: number; transform?: any; opacity?: number } {
-    const { imageIndex, screenDimensions } = this.state;
-    const { width, height } = image;
-
-    if (!width || !height) {
-      return { opacity: 0 };
-    }
-
-    // very strange caching, fix it with changing size to 1 pixel
-    const { x, y } = calculateInitialTranslate(width, height + 1, screenDimensions);
-    const translateValue = new Animated.ValueXY({ x, y });
-
-    const transform =
-      index === imageIndex ? this.imageTranslateValue.getTranslateTransform() : translateValue.getTranslateTransform();
-
-    const scale = index === imageIndex ? this.imageScaleValue : new Animated.Value(this.getInitialScale(index));
-    transform.push({ scale });
-
-    return { width, height, transform };
-  }
-
-  getControls = (): ControlsType => {
-    const { close, prev, next } = this.props.controls || {};
-
-    return {
-      close: close === false || close === null ? null : Close,
-      prev: prev === true ? Prev : prev || null,
-      next: next === true ? Next : next || null,
-    };
-  };
-
-  setSizeForImages = (nextImages: Array<ImageSizeType>): Array<ImageType> => {
-    if (nextImages.length === 0) {
-      return [];
-    }
-
-    const { images } = this.state;
-
-    return images.map((image, index) => {
-      const nextImageSize = nextImages.find((nextImage) => nextImage.index === index);
-
-      if (nextImageSize) {
-        image.width = nextImageSize.width;
-        image.height = nextImageSize.height;
-      }
-
-      return image;
-    });
-  };
-
-  scrollToNext = () => {
-    if (this.listRef && typeof this.listRef.scrollToIndex === 'function') {
-      this.listRef.scrollToIndex({
-        index: this.state.imageIndex + 1,
-        animated: true,
-      });
-    }
-  };
-
-  scrollToPrev = () => {
-    if (this.listRef && typeof this.listRef.scrollToIndex === 'function') {
-      this.listRef.scrollToIndex({
-        index: this.state.imageIndex - 1,
-        animated: true,
-      });
-    }
-  };
-
-  imageInitialParams: TransitionType[];
-  glideAlwaysTimer: number | null | undefined;
-  listRef: any;
-  isScrolling: boolean;
-  footerHeight: number;
-  initialTouches: TouchType[];
-  currentTouchesNum: number;
-  doubleTapTimer: NodeJS.Timeout | null | undefined;
-  modalAnimation: Animated.Value;
-  modalBackgroundOpacity: Animated.Value;
-  headerTranslateValue: Animated.ValueXY;
-  footerTranslateValue: Animated.ValueXY;
-  imageScaleValue: Animated.Value;
-  imageTranslateValue: Animated.ValueXY;
-  panResponder: PanResponderInstance;
-
-  calculateNextTranslate(dx: number, dy: number, scale: number): { x: number; y: number } {
-    const { images, imageIndex, imageTranslate, screenDimensions } = this.state;
-    const { x, y } = imageTranslate;
-    const { screenWidth, screenHeight } = screenDimensions;
-    const { width, height } = images[imageIndex];
-    const imageInitialScale = this.getInitialScale();
-
-    const getTranslate = (axis: string) => {
-      const imageSize = (axis === 'x' ? width : height) || 0;
-      const screenSize = axis === 'x' ? screenWidth : screenHeight;
-      const leftLimit = (scale * imageSize - imageSize) / 2;
-      const rightLimit = screenSize - imageSize - leftLimit;
-
-      let nextTranslate = axis === 'x' ? x + dx : y + dy;
-
-      // Less than the screen
-      if (screenSize > scale * imageSize) {
-        if ((width || 0) >= (height || 0)) {
-          nextTranslate = (screenSize - imageSize) / 2;
-        } else {
-          nextTranslate = screenSize / 2 - (imageSize * (scale / imageInitialScale)) / 2;
-        }
-
-        return nextTranslate;
-      }
-
-      if (nextTranslate > leftLimit) {
-        nextTranslate = leftLimit;
-      }
-
-      if (nextTranslate < rightLimit) {
-        nextTranslate = rightLimit;
-      }
-
-      return nextTranslate;
-    };
-
-    return { x: getTranslate('x'), y: getTranslate('y') };
-  }
-
-  togglePanels(isVisible?: boolean) {
-    const panelsVisible = typeof isVisible !== 'undefined' ? isVisible : !this.state.panelsVisible;
-    // toggle footer and header
-    this.setState({ panelsVisible });
-
-    Animated.timing(this.headerTranslateValue.y, {
-      toValue: !panelsVisible ? -(HEADER_HEIGHT + 44) : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-
-    if (this.footerHeight > 0) {
-      Animated.timing(this.footerTranslateValue.y, {
-        toValue: !panelsVisible ? this.footerHeight : 0,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-    }
-  }
-
-  listKeyExtractor = (image: ImageType): string => this.state.images.indexOf(image).toString();
-
-  close = () => {
-    this.setState({ isVisible: false });
-
-    if (typeof this.props.onClose === 'function') {
-      this.props.onClose();
-    }
-  };
-
-  renderImage = ({ item: image, index }: { item: ImageType; index: number }) => {
-    const loaded = !!image.loaded && !!image.width && !!image.height;
-
-    return (
-      <View style={styles.imageContainer} onStartShouldSetResponder={(): boolean => true}>
-        <Animated.Image
-          resizeMode="cover"
-          source={image.source}
-          style={this.getImageStyle(image, index)}
-          onLoad={() => {
-            this.onImageLoaded(index);
-          }}
-          {...this.panResponder.panHandlers}
-        />
-        {!loaded && <ActivityIndicator style={styles.loading} />}
-      </View>
-    );
-  };
-
-  render() {
-    const { animationType, renderFooter, backgroundColor } = this.props;
-    const { images, imageIndex, imageScale, isVisible, scrollEnabled } = this.state;
-
-    const { close, prev, next } = this.getControls();
-    const imageInitialScale = this.getInitialScale();
-    const headerTranslate = this.headerTranslateValue.getTranslateTransform();
-    const footerTranslate = this.footerTranslateValue.getTranslateTransform();
-    const rgbBackgroundColor =
-      backgroundColor && isHex(backgroundColor) ? hexToRgb(backgroundColor) : defaultBackgroundColor;
-    const rgb = rgbBackgroundColor.join(',');
-    const animatedBackgroundColor = this.modalBackgroundOpacity.interpolate({
-      inputRange: [0, 1],
-      outputRange: [`rgba(${rgb}, 0.9)`, `rgba(${rgb}, 0.2)`],
-    });
-
-    const isPrevVisible = imageScale === imageInitialScale && imageIndex > 0;
-    const isNextVisible = imageScale === imageInitialScale && imageIndex < images.length - 1;
-
-    return (
-      <Modal
-        transparent
-        visible={isVisible}
-        animationType={animationType}
-        onRequestClose={this.close}
-        supportedOrientations={['portrait', 'landscape']}
+  return (
+    <Modal
+      transparent={presentationStyle === 'overFullScreen'}
+      visible={visible}
+      presentationStyle={presentationStyle}
+      animationType={animationType}
+      onRequestClose={onRequestCloseEnhanced}
+      supportedOrientations={['portrait', 'landscape', 'landscape-left', 'landscape-right']}
+      hardwareAccelerated
+    >
+      <StatusBarManager presentationStyle={presentationStyle} />
+      <View
+        onLayout={(e) => {
+          setLayout(e.nativeEvent.layout);
+        }}
+        style={[styles.container, { opacity, backgroundColor }]}
       >
-        <Animated.View style={[{ backgroundColor: animatedBackgroundColor }, styles.underlay]} />
-        <Animated.View
-          style={[
-            styles.header,
-            {
-              transform: headerTranslate,
-            },
-          ]}
-        >
-          <SafeAreaView style={{ flex: 1 }}>
-            {!!close && React.createElement(close, { onPress: this.close })}
-          </SafeAreaView>
+        <Animated.View style={[styles.header, { transform: headerTransform }]}>
+          {typeof HeaderComponent !== 'undefined' ? (
+            React.createElement(HeaderComponent, {
+              imageIndex: currentImageIndex,
+            })
+          ) : (
+            <ImageDefaultHeader onRequestClose={onRequestCloseEnhanced} />
+          )}
         </Animated.View>
-        <FlatList
+        <VirtualizedList
+          ref={imageListRef}
+          data={images}
           horizontal
           pagingEnabled
-          data={images}
-          scrollEnabled={scrollEnabled}
-          scrollEventThrottle={16}
-          style={styles.container}
-          ref={this.onFlatListRender}
-          keyExtractor={this.listKeyExtractor}
-          onScroll={this.onNextImage}
-          renderItem={this.renderImage}
-          getItemLayout={this.getItemLayout}
-          onMomentumScrollBegin={this.onMomentumScrollBegin}
-          onMomentumScrollEnd={this.onMomentumScrollEnd}
+          windowSize={2}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          initialScrollIndex={imageIndex}
+          getItem={(_, index) => images[index]}
+          getItemCount={() => images.length}
+          getItemLayout={(_, index) => ({
+            length: layout.width,
+            offset: layout.width * index,
+            index,
+          })}
+          renderItem={({ item: imageSrc }) => (
+            <ImageItem
+              onZoom={onZoom}
+              imageSrc={imageSrc}
+              onRequestClose={onRequestCloseEnhanced}
+              onLongPress={onLongPress}
+              delayLongPress={delayLongPress}
+              swipeToCloseEnabled={swipeToCloseEnabled}
+              doubleTapToZoomEnabled={doubleTapToZoomEnabled}
+              layout={layout}
+            />
+          )}
+          onMomentumScrollEnd={onScroll}
+          keyExtractor={(imageSrc) => imageSrc?.uri || `${imageSrc}`}
         />
-        {prev && isPrevVisible && React.createElement(prev, { onPress: this.scrollToPrev })}
-        {next && isNextVisible && React.createElement(next, { onPress: this.scrollToNext })}
-        {renderFooter && (
-          <Animated.View
-            style={[styles.footer, { transform: footerTranslate }]}
-            onLayout={(event) => {
-              this.footerHeight = event.nativeEvent.layout.height;
-            }}
-          >
-            {typeof renderFooter === 'function' && images[imageIndex] && renderFooter(images[imageIndex])}
+        {typeof FooterComponent !== 'undefined' && (
+          <Animated.View style={[styles.footer, { transform: footerTransform }]}>
+            {React.createElement(FooterComponent, {
+              imageIndex: currentImageIndex,
+            })}
           </Animated.View>
         )}
-      </Modal>
-    );
-  }
+      </View>
+    </Modal>
+  );
 }
+
+const EnhancedExpandedGallery = (props: Props) => <ExpandedGallery key={props.imageIndex} {...props} />;
+
+export default EnhancedExpandedGallery;
