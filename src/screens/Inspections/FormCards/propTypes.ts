@@ -10,6 +10,7 @@ export interface TextCardProps {
   photos: DraftPhoto[];
   onTapPhoto: (index: number) => void;
   onTakePhoto: (uri: string, isFromGallery: boolean) => void;
+  onDeletePhoto: (photo: DraftPhoto) => void;
   onDelete: () => void;
   allowDelete: boolean;
 }

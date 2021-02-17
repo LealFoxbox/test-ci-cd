@@ -29,6 +29,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
   commentInputProps,
   onTapPhoto,
   onTakePhoto,
+  onDeletePhoto,
   onAddComment,
   onDelete,
   showComment,
@@ -64,6 +65,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
           commentInputProps={commentInputProps}
           photos={photos}
           onTapPhoto={onTapPhoto}
+          onDeletePhoto={onDeletePhoto}
           showComment={showComment}
         />
       </Card>

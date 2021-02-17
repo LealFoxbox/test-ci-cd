@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Button, Card, Chip, Text, useTheme } from 'react-native-paper';
 import { Formik, FormikProps } from 'formik';
 import { set, sortBy } from 'lodash/fp';
 import RNFS from 'react-native-fs';
@@ -125,6 +125,8 @@ const EditFormScreen: React.FC<{}> = () => {
     Object.values(draft.fields).filter((f) => !f.deleted),
   );
 
+  const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
+
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
@@ -147,7 +149,21 @@ const EditFormScreen: React.FC<{}> = () => {
             contentContainerStyle={{
               justifyContent: 'flex-start',
             }}
-            ListHeaderComponent={<Notes value={draft.notes} isCard />}
+            ListHeaderComponent={
+              <>
+                <Notes value={draft.notes} isCard />
+                {deletedFields.length > 0 && (
+                  <Card style={{ margin: 10 }}>
+                    <Card.Title title="Not Applicable fields"></Card.Title>
+                    <Card.Content style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                      {deletedFields.map((f) => (
+                        <Chip style={{ marginRight: 5, marginBottom: 5 }}>{f.name}</Chip>
+                      ))}
+                    </Card.Content>
+                  </Card>
+                )}
+              </>
+            }
             ListFooterComponent={() => (
               <Button
                 onPress={formikProps.handleSubmit}

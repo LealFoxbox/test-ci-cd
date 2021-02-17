@@ -2,7 +2,8 @@ import React from 'react';
 import { ListRenderItem } from 'react-native';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { FormikProps } from 'formik';
-import { find, set } from 'lodash/fp';
+import { differenceBy, find, set } from 'lodash/fp';
+import RNFS from 'react-native-fs';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
@@ -63,6 +64,15 @@ export const createRenderCard = (
       setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
+    const handleDeletePhoto = (photo: DraftPhoto) => {
+      const newPhotos = differenceBy({ uri: photo.uri }, fieldValue.photos, [photo]);
+      const newValues = set(`${draftField.formFieldId}.photos`, newPhotos, values);
+
+      void RNFS.unlink(photo.uri);
+
+      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      updateDraftFieldsAction(assignmentId, newValues);
+    };
     const handleAddComment = () => {
       setFieldValue(`${fieldValue.formFieldId}`, set('comment', '', fieldValue));
     };
@@ -95,6 +105,7 @@ export const createRenderCard = (
       photos: fieldValue.photos,
       onTapPhoto: handleTapPhoto,
       onTakePhoto: handleTakePhoto,
+      onDeletePhoto: handleDeletePhoto,
       onDelete: handleDelete,
       allowDelete,
     };

@@ -230,6 +230,7 @@ export default class ImageView extends Component<PropsType, StateType> {
       isFlatListRerendered: false,
     });
 
+    // TODO: when changing orientation this crashes the app
     this.imageScaleValue.setValue(scale);
     this.imageTranslateValue.setValue(translate);
   }
