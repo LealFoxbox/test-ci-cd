@@ -186,12 +186,7 @@ interface BaseField {
 export interface ScoreField extends BaseField {
   ratingTypeId: 1;
 
-  range_choice_label: string | null; // The selected range_choice.label.
-  range_choice_position: number | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
-  range_choice_max_position: number | null; // The max value of range_choices.position
-  range_choice_min_position: number | null; // The minimum value of range_choices.position
-  score: string | null; // The select range_choice.score. For example, '0.70'. Note that these are decimal values so 0.70 is what the client app should provide, not 70.
-  deficient: boolean | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
+  selectedChoice: RangeChoice | null;
 }
 
 export interface TextField extends BaseField {
@@ -211,10 +206,7 @@ export interface NumberField extends BaseField {
 export interface PointsField extends BaseField {
   ratingTypeId: 7;
 
-  deficient: boolean | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
-  range_choice_label: string | null; // The selected range_choice.label.
-  range_choice_position: number | null; // Based upon the selected range_choice.deficient boolean. If the user selects a deficient=true range choice, then provide "true". Otherwise, set as "false".
-  points: number | null; // The select range_choice.points. For example, "4".
+  selectedChoice: RangeChoice | null;
 }
 
 export interface SelectField extends BaseField {

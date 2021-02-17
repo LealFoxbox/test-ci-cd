@@ -157,29 +157,16 @@ export const createRenderCard = (
 
     if (fieldValue.ratingTypeId === 7 || fieldValue.ratingTypeId === 1) {
       const rangeChoices = rating.range_choices as RangeChoice[];
-      let selectedRangeChoice: RangeChoice | undefined;
-      if (fieldValue.ratingTypeId === 7) {
-        selectedRangeChoice =
-          fieldValue.points !== null
-            ? find({ points: fieldValue.points }, rangeChoices)
-            : find({ default: true }, rangeChoices);
-      } else {
-        selectedRangeChoice =
-          fieldValue.score !== null
-            ? find({ score: fieldValue.score }, rangeChoices)
-            : find({ default: true }, rangeChoices);
-      }
+
+      const selectedRangeChoice = fieldValue.selectedChoice || find({ default: true }, rangeChoices) || null;
 
       return (
         <RangeCard
           {...baseCardProps}
-          selectedRangeChoice={selectedRangeChoice || null}
+          selectedRangeChoice={selectedRangeChoice}
           rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
-            const newValues =
-              fieldValue.ratingTypeId === 7
-                ? set(`${draftField.formFieldId}.points`, choice.points, values)
-                : set(`${draftField.formFieldId}.score`, choice.score, values);
+            const newValues = set(`${draftField.formFieldId}.selectedChoice`, choice, values);
 
             setFieldValue(`${fieldValue.formFieldId}`, newValues[draftField.formFieldId]);
             updateDraftFieldsAction(assignmentId, newValues);

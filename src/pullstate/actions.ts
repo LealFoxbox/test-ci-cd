@@ -103,12 +103,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
       case 1:
         return {
           ...baseField,
-          range_choice_label: null,
-          range_choice_position: null,
-          range_choice_max_position: null,
-          range_choice_min_position: null,
-          score: null,
-          deficient: null,
+          selectedChoice: null,
         } as ScoreField;
 
       case 3:
@@ -126,10 +121,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
         return {
           ...baseField,
 
-          deficient: null,
-          range_choice_label: null,
-          range_choice_position: null,
-          points: null,
+          selectedChoice: null,
         } as PointsField;
       case 8:
       case 9:
