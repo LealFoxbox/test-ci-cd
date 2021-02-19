@@ -7,7 +7,7 @@ import { PermissionsAndroid } from 'react-native';
 import { directories } from 'react-native-background-downloader';
 import RNFS from 'react-native-fs';
 
-type onTakePhotoType = (uri: string, isFromGallery: boolean) => void;
+type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
@@ -58,8 +58,9 @@ function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: (
     const callback = async (response: ImagePickerResponse) => {
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
-          const newUri = await fileUrlCopy(response.uri, `photo - ${Date.now()}.jpg`);
-          onTakePhoto && onTakePhoto(newUri, isAttachment);
+          const fileName = `photo - ${Date.now()}.jpg`;
+          const newUri = await fileUrlCopy(response.uri, fileName);
+          onTakePhoto && onTakePhoto({ uri: newUri, fileName }, isAttachment);
         } else {
           console.warn('No uri??');
         }

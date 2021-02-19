@@ -3,7 +3,7 @@ import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Card, Chip, useTheme } from 'react-native-paper';
 import { Formik, FormikProps } from 'formik';
-import { groupBy, isString, set, sortBy, toPairs } from 'lodash/fp';
+import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
@@ -13,7 +13,7 @@ import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/nav
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import { DraftField, DraftPhoto, SelectField } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
-import { updateDraftFieldsAction } from 'src/pullstate/actions';
+import { submitDraftAction, updateDraftFieldsAction } from 'src/pullstate/actions';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -97,10 +97,7 @@ const EditFormScreen: React.FC<{}> = () => {
   }
 
   const submit = () => {
-    PersistentUserStore.update((s) => {
-      s.pendingUploads.push(s.drafts[assignmentId]);
-      delete s.drafts[assignmentId];
-    });
+    submitDraftAction(assignmentId);
     navigation.goBack();
   };
 
@@ -120,12 +117,15 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
   };
 
-  const fields = toPairs(
-    groupBy(
-      'category_id',
-      Object.values(draft.fields).filter((f) => !f.deleted),
-    ),
-  )
+  const filteredFields = sortBy(
+    'position',
+    Object.values(draft.fields).filter((f) => !f.deleted),
+  );
+
+  const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
+
+  const fields = toPairs(groupBy('category_id', filteredFields))
+    .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
     .flatMap(([catId, values]) => [
       catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
       sortBy('position', values),

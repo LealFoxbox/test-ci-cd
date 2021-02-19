@@ -16,9 +16,19 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { ApiError } from 'src/services/api/utils';
 import { clearInspectionsDataAction, loginAction, setStagingAction } from 'src/pullstate/actions';
+import { styled } from 'src/paperTheme';
 
 import StagingDialog from './StagingDialog';
-import { EasterEgg, FormContainer } from './styles';
+
+export const FormContainer = styled.View`
+  padding: 50px;
+  padding-top: 100px;
+`;
+
+export const EasterEgg = styled.View`
+  width: 100px;
+  height: 50px;
+`;
 
 interface Form {
   companyId: string;

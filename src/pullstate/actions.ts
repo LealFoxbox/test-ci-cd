@@ -182,3 +182,10 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
     return compose([isDirtySetter, fieldsSetter])(s) as PersistentState;
   });
 };
+
+export const submitDraftAction = (assignmentId: number) => {
+  PersistentUserStore.update((s) => {
+    s.pendingUploads.push({ draft: s.drafts[assignmentId], error: null, progress: 0, uploading: null });
+    delete s.drafts[assignmentId];
+  });
+};

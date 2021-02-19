@@ -14,7 +14,7 @@ import { initFormDraftAction } from 'src/pullstate/actions';
 
 import BlankScreen from './BlankScreen';
 
-const ItemsTable: React.FC<{}> = () => {
+const FormListScreen: React.FC<{}> = () => {
   const {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
@@ -87,4 +87,4 @@ const ItemsTable: React.FC<{}> = () => {
   );
 };
 
-export default ItemsTable;
+export default FormListScreen;

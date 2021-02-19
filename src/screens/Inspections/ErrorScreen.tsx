@@ -2,10 +2,16 @@ import React from 'react';
 import { Button, Title } from 'react-native-paper';
 
 import ConnectionBanner from 'src/components/ConnectionBanner';
+import { styled } from 'src/paperTheme';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
-import { MessageContainer } from './styles';
+const MessageContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+`;
 
 const ErrorScreen: React.FC<{}> = () => {
   const connected = useNetworkStatus();

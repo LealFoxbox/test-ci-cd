@@ -168,6 +168,7 @@ export type Rating = ScoreRating | TextfieldRating | SignatureRating | NumberRat
 export interface DraftPhoto {
   isFromGallery: boolean;
   uri: string;
+  fileName: string;
   latitude: number | null; // Latitude where the inspection was started or first available location coordinates
   longitude: number | null; // Longitude where the inspection was started or first available location coordinates
   created_at: number; // timestamp in format "2020-01-08T14:52:56-07:00",
@@ -185,7 +186,7 @@ interface BaseField {
   category_id: number | null;
   comment: string | null; //  If the user adds a comment to a line item, then clients should send the comment as a string. Otherwise, set as null. Ratings of type Textfield will save their result to the comment field.
 
-  photos: DraftPhoto[]; // maybe it's not common? examples say it is
+  photos: DraftPhoto[];
 }
 
 export interface ScoreField extends BaseField {
@@ -236,8 +237,48 @@ export interface DraftForm {
   privateInspection: boolean;
 
   flagged: boolean; // if the user toggles the flagged button
-  private: boolean; // if the user toggles the private button or if the origating inspection_form was private
+  private: boolean; // if the user toggles the private button or if the originating inspection_form was private
   latitude: number | null;
   longitude: number | null;
   fields: Record<string, DraftField>; // formFieldId is the key
+}
+
+export interface PendingUpload {
+  draft: DraftForm;
+  progress: number;
+  error: string | null;
+  uploading: 'photos' | 'form' | null;
+}
+
+export interface PresignedPhoto {
+  url: string;
+  'expires-at': string;
+  'object-url': string;
+  fields: {
+    acl: string;
+    key: string;
+    policy: string;
+    'x-amz-credential': string;
+    'x-amz-algorithm': string;
+    'x-amz-date': string;
+    'x-amz-signature': string;
+  };
+
+  /*
+  for example:
+  {
+    "url": "https://orangeqc-staging-attachments.s3.amazonaws.com",
+    "expires-at": "2021-02-19T22:53:17Z",
+    "object-url": "https://orangeqc-staging-attachments.s3.amazonaws.com/cache/2209/2021-02-18/f29927e1ef/test1.png",
+    "fields": {
+        "acl": "public-read",
+        "key": "cache/2209/2021-02-18/f29927e1ef/test1.png",
+        "policy": "eyJleHBpcmF0aW9uIjoiMjAyMS0wMi0xOVQyMjo1MzoxN1oiLCJjb25kaXRpb25zIjpbeyJidWNrZXQiOiJvcmFuZ2VxYy1zdGFnaW5nLWF0dGFjaG1lbnRzIn0seyJhY2wiOiJwdWJsaWMtcmVhZCJ9LFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDEsMTA0ODU3NjBdLHsia2V5IjoiY2FjaGUvMjIwOS8yMDIxLTAyLTE4L2YyOTkyN2UxZWYvdGVzdDEucG5nIn0seyJ4LWFtei1jcmVkZW50aWFsIjoiQUtJQVRJRjVVUzZIRjJEUzVLSEovMjAyMTAyMTgvdXMtZWFzdC0xL3MzL2F3czRfcmVxdWVzdCJ9LHsieC1hbXotYWxnb3JpdGhtIjoiQVdTNC1ITUFDLVNIQTI1NiJ9LHsieC1hbXotZGF0ZSI6IjIwMjEwMjE4VDIyNTMxN1oifV19",
+        "x-amz-credential": "AKIATIF5US6HF2DS5KHJ/20210218/us-east-1/s3/aws4_request",
+        "x-amz-algorithm": "AWS4-HMAC-SHA256",
+        "x-amz-date": "20210218T225317Z",
+        "x-amz-signature": "94a5f5efcdb8ea1d80c426a976628a6b4dacd843b45936a6519e5089eb33148f"
+    }
+  }
+  */
 }

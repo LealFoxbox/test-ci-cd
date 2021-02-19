@@ -12,11 +12,17 @@ import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNa
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
+import { styled } from 'src/paperTheme';
 
-import { Container } from './styles';
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
 import BlankScreen from './BlankScreen';
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+  justify-content: center;
+`;
 
 const InspectionsScreen: React.FC<{}> = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
@@ -31,7 +37,7 @@ const InspectionsScreen: React.FC<{}> = () => {
   const navigation = useNavigation();
 
   if (!userData) {
-    return <Container />;
+    return <Container theme={theme} />;
   }
 
   if (error) {
@@ -47,7 +53,7 @@ const InspectionsScreen: React.FC<{}> = () => {
   }
 
   return (
-    <Container>
+    <Container theme={theme}>
       {children.length === 0 && <BlankScreen />}
       {children.length > 0 && (
         <FlatList

@@ -21,12 +21,15 @@ import {
   SIGNATURE_MODAL,
   TAB_STACK_NAVIGATOR,
   TICKETS_NAVIGATOR,
+  UPLOADS_NAVIGATOR,
 } from './screenNames';
+import UploadsNavigator from './UploadsNavigator';
 
 export type MainTabsNavigatorParamList = {
   [INSPECTIONS_NAVIGATOR]: undefined;
   [SCHEDULE_NAVIGATOR]: undefined;
   [TICKETS_NAVIGATOR]: undefined;
+  [UPLOADS_NAVIGATOR]: undefined;
   [ACCOUNT_NAVIGATOR]: undefined;
 };
 
@@ -86,6 +89,16 @@ const TabStackNavigator: React.FC = () => {
             tabBarIcon: ({ color }) => (
               <MaterialIcons name="warning" color={color} size={26} style={{ marginRight: -1 }} />
             ),
+          }}
+        />
+      )}
+      {userData.features.inspection_feature.enabled && (
+        <TabStack.Screen
+          name={UPLOADS_NAVIGATOR}
+          component={UploadsNavigator}
+          options={{
+            tabBarLabel: 'Uploads',
+            tabBarIcon: ({ color }) => <MaterialIcons name="arrow-circle-up" color={color} size={26} />,
           }}
         />
       )}
