@@ -31,6 +31,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
   onChoicePress,
   onTapPhoto,
   onTakePhoto,
+  onDeletePhoto,
   onAddComment,
   onDelete,
   showComment,
@@ -91,6 +92,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
           showComment={showComment}
           photos={photos}
           onTapPhoto={onTapPhoto}
+          onDeletePhoto={onDeletePhoto}
         />
       </Card>
     </Container>

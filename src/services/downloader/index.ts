@@ -48,7 +48,13 @@ function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices
 
 async function getMissingForms(forms: Record<string, Form>) {
   const distinctIds = await assignmentsDb.getDistinctFormIds();
-  return distinctIds.filter((id) => !forms[id] || isSecondsExpired(forms[id].lastDownloaded));
+  const missingIds = distinctIds.filter((id) => !forms[id]);
+
+  if (missingIds.length > 0) {
+    return missingIds.filter((id) => isSecondsExpired(forms[id].lastDownloaded));
+  }
+
+  return [];
 }
 
 export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<DbTotalPages>) {

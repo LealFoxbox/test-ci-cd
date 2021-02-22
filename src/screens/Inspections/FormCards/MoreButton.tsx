@@ -7,7 +7,7 @@ import { PermissionsAndroid } from 'react-native';
 import { directories } from 'react-native-background-downloader';
 import RNFS from 'react-native-fs';
 
-type onTakePhotoType = (uri: string, isFromGallery: boolean) => void;
+type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
@@ -58,8 +58,9 @@ function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: (
     const callback = async (response: ImagePickerResponse) => {
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
-          const newUri = await fileUrlCopy(response.uri, `photo - ${Date.now()}.jpg`);
-          onTakePhoto && onTakePhoto(newUri, isAttachment);
+          const fileName = `photo - ${Date.now()}.jpg`;
+          const newUri = await fileUrlCopy(response.uri, fileName);
+          onTakePhoto && onTakePhoto({ uri: newUri, fileName }, isAttachment);
         } else {
           console.warn('No uri??');
         }
@@ -112,6 +113,8 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   allowDelete,
 }) => {
   const [visible, setVisible] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
+
   const theme = useTheme();
 
   const openMenu = () => setVisible(true);
@@ -132,6 +135,9 @@ const MoreButton: React.FC<MoreButtonProps> = ({
     onAddComment && onAddComment();
   };
 
+  const handleOpenDelete = () => setDeleteMode(true);
+  const handleCloseDelete = () => setDeleteMode(false);
+
   if (!allowPhotos && !showCommentOption && !allowDelete) {
     return null;
   }
@@ -146,20 +152,33 @@ const MoreButton: React.FC<MoreButtonProps> = ({
         </TouchableOpacity>
       }
     >
-      {allowPhotos && (
+      {!deleteMode && allowPhotos && (
         <>
           <Menu.Item icon="camera-outline" onPress={handlePhoto} title="Take Photo" />
           <Menu.Item icon="image-multiple-outline" onPress={handleAttach} title="Choose Photo" />
         </>
       )}
-      {showCommentOption && <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />}
-      {allowDelete && (
+      {!deleteMode && showCommentOption && (
+        <Menu.Item icon="message-outline" onPress={handleAddComment} title="Add Comment" />
+      )}
+      {!deleteMode && allowDelete && (
         <Menu.Item
           icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
-          onPress={handleDelete}
+          onPress={handleOpenDelete}
           title="Not Applicable"
           titleStyle={{ color: theme.colors.deficient }}
         />
+      )}
+      {deleteMode && (
+        <>
+          <Menu.Item
+            icon={() => <MaterialCommunityIcons color={theme.colors.deficient} name="delete-outline" size={24} />}
+            onPress={handleDelete}
+            title="Delete"
+            titleStyle={{ color: theme.colors.deficient }}
+          />
+          <Menu.Item icon="close" onPress={handleCloseDelete} title="Cancel" />
+        </>
       )}
     </Menu>
   );

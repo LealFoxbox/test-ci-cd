@@ -1,5 +1,5 @@
 import config from 'src/config';
-import { DraftForm, Form, Rating, User } from 'src/types';
+import { DraftForm, Form, PendingUpload, Rating, User } from 'src/types';
 
 export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
 
@@ -21,7 +21,7 @@ export type PersistentState = {
   lastUpdated: null | number;
 
   drafts: Record<string, DraftForm>; // the key is assignmentId
-  pendingUploads: DraftForm[];
+  pendingUploads: PendingUpload[];
   uploads: DraftForm[];
 };
 

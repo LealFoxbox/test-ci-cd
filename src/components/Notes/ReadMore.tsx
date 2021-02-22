@@ -44,6 +44,7 @@ const ReadMore: React.FC<
           // Get the height of the text now that number of lines has been set
           const limitedHeight = await measureHeightAsync(_text.current);
 
+          // TODO: this was triggered on an unmounted component somehow
           setShouldShowReadMore((_fullHeight.current || 0) > limitedHeight);
         } else {
           await nextFrameAsync();

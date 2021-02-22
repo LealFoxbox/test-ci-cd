@@ -31,7 +31,7 @@ function AppNavigator() {
   useEffect(() => {
     if (userData?.features.inspection_feature.enabled) {
       triggerDownload();
-      triggerUpload();
+      false && triggerUpload(); // TODO: re-enable this
     } else if (userData?.features.inspection_feature.enabled === false) {
       void clearInspectionsDataAction();
     }

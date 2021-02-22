@@ -24,6 +24,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   photos,
   onOpen,
   onTapPhoto,
+  onDeletePhoto,
   onDelete,
   onAddComment,
   showComment,
@@ -52,6 +53,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
           showComment={showComment}
           photos={photos}
           onTapPhoto={onTapPhoto}
+          onDeletePhoto={onDeletePhoto}
           isSignature
         />
       </Card>

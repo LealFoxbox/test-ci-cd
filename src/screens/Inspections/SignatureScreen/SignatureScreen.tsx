@@ -13,19 +13,13 @@ import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
 const Container = styled.View`
   flex: 1;
   width: 100%;
-  justify-content: flex-start;
-  align-items: flex-start;
 `;
 
 const ButtonsContainer = styled.View`
-  width: 70%;
-  align-self: flex-end;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  margin-right: 24px;
+  margin: 20px;
 `;
 
 const SignatureScreen: React.FC = () => {
@@ -88,12 +82,14 @@ const SignatureScreen: React.FC = () => {
           Clear
         </Button>
         <Button
+          mode="contained"
+          dark
           onPress={() => {
             signatureRef.current && signatureRef.current.saveImage();
           }}
           disabled={!userHasSigned}
         >
-          Confirm
+          Save
         </Button>
       </ButtonsContainer>
     </Container>

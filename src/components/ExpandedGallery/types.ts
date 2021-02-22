@@ -1,52 +1,21 @@
-import { ComponentType } from 'react';
-import { GestureResponderEvent, ImageURISource } from 'react-native';
+/**
+ * Copyright (c) JOB TODAY S.A. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
 
-export type ControlType = {
-  onPress: () => void;
+import { ImageRequireSource, ImageURISource } from 'react-native';
+
+export type Dimensions = {
+  width: number;
+  height: number;
 };
 
-export type ControlsType = {
-  close?: ComponentType<ControlType> | null;
-  next?: ComponentType<ControlType> | null;
-  prev?: ComponentType<ControlType> | null;
-};
-
-export type TouchType = {
-  pageX: number;
-  pageY: number;
-};
-
-export type NativeEventType = {
-  touches: Array<TouchType>;
-  contentOffset: { x: number; y: number };
-};
-
-export type EventType = { nativeEvent: GestureResponderEvent };
-
-export type ImageType = {
-  loaded?: boolean;
-  source: ImageURISource;
-  width?: number;
-  height?: number;
-  title?: string | null;
-  index: number;
-};
-
-export type TranslateType = {
+export type Position = {
   x: number;
   y: number;
 };
 
-export type GestureState = {
-  dx: number;
-  dy: number;
-  vx: number;
-  vy: number;
-};
-
-export type DimensionsType = { width: number; height: number };
-export type ScreenDimensionsType = { screenWidth: number; screenHeight: number };
-
-export type ImageSizeType = DimensionsType & { index: number };
-
-export type TransitionType = { scale: number; translate: TranslateType };
+export type ImageSource = ImageURISource | ImageRequireSource;

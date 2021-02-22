@@ -4,6 +4,12 @@ export const Container = styled.View`
   flex: 1;
 `;
 
+export const MessageContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
 export const DisabledOverlay = withTheme(styled.View`
   position: absolute;
   top: 0;
@@ -13,9 +19,3 @@ export const DisabledOverlay = withTheme(styled.View`
   background-color: ${(p) => p.theme.colors.backdrop};
   opacity: 0.45;
 `);
-
-export const MessageContainer = styled.View`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;

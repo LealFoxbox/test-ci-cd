@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Button, Card, Chip, useTheme } from 'react-native-paper';
 import { Formik, FormikProps } from 'formik';
-import { set, sortBy } from 'lodash/fp';
+import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
@@ -13,7 +13,7 @@ import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/nav
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import { DraftField, DraftPhoto, SelectField } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
-import { updateDraftFieldsAction } from 'src/pullstate/actions';
+import { submitDraftAction, updateDraftFieldsAction } from 'src/pullstate/actions';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -97,10 +97,7 @@ const EditFormScreen: React.FC<{}> = () => {
   }
 
   const submit = () => {
-    PersistentUserStore.update((s) => {
-      s.pendingUploads.push(s.drafts[assignmentId]);
-      delete s.drafts[assignmentId];
-    });
+    submitDraftAction(assignmentId);
     navigation.goBack();
   };
 
@@ -120,34 +117,57 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
   };
 
-  const fields = sortBy(
+  const filteredFields = sortBy(
     'position',
     Object.values(draft.fields).filter((f) => !f.deleted),
   );
 
+  const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
+
+  const fields = toPairs(groupBy('category_id', filteredFields))
+    .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
+    .flatMap(([catId, values]) => [
+      catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
+      sortBy('position', values),
+    ])
+    .flat();
+
+  const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
+
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
-        images={expandedPhoto.photos.map((uri, index) => ({
-          source: { uri: `file://${uri}` },
-          index,
+        images={expandedPhoto.photos.map((uri) => ({
+          uri: `file://${uri}`,
         }))}
         imageIndex={expandedPhoto.index !== -1 ? expandedPhoto.index : 0}
-        isVisible={expandedPhoto.index !== -1}
-        onClose={() => setExpandedPhoto((s) => ({ ...s, index: -1 }))}
-        renderFooter={(_currentImage: any) => (
-          <View>
-            <Text>.</Text>
-          </View>
-        )}
+        visible={expandedPhoto.index !== -1}
+        onRequestClose={() => setExpandedPhoto((s) => ({ ...s, index: -1 }))}
       />
+
       <Formik initialValues={draft.fields} onSubmit={submit} innerRef={formikBagRef}>
         {(formikProps) => (
           <FlatList
             contentContainerStyle={{
               justifyContent: 'flex-start',
             }}
-            ListHeaderComponent={<Notes value={draft.notes} isCard />}
+            ListHeaderComponent={
+              <>
+                <Notes value={draft.notes} isCard />
+                {deletedFields.length > 0 && (
+                  <Card style={{ margin: 10 }}>
+                    <Card.Title title="Not Applicable fields" />
+                    <Card.Content style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                      {deletedFields.map((f) => (
+                        <Chip key={f.name} style={{ marginRight: 5, marginBottom: 5 }}>
+                          {f.name}
+                        </Chip>
+                      ))}
+                    </Card.Content>
+                  </Card>
+                )}
+              </>
+            }
             ListFooterComponent={() => (
               <Button
                 onPress={formikProps.handleSubmit}
@@ -159,7 +179,7 @@ const EditFormScreen: React.FC<{}> = () => {
               </Button>
             )}
             data={fields}
-            keyExtractor={(item) => `${item.formFieldId}`}
+            keyExtractor={(item) => (isString(item) ? item : `${item.formFieldId}`)}
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,
               assignmentId,

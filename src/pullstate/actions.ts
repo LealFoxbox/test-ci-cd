@@ -103,12 +103,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
       case 1:
         return {
           ...baseField,
-          range_choice_label: null,
-          range_choice_position: null,
-          range_choice_max_position: null,
-          range_choice_min_position: null,
-          score: null,
-          deficient: null,
+          selectedChoice: null,
         } as ScoreField;
 
       case 3:
@@ -126,10 +121,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
         return {
           ...baseField,
 
-          deficient: null,
-          range_choice_label: null,
-          range_choice_position: null,
-          points: null,
+          selectedChoice: null,
         } as PointsField;
       case 8:
       case 9:
@@ -159,7 +151,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     isDirty: false,
 
     notes: form.notes,
-    categories: form.categories,
+    categories: fromPairs(form.categories.map((c) => [c.id, c.name])),
     privateInspection: form.private_inspection,
   };
 
@@ -188,5 +180,18 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
     // we are intentionally changing the state object reference so that the FlatList notices changes and rerenders
     // seems like immerJs does not play well with the virtualization
     return compose([isDirtySetter, fieldsSetter])(s) as PersistentState;
+  });
+};
+
+export const submitDraftAction = (assignmentId: number) => {
+  PersistentUserStore.update((s) => {
+    s.pendingUploads.push({
+      draft: s.drafts[assignmentId],
+      error: null,
+      progress: 0,
+      uploading: null,
+      photoUploadUrls: {},
+    });
+    delete s.drafts[assignmentId];
   });
 };

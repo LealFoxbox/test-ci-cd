@@ -2,7 +2,9 @@ import React from 'react';
 import { ListRenderItem } from 'react-native';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { FormikProps } from 'formik';
-import { find, set } from 'lodash/fp';
+import { differenceBy, find, set } from 'lodash/fp';
+import RNFS from 'react-native-fs';
+import { Title } from 'react-native-paper';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
@@ -42,23 +44,41 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
 export const createRenderCard = (
   { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
   { setExpandedPhoto, assignmentId, ratings, theme, goToSignature, goToRatingChoices }: CreateRenderCardParams,
-): ListRenderItem<DraftField> => {
+): ListRenderItem<DraftField | string> => {
   return ({ item: draftField }) => {
+    if (typeof draftField === 'string') {
+      if (!draftField) {
+        return null;
+      }
+
+      return <Title style={{ marginLeft: 10 }}>{draftField}</Title>;
+    }
+
     const fieldValue = values[draftField.formFieldId];
     const rating = ratings[fieldValue.rating_id];
 
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
     const handleTapPhoto = (index: number) => setExpandedPhoto({ index, photos: draftField.photos.map((p) => p.uri) });
-    const handleTakePhoto = (uri: string, isFromGallery: boolean) => {
+    const handleTakePhoto = ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
       const newPhoto: DraftPhoto = {
         isFromGallery,
         uri,
+        fileName,
         latitude: null, // Latitude where the inspection was started or first available location coordinates
         longitude: null, // Longitude where the inspection was started or first available location coordinates
         created_at: Date.now(), // timestamp in format "2020-01-08T14:52:56-07:00",
       };
 
       const newValues = set(`${draftField.formFieldId}.photos`, fieldValue.photos.concat([newPhoto]), values);
+
+      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      updateDraftFieldsAction(assignmentId, newValues);
+    };
+    const handleDeletePhoto = (photo: DraftPhoto) => {
+      const newPhotos = differenceBy({ uri: photo.uri }, fieldValue.photos, [photo]);
+      const newValues = set(`${draftField.formFieldId}.photos`, newPhotos, values);
+
+      void RNFS.unlink(photo.uri);
 
       setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
       updateDraftFieldsAction(assignmentId, newValues);
@@ -95,6 +115,7 @@ export const createRenderCard = (
       photos: fieldValue.photos,
       onTapPhoto: handleTapPhoto,
       onTakePhoto: handleTakePhoto,
+      onDeletePhoto: handleDeletePhoto,
       onDelete: handleDelete,
       allowDelete,
     };
@@ -146,29 +167,16 @@ export const createRenderCard = (
 
     if (fieldValue.ratingTypeId === 7 || fieldValue.ratingTypeId === 1) {
       const rangeChoices = rating.range_choices as RangeChoice[];
-      let selectedRangeChoice: RangeChoice | undefined;
-      if (fieldValue.ratingTypeId === 7) {
-        selectedRangeChoice =
-          fieldValue.points !== null
-            ? find({ points: fieldValue.points }, rangeChoices)
-            : find({ default: true }, rangeChoices);
-      } else {
-        selectedRangeChoice =
-          fieldValue.score !== null
-            ? find({ score: fieldValue.score }, rangeChoices)
-            : find({ default: true }, rangeChoices);
-      }
+
+      const selectedRangeChoice = fieldValue.selectedChoice || find({ default: true }, rangeChoices) || null;
 
       return (
         <RangeCard
           {...baseCardProps}
-          selectedRangeChoice={selectedRangeChoice || null}
+          selectedRangeChoice={selectedRangeChoice}
           rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
-            const newValues =
-              fieldValue.ratingTypeId === 7
-                ? set(`${draftField.formFieldId}.points`, choice.points, values)
-                : set(`${draftField.formFieldId}.score`, choice.score, values);
+            const newValues = set(`${draftField.formFieldId}.selectedChoice`, choice, values);
 
             setFieldValue(`${fieldValue.formFieldId}`, newValues[draftField.formFieldId]);
             updateDraftFieldsAction(assignmentId, newValues);
