@@ -193,6 +193,8 @@ export interface ScoreField extends BaseField {
   ratingTypeId: 1;
 
   selectedChoice: RangeChoice | null;
+  minPosition: number;
+  maxPosition: number;
 }
 
 export interface TextField extends BaseField {

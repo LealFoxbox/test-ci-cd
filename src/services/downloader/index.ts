@@ -48,10 +48,10 @@ function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices
 
 async function getMissingForms(forms: Record<string, Form>) {
   const distinctIds = await assignmentsDb.getDistinctFormIds();
-  const missingIds = distinctIds.filter((id) => !forms[id]);
+  const hadMissingIds = distinctIds.some((id) => !forms[id]);
 
-  if (missingIds.length > 0) {
-    return missingIds.filter((id) => isSecondsExpired(forms[id].lastDownloaded));
+  if (hadMissingIds) {
+    return distinctIds.filter((id) => !forms[id] || isSecondsExpired(forms[id].lastDownloaded));
   }
 
   return [];

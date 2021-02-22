@@ -23,7 +23,7 @@ export type InspectionsNavigatorParamList = {
     formId: null | number;
     structureId: null | number;
     assignmentId: null | number;
-    newPhoto?: { path: string; formFieldId: number };
+    newPhoto?: { path: string; fileName: string; formFieldId: number };
     rangeChoicesSelection?: {
       listChoiceIds: RangeChoice[];
       formFieldId: number;

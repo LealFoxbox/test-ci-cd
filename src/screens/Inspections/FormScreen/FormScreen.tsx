@@ -43,6 +43,7 @@ const EditFormScreen: React.FC<{}> = () => {
       const data: DraftPhoto = {
         isFromGallery: false,
         uri: newPhoto.path,
+        fileName: newPhoto.fileName,
         latitude: null, // TODO:
         longitude: null, // TODO:
         created_at: Date.now(),

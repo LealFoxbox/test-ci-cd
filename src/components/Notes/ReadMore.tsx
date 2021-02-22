@@ -32,26 +32,47 @@ const ReadMore: React.FC<
   const theme = useTheme();
 
   useLayoutEffect(() => {
+    let mounted = true;
+
     (async () => {
       if (!measured) {
         await nextFrameAsync();
+        if (!mounted) {
+          return;
+        }
         // Get the height of the text with no restriction on number of lines
         _fullHeight.current = await measureHeightAsync(_text.current);
+        if (!mounted) {
+          return;
+        }
         setMeasured(true);
       } else {
         if (shouldShowReadMore === null) {
           await nextFrameAsync();
+          if (!mounted) {
+            return;
+          }
           // Get the height of the text now that number of lines has been set
           const limitedHeight = await measureHeightAsync(_text.current);
+          if (!mounted) {
+            return;
+          }
 
           // TODO: this was triggered on an unmounted component somehow
           setShouldShowReadMore((_fullHeight.current || 0) > limitedHeight);
         } else {
           await nextFrameAsync();
+          if (!mounted) {
+            return;
+          }
           onReady && onReady();
         }
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, [measured, onReady, shouldShowReadMore]);
 
   return (
