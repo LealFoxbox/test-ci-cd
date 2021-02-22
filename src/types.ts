@@ -245,6 +245,7 @@ export interface DraftForm {
 
 export interface PendingUpload {
   draft: DraftForm;
+  photoUploadUrls: Record<string, string>; // key is the photo filename, value is the aws bucket photo url
   progress: number;
   error: string | null;
   uploading: 'photos' | 'form' | null;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { Divider } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import Row from 'src/components/Row';
@@ -31,7 +32,14 @@ const UploadsScreen: React.FC<{}> = () => {
           data={pendingUploads}
           ItemSeparatorComponent={Divider}
           renderItem={({ item }) => {
-            return <Row label={item.draft.name} value={`Progress ${item.progress}%`} icon="brush" />;
+            return (
+              <Row
+                label={item.draft.name}
+                value={`Progress ${item.progress}%`}
+                icon="file-document-outline"
+                IconComponent={MaterialCommunityIcons}
+              />
+            );
           }}
           keyExtractor={(item) => `${item.draft.guid}`}
         />
@@ -44,7 +52,14 @@ const UploadsScreen: React.FC<{}> = () => {
           data={uploads}
           ItemSeparatorComponent={Divider}
           renderItem={({ item }) => {
-            return <Row label={item.name} value={`Uploaded`} icon="brush" />;
+            return (
+              <Row
+                label={item.name}
+                value={`Uploaded`}
+                icon="file-document-outline"
+                IconComponent={MaterialCommunityIcons}
+              />
+            );
           }}
           keyExtractor={(item) => `${item.guid}`}
         />

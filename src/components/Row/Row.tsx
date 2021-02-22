@@ -23,17 +23,27 @@ interface RowProps {
   accessibilityLabel?: string;
   value?: React.ReactNode;
   icon?: string;
+  IconComponent?: typeof MaterialIcons;
   onPress?: () => void;
   spinner?: boolean;
   disabled?: boolean;
 }
 
-const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, disabled, spinner, onPress }) => {
+const Row: React.FC<RowProps> = ({
+  accessibilityLabel,
+  label,
+  value = null,
+  icon,
+  IconComponent = MaterialIcons,
+  disabled,
+  spinner,
+  onPress,
+}) => {
   const theme = useTheme();
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
       {spinner && <ActivityIndicator size="small" />}
-      {icon && !spinner && <MaterialIcons name={icon} size={24} color={theme.colors.placeholder} />}
+      {icon && !spinner && <IconComponent name={icon} size={24} color={theme.colors.placeholder} />}
       {!icon && !spinner && <View style={{ marginRight: 24 }} />}
       <Card.Content style={{ flex: 1 }}>
         <Title>{label}</Title>
@@ -56,10 +66,6 @@ const Row: React.FC<RowProps> = ({ accessibilityLabel, label, value, icon, disab
   }
 
   return <Container>{content}</Container>;
-};
-
-Row.defaultProps = {
-  value: null,
 };
 
 export default Row;

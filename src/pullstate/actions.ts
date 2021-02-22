@@ -185,7 +185,13 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
 
 export const submitDraftAction = (assignmentId: number) => {
   PersistentUserStore.update((s) => {
-    s.pendingUploads.push({ draft: s.drafts[assignmentId], error: null, progress: 0, uploading: null });
+    s.pendingUploads.push({
+      draft: s.drafts[assignmentId],
+      error: null,
+      progress: 0,
+      uploading: null,
+      photoUploadUrls: {},
+    });
     delete s.drafts[assignmentId];
   });
 };
