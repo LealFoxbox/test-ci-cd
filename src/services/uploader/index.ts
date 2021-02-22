@@ -31,10 +31,12 @@ function getPhotoUpload(upload: PendingUpload) {
   const allPhotos = flatMap('photos', upload.draft.fields) as DraftPhoto[];
   const index = allPhotos.findIndex((p) => !upload.photoUploadUrls[p.fileName]);
 
+  console.warn(JSON.stringify(allPhotos[index]));
+
   return {
     index,
     length: allPhotos.length,
-    photoUpload: allPhotos[index],
+    photoUpload: index === -1 ? null : allPhotos[index],
   };
 }
 
@@ -132,9 +134,9 @@ export function useUploader() {
 
         if (currentUpload && state === null) {
           const { index, length, photoUpload } = getPhotoUpload(currentUpload);
-          const nextPercentage = getPercentage(length, index);
 
-          if (index !== -1) {
+          if (photoUpload) {
+            const nextPercentage = getPercentage(length, index);
             void photoUploader(token, subdomain, currentUpload, photoUpload, nextPercentage);
           } else {
             formUploader(token, subdomain, currentUpload);

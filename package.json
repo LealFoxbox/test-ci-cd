@@ -29,6 +29,7 @@
     "@types/react-native-background-downloader": "^2.3.3",
     "@types/react-native-signature-capture": "^0.4.1",
     "@types/react-native-vector-icons": "^6.4.6",
+    "@types/uuid": "^8.3.0",
     "axios": "^0.20.0",
     "date-fns": "^2.16.1",
     "formik": "^2.1.5",
@@ -46,6 +47,7 @@
     "react-native-fs": "^2.16.6",
     "react-native-geolocation-service": "^5.0.0",
     "react-native-gesture-handler": "^1.8.0",
+    "react-native-get-random-values": "^1.6.0",
     "react-native-image-picker": "^3.1.4",
     "react-native-keyboard-aware-scroll-view": "^0.9.3",
     "react-native-local-mongodb": "^2.2.9",
@@ -63,6 +65,7 @@
     "retry-axios": "^2.3.0",
     "rn-fetch-blob": "^0.12.0",
     "styled-components": "^5.0.1",
+    "uuid": "^8.3.2",
     "yup": "^0.29.3"
   },
   "devDependencies": {

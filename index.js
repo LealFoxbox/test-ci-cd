@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { AppRegistry } from 'react-native';
 import 'react-native-gesture-handler';
+import 'react-native-get-random-values';
 import Flurry from 'react-native-flurry-sdk';
 import * as Sentry from '@sentry/react-native';
 

@@ -1,4 +1,5 @@
-import { compose, fromPairs, mapValues, set, uniqueId } from 'lodash/fp';
+import { compose, fromPairs, mapValues, set } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
@@ -104,6 +105,11 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
         return {
           ...baseField,
           selectedChoice: null,
+          minPosition: rating.range_choices.reduce(
+            (acc, curr) => Math.min(curr.position, acc),
+            rating.range_choices[0]?.position || Infinity,
+          ),
+          maxPosition: rating.range_choices.reduce((acc, curr) => Math.max(curr.position, acc), 0),
         } as ScoreField;
 
       case 3:
@@ -142,7 +148,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     structureId: assignment.structure_id,
     started_at: Date.now(),
     ended_at: null,
-    guid: `${Date.now()}${uniqueId('')}`,
+    guid: uuidv4() as string,
     flagged: false,
     private: form.private_inspection || false,
     latitude: null,

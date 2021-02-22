@@ -1,7 +1,8 @@
 import axios, { AxiosPromise } from 'axios';
 import RNFetchBlob from 'rn-fetch-blob';
+import { formatISO } from 'date-fns';
 
-import { PresignedPhoto } from 'src/types';
+import { PendingUpload, PresignedPhoto } from 'src/types';
 
 import { baseRaxConfig, getApiUrl } from './utils';
 
@@ -67,4 +68,122 @@ export const uploadPhotos = (params: UploadPhotoParams) => {
     },
     data,
   );
+};
+
+export interface SubmitInspectionParams {
+  pendingUpload: PendingUpload;
+
+  token: string;
+  companyId: string;
+}
+
+export interface SubmitInspectionResponse {
+  inspection: {
+    id: number;
+    inspection_event: {
+      id: number;
+      account_id: number;
+      name: null | string;
+      due_at: string;
+      original_due_at: string;
+      inspection_form_id: number;
+      structure_id: number;
+      inspection_id: number;
+      updated_at: string;
+      deleted_at: null | string;
+      display_name: string;
+      assignee: null | string;
+    };
+  };
+}
+
+export const submitInspection = (params: SubmitInspectionParams) => {
+  const {
+    pendingUpload: { draft, photoUploadUrls },
+  } = params;
+  return axios({
+    method: 'post',
+    url: `${getApiUrl(params.companyId)}/uploads/presigned_posts`,
+    withCredentials: false,
+    data: {
+      submission_token: draft.guid,
+      inspection_event_id: null, // TODO: check exactly what id is this
+      inspection: {
+        name: draft.name,
+        structure_id: draft.structureId,
+        inspection_form_id: draft.formId,
+        started_at: formatISO(draft.started_at),
+        ended_at: formatISO(draft.ended_at || Date.now()),
+        flagged: draft.flagged,
+        private: draft.private,
+        latitude: draft.latitude,
+        longitude: draft.longitude,
+        inspection_items: Object.values(draft.fields).map((f) => {
+          const common = {
+            name: f.name,
+            comment: f.comment,
+            rating_id: f.rating_id,
+            weight: f.weight,
+            position: f.position,
+            category_id: f.category_id,
+            description: f.description,
+            inspection_item_photos: f.photos.map((photo) => ({
+              source_type: photo.isFromGallery ? '2' : '1',
+              temporary_url: photoUploadUrls[photo.fileName],
+              latitude: photo.latitude,
+              longitude: photo.longitude,
+              created_at: formatISO(photo.created_at),
+            })),
+          };
+
+          if (f.ratingTypeId === 1) {
+            return {
+              ...common,
+              deficient: f.selectedChoice?.deficient,
+              range_choice_position: f.selectedChoice?.position,
+              range_choice_min_position: f.minPosition,
+              range_choice_max_position: f.maxPosition,
+              range_choice_label: f.selectedChoice?.label,
+              score: f.selectedChoice?.score,
+            };
+          }
+
+          if (f.ratingTypeId === 6) {
+            return {
+              ...common,
+
+              number_choice: f.number_choice,
+            };
+          }
+
+          if (f.ratingTypeId === 7) {
+            return {
+              ...common,
+
+              range_choice_label: f.selectedChoice?.label,
+              deficient: f.selectedChoice?.deficient,
+              range_choice_position: f.selectedChoice?.position,
+              points: f.selectedChoice?.points,
+            };
+          }
+
+          if (f.ratingTypeId === 8 || f.ratingTypeId === 9) {
+            return {
+              ...common,
+
+              list_choice_ids: f.list_choice_ids,
+            };
+          }
+
+          return common;
+        }),
+      },
+    },
+    raxConfig: baseRaxConfig,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'cache-control': 'no-cache',
+    },
+  }) as AxiosPromise<SubmitInspectionResponse>;
 };

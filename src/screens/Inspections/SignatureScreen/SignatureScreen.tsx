@@ -51,12 +51,12 @@ const SignatureScreen: React.FC = () => {
         style={{ flex: 1, width: '100%' }}
         ref={signatureRef}
         onSaveEvent={({ encoded }) => {
-          // const imageBase64 = `data:image/png;base64,${encoded}`;
+          const fileName = `signature - ${Date.now()}.png`;
 
-          const path = `${directories.documents}/signature - ${Date.now()}.png`;
+          const path = `${directories.documents}/${fileName}`;
           RNFS.writeFile(path, encoded, 'base64')
             .then(() => {
-              navigation.navigate(INSPECTIONS_FORM, { newPhoto: { path, formFieldId } });
+              navigation.navigate(INSPECTIONS_FORM, { newPhoto: { path, fileName, formFieldId } });
             })
             .catch((err) => {
               console.warn('RNFS writefile error: ', JSON.stringify(err));
