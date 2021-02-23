@@ -230,7 +230,7 @@ export interface DraftForm {
   assignmentId: number;
   formId: number;
   structureId: number;
-  started_at: number;
+  started_at: number | null;
   ended_at: number | null;
   guid: string; // random unique token created in the frontend. It's basically `${Date.now()}${uniqueId('')}`
   isDirty: boolean;
@@ -245,12 +245,15 @@ export interface DraftForm {
   fields: Record<string, DraftField>; // formFieldId is the key
 }
 
+export interface DraftFormUpload extends DraftForm {
+  started_at: number;
+  ended_at: number;
+}
+
 export interface PendingUpload {
-  draft: DraftForm;
+  draft: DraftFormUpload;
   photoUploadUrls: Record<string, string>; // key is the photo filename, value is the aws bucket photo url
-  progress: number;
-  error: string | null;
-  uploading: 'photos' | 'form' | null;
+  submittedAt: number | null;
 }
 
 export interface PresignedPhoto {

@@ -9,10 +9,11 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { DraftPhoto, PendingUpload } from 'src/types';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
 import { UploadStore } from 'src/pullstate/uploadStore';
+import { UploadStoreState } from 'src/pullstate/uploadStore/initialState';
 
-import { presignPhotos, uploadPhotos } from '../api/uploads';
+import { presignPhotos, submitInspection, uploadPhotos } from '../api/uploads';
 
-import { savePhotoUploadUrl, setUploadProgress, setUploadingStateAction } from './actions';
+import { savePhotoUploadUrl, setFormSubmittedAction, setUploadProgress, setUploadingStateAction } from './actions';
 
 const FLAGS = {
   loggedIn: false,
@@ -20,18 +21,19 @@ const FLAGS = {
 
 // index starts from zero and represents the currently uploaded photo
 function getPercentage(photoCount: number, index: number) {
-  return (index + 1) / (photoCount + 1);
+  return (100 * (index + 1)) / (photoCount + 1);
 }
 
-function getCurrentUpload(pendingUploads: PendingUpload[]) {
-  return pendingUploads.find((u) => !u.error);
+function getCurrentUpload(pendingUploads: PendingUpload[], uploadStoreState: UploadStoreState) {
+  return pendingUploads.find((p) => {
+    const { guid } = p.draft;
+    return !uploadStoreState[guid]?.error;
+  });
 }
 
 function getPhotoUpload(upload: PendingUpload) {
   const allPhotos = flatMap('photos', upload.draft.fields) as DraftPhoto[];
   const index = allPhotos.findIndex((p) => !upload.photoUploadUrls[p.fileName]);
-
-  console.warn(JSON.stringify(allPhotos[index]));
 
   return {
     index,
@@ -49,14 +51,14 @@ async function photoUploader(
 ) {
   setUploadingStateAction(upload, 'photos');
 
-  console.warn('UPLOADING ', photo.fileName);
+  console.warn('photoUploader init of file ', photo.fileName);
 
   let file: string | undefined;
 
   try {
     file = await RNFS.readFile(photo.uri, 'base64');
   } catch (e) {
-    console.warn('file read error for photoupload: ', e);
+    console.warn('photoUploader: file read error for photoupload: ', e);
   }
 
   if (file) {
@@ -72,10 +74,9 @@ async function photoUploader(
       const data = Object.values(presign.data.presignedPosts)[0];
 
       let uploadPhotoError: string | null = null;
-      let success = null;
 
       try {
-        success = await uploadPhotos({
+        await uploadPhotos({
           url: data.url,
           file,
           fileName: photo.fileName,
@@ -86,17 +87,16 @@ async function photoUploader(
       }
 
       if (!uploadPhotoError) {
-        console.warn('upload response: ', JSON.stringify(success), ' of type ', typeof success);
-        console.warn('UPLOADED ', photo.fileName, ' with url result: ', data['object-url']);
+        console.warn('photoUploader success with file ', photo.fileName);
 
         savePhotoUploadUrl(upload, photo.fileName, data['object-url']);
         setUploadProgress(upload, nextPercentage);
       } else {
-        console.warn('uploadPhotoError: ', uploadPhotoError);
+        console.warn('photoUploader uploadPhotoError: ', uploadPhotoError);
       }
     } else {
       console.warn(
-        'presignPhotoError: ',
+        'photoUploader presignPhotoError: ',
         presignPhotoError,
         ' and presign is ',
         presign ? ' correctly set' : ' undefined',
@@ -107,11 +107,19 @@ async function photoUploader(
   setUploadingStateAction(upload, null);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function formUploader(token: string, subdomain: string, upload: PendingUpload) {
-  // setUploadingStateAction(upload, 'form');
-  // logic goes here
-  // setUploadingStateAction(upload, null);
+async function formUploader(token: string, companyId: string, pendingUpload: PendingUpload) {
+  setUploadingStateAction(pendingUpload, 'form');
+
+  console.warn('formUploader init: ', pendingUpload.draft.guid);
+
+  const [submitError] = await axiosCatchTo(submitInspection({ pendingUpload, token, companyId }));
+
+  if (!submitError) {
+    console.warn('formUploader SUCCESS!');
+    setFormSubmittedAction(pendingUpload);
+  } else {
+    console.warn('formUploader submitError: ', submitError);
+  }
 }
 
 export function useUploader() {
@@ -129,7 +137,7 @@ export function useUploader() {
     } else if (shouldTrigger && subdomain) {
       FLAGS.loggedIn = true;
       if (inspectionsEnabled && connected) {
-        const currentUpload = getCurrentUpload(pendingUploads);
+        const currentUpload = getCurrentUpload(pendingUploads, uploadStoreState);
         const state = currentUpload && getUploadState(uploadStoreState, currentUpload?.draft.guid).state;
 
         if (currentUpload && state === null) {
@@ -139,7 +147,7 @@ export function useUploader() {
             const nextPercentage = getPercentage(length, index);
             void photoUploader(token, subdomain, currentUpload, photoUpload, nextPercentage);
           } else {
-            formUploader(token, subdomain, currentUpload);
+            void formUploader(token, subdomain, currentUpload);
           }
         }
       }
