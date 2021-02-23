@@ -22,7 +22,7 @@ export type PersistentState = {
 
   drafts: Record<string, DraftForm>; // the key is assignmentId
   pendingUploads: PendingUpload[];
-  uploads: DraftForm[];
+  uploads: PendingUpload[];
 };
 
 export const initialState: PersistentState = {

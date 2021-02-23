@@ -18,15 +18,27 @@ export const structures = {
     const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
 
     useEffect(() => {
+      let mounted = true;
+
       (async () => {
         if (isMongoComplete) {
           if (id) {
             await structuresDb.loadPromise;
+            if (!mounted) {
+              return;
+            }
             setData((await structuresDb.get(id)) || null);
+            if (!mounted) {
+              return;
+            }
           }
           setIsloading(false);
         }
       })();
+
+      return () => {
+        mounted = false;
+      };
     }, [id, isMongoComplete]);
 
     return [data, isLoading];
@@ -38,33 +50,44 @@ export const structures = {
     const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
 
     useEffect(() => {
+      let mounted = true;
+
       (async () => {
         await structuresDb.loadPromise;
         if (isMongoComplete) {
           setIsloading(true);
 
           if (parentId) {
-            setData({
+            const newData = {
               parent: (await structuresDb.get(parentId)) || null,
               children: await structuresDb.getChildren(parentId),
-            });
+            };
+
+            mounted && setData(newData);
           } else {
             const children = await structuresDb.getBase();
-            if (children.length > 1) {
-              setData({
-                parent: null,
-                children,
-              });
-            } else {
-              setData({
-                parent: (await structuresDb.get(children[0].id)) || null,
-                children: await structuresDb.getChildren(children[0].id),
-              });
+            if (mounted) {
+              if (children.length > 1) {
+                setData({
+                  parent: null,
+                  children,
+                });
+              } else {
+                const newData = {
+                  parent: (await structuresDb.get(children[0].id)) || null,
+                  children: await structuresDb.getChildren(children[0].id),
+                };
+                mounted && setData(newData);
+              }
             }
           }
         }
-        setIsloading(false);
+        mounted && setIsloading(false);
       })();
+
+      return () => {
+        mounted = false;
+      };
     }, [parentId, isMongoComplete]);
 
     return [data, isLoading, isMongoComplete];
@@ -77,18 +100,27 @@ export const assignments = {
     const [isLoading, setIsloading] = useState(true);
 
     useEffect(() => {
+      let mounted = true;
+
       (async () => {
         if (id) {
           await assignmentsDb.loadPromise;
-          const result = await assignmentsDb.getAssignments(id);
+          if (mounted) {
+            const result = await assignmentsDb.getAssignments(id);
 
-          setData(
-            result.sort((a, b) => {
-              return forms[a.inspection_form_id].name.localeCompare(forms[b.inspection_form_id].name);
-            }),
-          );
+            mounted &&
+              setData(
+                result.sort((a, b) => {
+                  return forms[a.inspection_form_id].name.localeCompare(forms[b.inspection_form_id].name);
+                }),
+              );
+          }
         }
-        setIsloading(false);
+        mounted && setIsloading(false);
+
+        return () => {
+          mounted = false;
+        };
       })();
     }, [forms, id]);
 
@@ -100,10 +132,16 @@ export function useIsMongoLoaded() {
   const [data, setData] = useState<boolean>(false);
 
   useEffect(() => {
+    let mounted = true;
+
     (async () => {
       await Promise.all([assignmentsDb.loadPromise, structuresDb.loadPromise]);
-      setData(true);
+      mounted && setData(true);
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return data;

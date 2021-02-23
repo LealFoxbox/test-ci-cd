@@ -1,12 +1,14 @@
-import { compose, fromPairs, mapValues, set } from 'lodash/fp';
+import { compose, fromPairs, mapValues, omit, pick, sample, sampleSize, set } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
+import config from 'src/config';
 import {
   Assignment,
   DraftField,
   DraftForm,
+  DraftFormUpload,
   Form,
   NumberField,
   PointsField,
@@ -18,14 +20,18 @@ import {
   User,
 } from 'src/types';
 
+import { initialState as downloadInitialState } from './downloadStore/initialState';
 import { DownloadStore } from './downloadStore';
-import { PersistentState, initialState } from './persistentStore/initialState';
+import { PersistentState, initialState as persistentInitialState } from './persistentStore/initialState';
 import { PersistentUserStore } from './persistentStore';
 
 export const loginAction = (user: User) => {
   PersistentUserStore.update((s) => {
-    s.userData = user;
-    s.status = 'loggedIn';
+    return {
+      ...s,
+      userData: user,
+      status: 'loggedIn',
+    };
   });
 };
 
@@ -33,48 +39,55 @@ export const logoutAction = async () => {
   await deleteAllJSONFiles();
   await cleanMongo();
 
-  PersistentUserStore.update((s) => {
-    for (const key of Object.keys(s)) {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      s[key] = initialState[key];
-    }
-    s.status = 'shouldLogIn';
+  PersistentUserStore.update(() => {
+    return {
+      ...persistentInitialState,
+      status: 'shouldLogIn',
+    };
   });
 };
 
 export const setStagingAction = (isStaging: boolean) => {
   PersistentUserStore.update((s) => {
-    s.isStaging = isStaging;
+    return {
+      ...s,
+      isStaging,
+    };
   });
 };
 
 export const updateStructuresMeta = (currentPage: number, totalPages: number) => {
   PersistentUserStore.update((s) => {
-    s.structuresDbMeta = { currentPage, totalPages };
+    return {
+      ...s,
+      structuresDbMeta: { currentPage, totalPages },
+    };
   });
 };
 
 export const updateAssignmentsMeta = (currentPage: number, totalPages: number) => {
   PersistentUserStore.update((s) => {
-    s.assignmentsDbMeta = { currentPage, totalPages };
+    return {
+      ...s,
+      assignmentsDbMeta: { currentPage, totalPages },
+    };
   });
 };
 
 export async function clearInspectionsDataAction() {
   await deleteAllJSONFiles();
   await cleanMongo();
-  DownloadStore.update((s) => {
-    s.progress = 0;
-    s.error = null;
-  });
+
+  DownloadStore.update(() => downloadInitialState);
+
   PersistentUserStore.update((s) => {
-    s.forms = initialState.forms;
-    s.ratings = initialState.ratings;
-    s.ratingsDownloaded = initialState.ratingsDownloaded;
-    s.assignmentsDbMeta = initialState.assignmentsDbMeta;
-    s.structuresDbMeta = initialState.structuresDbMeta;
-    s.lastUpdated = initialState.lastUpdated;
+    return {
+      ...s,
+      ...pick(
+        ['forms', 'ratings', 'ratingsDownloaded', 'assignmentsDbMeta', 'structuresDbMeta', 'lastUpdated'],
+        persistentInitialState,
+      ),
+    };
   });
 }
 
@@ -146,7 +159,7 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
     assignmentId: assignment.id,
     formId: form.id,
     structureId: assignment.structure_id,
-    started_at: Date.now(),
+    started_at: null,
     ended_at: null,
     guid: uuidv4() as string,
     flagged: false,
@@ -164,10 +177,71 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
   return result;
 }
 
+function makeString() {
+  return Math.random().toString(36).substring(7);
+}
+
+function createMockDraftForm(form: Form, assignment: Assignment, ratings: Record<string, Rating>) {
+  const emptyDraftForm = createEmptyDraftForm(form, assignment, ratings);
+
+  return {
+    ...emptyDraftForm,
+    started_at: Date.now(),
+    isDirty: true,
+    fields: mapValues((field) => {
+      const rating = ratings[field.rating_id];
+
+      const baseField = {
+        ...field,
+        comment: makeString(),
+        photos: [],
+      };
+
+      switch (rating.rating_type_id) {
+        case 1:
+          return {
+            ...baseField,
+            selectedChoice: sample(rating.range_choices),
+          } as ScoreField;
+
+        case 6:
+          return {
+            ...baseField,
+            number_choice: Math.floor(Math.random() * 100).toString(),
+          } as NumberField;
+        case 7:
+          return {
+            ...baseField,
+
+            selectedChoice: sample(rating.range_choices),
+          } as PointsField;
+        case 8:
+          return {
+            ...baseField,
+            list_choice_ids: [sample(rating.range_choices)?.id],
+          } as SelectField;
+        case 9:
+          return {
+            ...baseField,
+            list_choice_ids: sampleSize(
+              Math.floor(Math.random() * rating.range_choices.length) + 1,
+              rating.range_choices,
+            ).map((c) => c.id),
+          } as SelectField;
+
+        default:
+          return baseField as TextField;
+      }
+    }, emptyDraftForm.fields),
+  };
+}
+
 export const initFormDraftAction = (form: Form, assignment: Assignment, ratings: Record<string, Rating>) => {
   PersistentUserStore.update((s) => {
     if (!s.drafts[assignment.id]) {
-      return set(`drafts.${assignment.id}`, createEmptyDraftForm(form, assignment, ratings), s);
+      const createForm = config.MOCKS.FORM ? createMockDraftForm : createEmptyDraftForm;
+
+      return set(`drafts.${assignment.id}`, createForm(form, assignment, ratings), s);
     }
 
     return s;
@@ -175,29 +249,42 @@ export const initFormDraftAction = (form: Form, assignment: Assignment, ratings:
 };
 
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
-  PersistentUserStore.update((s) => {
-    const isDirtySetter = set(`drafts.${assignmentId}.isDirty`, true);
+  PersistentUserStore.update((persistentState) => {
+    // we are returning a new state instead of using imer's features because we want to intentionally change the state object reference
+    // so that the FlatList notices changes and rerenders, this may be unnnecessary and needs more experimentation
 
-    const fieldsSetter = set(
-      `drafts.${assignmentId}.fields`,
-      mapValues((field) => set('comment', field.comment || null, field), formValues),
-    );
-
-    // we are intentionally changing the state object reference so that the FlatList notices changes and rerenders
-    // seems like immerJs does not play well with the virtualization
-    return compose([isDirtySetter, fieldsSetter])(s) as PersistentState;
+    return compose([
+      // set draft as dirty
+      set(`drafts.${assignmentId}.isDirty`, true),
+      // set started_at if not already set
+      (s: PersistentState) =>
+        s.drafts[assignmentId].started_at ? s : set(`drafts.${assignmentId}.started_at`, Date.now(), s),
+      // set all of form's values to draft's fields but with comments as null if they are empty
+      set(
+        `drafts.${assignmentId}.fields`,
+        mapValues((field) => set('comment', field.comment || null, field), formValues),
+      ),
+    ])(persistentState) as PersistentState;
   });
 };
 
 export const submitDraftAction = (assignmentId: number) => {
   PersistentUserStore.update((s) => {
-    s.pendingUploads.push({
-      draft: s.drafts[assignmentId],
-      error: null,
-      progress: 0,
-      uploading: null,
-      photoUploadUrls: {},
-    });
-    delete s.drafts[assignmentId];
+    const uploadDraft = {
+      ...s.drafts[assignmentId],
+      ended_at: Date.now(),
+    } as DraftFormUpload;
+
+    return {
+      ...s,
+      drafts: omit([assignmentId.toString()], s.drafts),
+      pendingUploads: s.pendingUploads.concat([
+        {
+          draft: uploadDraft,
+          photoUploadUrls: {},
+          submittedAt: null,
+        },
+      ]),
+    };
   });
 };
