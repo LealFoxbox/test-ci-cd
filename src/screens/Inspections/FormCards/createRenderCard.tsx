@@ -66,7 +66,7 @@ export const createRenderCard = (
         fileName,
         latitude: null, // Latitude where the inspection was started or first available location coordinates
         longitude: null, // Longitude where the inspection was started or first available location coordinates
-        created_at: Date.now(), // timestamp in format "2020-01-08T14:52:56-07:00",
+        created_at: Date.now(), // timestamp in unix time
       };
 
       const newValues = set(`${draftField.formFieldId}.photos`, fieldValue.photos.concat([newPhoto]), values);

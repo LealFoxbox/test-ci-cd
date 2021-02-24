@@ -15,7 +15,7 @@ export type InspectionsNavigatorParamList = {
     title: string;
   };
   [INSPECTIONS_FORM_LIST]: {
-    parentId: null | number;
+    parentId: number;
     title: string;
   };
   [INSPECTIONS_FORM]: {
@@ -48,7 +48,6 @@ const InspectionsNavigator: React.FC = () => {
         name={INSPECTIONS_FORM_LIST}
         component={InspectionsFormListScreen}
         initialParams={{
-          parentId: null,
           title: 'Inspections',
         }}
       />

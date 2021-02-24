@@ -14,7 +14,7 @@ const BlankScreen: React.FC = () => {
   return (
     <BlankContentContainer>
       <Title>No Uploads</Title>
-      <Paragraph style={{ marginTop: 0 }}>You don't have any uploads.</Paragraph>
+      <Paragraph style={{ marginTop: 0 }}>You've not submitted an inspection yet.</Paragraph>
     </BlankContentContainer>
   );
 };

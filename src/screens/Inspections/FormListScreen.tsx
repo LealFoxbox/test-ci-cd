@@ -11,6 +11,7 @@ import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { initFormDraftAction } from 'src/pullstate/actions';
+import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import BlankScreen from './BlankScreen';
 
@@ -27,7 +28,7 @@ const FormListScreen: React.FC<{}> = () => {
 
   const navigation = useNavigation();
 
-  if (isLoading) {
+  if (isLoading || !structure) {
     return <LoadingOverlay />;
   }
 
@@ -46,14 +47,12 @@ const FormListScreen: React.FC<{}> = () => {
           }}
           ListHeaderComponent={() => (
             <>
-              {!!structure && (
+              {!!structure.location_path && (
                 <View style={{ backgroundColor: theme.colors.surface, paddingTop: 30, paddingHorizontal: 30 }}>
-                  {!!structure?.location_path && (
-                    <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
-                  )}
+                  <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
                 </View>
               )}
-              <Notes value={structure?.notes} style={{ padding: 30 }} />
+              <Notes value={structure.notes} style={{ padding: 30 }} />
             </>
           )}
           data={assignments}
@@ -67,8 +66,20 @@ const FormListScreen: React.FC<{}> = () => {
               <NavRow
                 label={label}
                 icon={hasDraft ? 'file-document' : 'file-document-outline'}
-                onPress={() => {
-                  initFormDraftAction(form, item, ratings);
+                onPress={async () => {
+                  let coords: { latitude: number | null; longitude: number | null } = {
+                    latitude: null,
+                    longitude: null,
+                  };
+
+                  try {
+                    const position = await getCurrentPosition();
+                    coords = position.coords;
+                  } catch (e) {
+                    console.warn('getCurrentPosition failed with error: ', e);
+                  }
+
+                  initFormDraftAction({ form, assignmentId: item.id, ratings, coords, structure });
 
                   navigation.navigate(INSPECTIONS_FORM, {
                     formId: item.inspection_form_id,

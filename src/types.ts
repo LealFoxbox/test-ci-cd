@@ -237,6 +237,7 @@ export interface DraftForm {
   notes: string | null;
   categories: Record<string, string>; // key is categoryId, values is the name
   privateInspection: boolean;
+  locationPath: string;
 
   flagged: boolean; // if the user toggles the flagged button
   private: boolean; // if the user toggles the private button or if the originating inspection_form was private

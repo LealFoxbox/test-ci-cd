@@ -5,7 +5,6 @@ import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
 import config from 'src/config';
 import {
-  Assignment,
   DraftField,
   DraftForm,
   DraftFormUpload,
@@ -16,6 +15,7 @@ import {
   ScoreField,
   SelectField,
   SignatureField,
+  Structure,
   TextField,
   User,
 } from 'src/types';
@@ -93,7 +93,15 @@ export async function clearInspectionsDataAction() {
 
 // FORM ACTIONS
 
-function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Record<string, Rating>) {
+interface FormCreationParams {
+  form: Form;
+  assignmentId: number;
+  ratings: Record<string, Rating>;
+  structure: Structure;
+  coords: { latitude: number | null; longitude: number | null };
+}
+
+function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }: FormCreationParams) {
   const fields = form.inspection_form_items.map((field) => {
     const rating = ratings[field.rating_id];
 
@@ -156,22 +164,23 @@ function createEmptyDraftForm(form: Form, assignment: Assignment, ratings: Recor
 
   const result: DraftForm = {
     name: form.name,
-    assignmentId: assignment.id,
+    assignmentId: assignmentId,
     formId: form.id,
-    structureId: assignment.structure_id,
+    structureId: structure.id,
     started_at: null,
     ended_at: null,
-    guid: uuidv4() as string,
+    guid: uuidv4(),
     flagged: false,
     private: form.private_inspection || false,
-    latitude: null,
-    longitude: null,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
     fields: fromPairs(fields.map((field) => [field.formFieldId, field])),
     isDirty: false,
 
     notes: form.notes,
     categories: fromPairs(form.categories.map((c) => [c.id, c.name])),
     privateInspection: form.private_inspection,
+    locationPath: structure.location_path || structure.display_name,
   };
 
   return result;
@@ -181,15 +190,15 @@ function makeString() {
   return Math.random().toString(36).substring(7);
 }
 
-function createMockDraftForm(form: Form, assignment: Assignment, ratings: Record<string, Rating>) {
-  const emptyDraftForm = createEmptyDraftForm(form, assignment, ratings);
+function createMockDraftForm(params: FormCreationParams) {
+  const emptyDraftForm = createEmptyDraftForm(params);
 
   return {
     ...emptyDraftForm,
     started_at: Date.now(),
     isDirty: true,
     fields: mapValues((field) => {
-      const rating = ratings[field.rating_id];
+      const rating = params.ratings[field.rating_id];
 
       const baseField = {
         ...field,
@@ -236,12 +245,12 @@ function createMockDraftForm(form: Form, assignment: Assignment, ratings: Record
   };
 }
 
-export const initFormDraftAction = (form: Form, assignment: Assignment, ratings: Record<string, Rating>) => {
+export const initFormDraftAction = (params: FormCreationParams) => {
   PersistentUserStore.update((s) => {
-    if (!s.drafts[assignment.id]) {
+    if (!s.drafts[params.assignmentId]) {
       const createForm = config.MOCKS.FORM ? createMockDraftForm : createEmptyDraftForm;
 
-      return set(`drafts.${assignment.id}`, createForm(form, assignment, ratings), s);
+      return set(`drafts.${params.assignmentId}`, createForm(params), s);
     }
 
     return s;
