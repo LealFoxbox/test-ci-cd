@@ -2,6 +2,13 @@
 import { DefaultTheme, withTheme as paperWithTheme } from 'react-native-paper';
 import * as styledComponents from 'styled-components/native';
 
+const customColors = {
+  deficient: '#FF3333',
+  gps: '#007AFE',
+};
+
+type CustomColors = typeof customColors;
+
 const paperTheme = {
   ...DefaultTheme,
   colors: {
@@ -16,17 +23,15 @@ const paperTheme = {
     onSurface: '#FF9400',
     notification: '#FF9400',
 
-    // custom colors:
-    deficient: '#FF3333',
+    ...customColors,
   },
 };
 
 // Fix the type according to https://callstack.github.io/react-native-paper/theming.html#typescript
 declare global {
   namespace ReactNativePaper {
-    interface ThemeColors {
-      deficient: string;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface ThemeColors extends CustomColors {}
   }
 }
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Divider, Title, useTheme } from 'react-native-paper';
+import { Button, Divider, Title, useTheme } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList, View } from 'react-native';
+import { isEmpty } from 'lodash/fp';
 
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import NavRow from 'src/components/NavRow';
@@ -13,6 +14,7 @@ import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigat
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
 import { styled } from 'src/paperTheme';
+import config from 'src/config';
 
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
@@ -30,6 +32,7 @@ const InspectionsScreen: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => s);
+  const drafts = PersistentUserStore.useState((s) => s.drafts);
   const [{ parent, children }, isLoading, isComplete] = dbHooks.structures.useInspection(parentId);
   const theme = useTheme();
   const [isReady, onReady] = useResult<undefined>();
@@ -62,16 +65,32 @@ const InspectionsScreen: React.FC<{}> = () => {
           }}
           data={children}
           ItemSeparatorComponent={Divider}
-          ListHeaderComponent={() => (
+          ListHeaderComponent={
             <>
               {!!parentId && !!parent && (
                 <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
                   {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
                 </View>
               )}
+
+              {!parentId && config.MOCKS.DELETE_BUTTONS && config.isDev && !isEmpty(drafts) && (
+                <Button
+                  onPress={() =>
+                    PersistentUserStore.update((s) => {
+                      s.drafts = {};
+                    })
+                  }
+                  mode="contained"
+                  dark
+                  style={{ margin: 10 }}
+                >
+                  Delete Drafts
+                </Button>
+              )}
+
               <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
             </>
-          )}
+          }
           renderItem={({ item }) => (
             <NavRow
               label={item.display_name}

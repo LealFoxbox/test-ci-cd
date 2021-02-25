@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Divider, Title, useTheme } from 'react-native-paper';
@@ -11,6 +11,8 @@ import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { initFormDraftAction } from 'src/pullstate/actions';
+import getCurrentPosition from 'src/utils/getCurrentPosition';
+import { useResult } from 'src/utils/useResult';
 
 import BlankScreen from './BlankScreen';
 
@@ -22,12 +24,13 @@ const FormListScreen: React.FC<{}> = () => {
   const drafts = PersistentUserStore.useState((s) => s.drafts);
   const ratings = PersistentUserStore.useState((s) => s.ratings);
   const [structure] = dbHooks.structures.useGet(parentId);
-  const [assignments, isLoading] = dbHooks.assignments.useGetAssignments(parentId, forms);
+  const [assignments, isLoadingAssignments] = dbHooks.assignments.useGetAssignments(parentId, forms);
   const theme = useTheme();
-
+  const [isReady, onReady] = useResult<undefined>();
+  const [isFetchingGpsCoords, setIsFetchingGpsCoords] = useState(false);
   const navigation = useNavigation();
 
-  if (isLoading) {
+  if (isLoadingAssignments || !structure) {
     return <LoadingOverlay />;
   }
 
@@ -44,18 +47,16 @@ const FormListScreen: React.FC<{}> = () => {
           contentContainerStyle={{
             justifyContent: 'flex-start',
           }}
-          ListHeaderComponent={() => (
+          ListHeaderComponent={
             <>
-              {!!structure && (
+              {!!structure.location_path && (
                 <View style={{ backgroundColor: theme.colors.surface, paddingTop: 30, paddingHorizontal: 30 }}>
-                  {!!structure?.location_path && (
-                    <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
-                  )}
+                  <Title style={{ fontWeight: 'bold' }}>{structure.location_path}</Title>
                 </View>
               )}
-              <Notes value={structure?.notes} style={{ padding: 30 }} />
+              <Notes value={structure.notes} onReady={onReady} style={{ padding: 30 }} />
             </>
-          )}
+          }
           data={assignments}
           ItemSeparatorComponent={Divider}
           renderItem={({ item }) => {
@@ -67,8 +68,23 @@ const FormListScreen: React.FC<{}> = () => {
               <NavRow
                 label={label}
                 icon={hasDraft ? 'file-document' : 'file-document-outline'}
-                onPress={() => {
-                  initFormDraftAction(form, item, ratings);
+                onPress={async () => {
+                  if (!drafts[item.id]) {
+                    setIsFetchingGpsCoords(true);
+                    let coords: { latitude: number | null; longitude: number | null } = {
+                      latitude: null,
+                      longitude: null,
+                    };
+
+                    try {
+                      const position = await getCurrentPosition();
+                      coords = position.coords;
+                    } catch (e) {
+                      console.warn('getCurrentPosition failed with error: ', e);
+                    }
+
+                    initFormDraftAction({ form, assignmentId: item.id, ratings, coords, structure });
+                  }
 
                   navigation.navigate(INSPECTIONS_FORM, {
                     formId: item.inspection_form_id,
@@ -76,6 +92,8 @@ const FormListScreen: React.FC<{}> = () => {
                     assignmentId: item.id,
                     title: label,
                   });
+
+                  setIsFetchingGpsCoords(false);
                 }}
               />
             );
@@ -83,6 +101,7 @@ const FormListScreen: React.FC<{}> = () => {
           keyExtractor={(item) => `${item.id}`}
         />
       )}
+      {(!isReady || isFetchingGpsCoords) && <LoadingOverlay />}
     </View>
   );
 };

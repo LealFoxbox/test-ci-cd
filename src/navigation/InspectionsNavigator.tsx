@@ -15,14 +15,14 @@ export type InspectionsNavigatorParamList = {
     title: string;
   };
   [INSPECTIONS_FORM_LIST]: {
-    parentId: null | number;
+    parentId: number;
     title: string;
   };
   [INSPECTIONS_FORM]: {
     title: string;
-    formId: null | number;
-    structureId: null | number;
-    assignmentId: null | number;
+    formId: number;
+    structureId: number;
+    assignmentId: number;
     newPhoto?: { path: string; fileName: string; formFieldId: number };
     rangeChoicesSelection?: {
       listChoiceIds: RangeChoice[];
@@ -48,7 +48,6 @@ const InspectionsNavigator: React.FC = () => {
         name={INSPECTIONS_FORM_LIST}
         component={InspectionsFormListScreen}
         initialParams={{
-          parentId: null,
           title: 'Inspections',
         }}
       />

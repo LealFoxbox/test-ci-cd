@@ -8,6 +8,7 @@ import { Title } from 'react-native-paper';
 
 import { updateDraftFieldsAction } from 'src/pullstate/actions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
+import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import TextCard from './TextCard';
 import NumberCard from './NumberCard';
@@ -59,14 +60,26 @@ export const createRenderCard = (
 
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
     const handleTapPhoto = (index: number) => setExpandedPhoto({ index, photos: draftField.photos.map((p) => p.uri) });
-    const handleTakePhoto = ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
+    const handleTakePhoto = async ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
+      let coords: { latitude: number | null; longitude: number | null } = {
+        latitude: null,
+        longitude: null,
+      };
+
+      try {
+        const position = await getCurrentPosition();
+        coords = position.coords;
+      } catch (e) {
+        console.warn('photo getCurrentPosition failed with error: ', e);
+      }
+
       const newPhoto: DraftPhoto = {
         isFromGallery,
         uri,
         fileName,
-        latitude: null, // Latitude where the inspection was started or first available location coordinates
-        longitude: null, // Longitude where the inspection was started or first available location coordinates
-        created_at: Date.now(), // timestamp in format "2020-01-08T14:52:56-07:00",
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        created_at: Date.now(),
       };
 
       const newValues = set(`${draftField.formFieldId}.photos`, fieldValue.photos.concat([newPhoto]), values);
