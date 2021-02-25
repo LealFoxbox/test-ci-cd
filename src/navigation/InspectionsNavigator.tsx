@@ -20,9 +20,9 @@ export type InspectionsNavigatorParamList = {
   };
   [INSPECTIONS_FORM]: {
     title: string;
-    formId: null | number;
-    structureId: null | number;
-    assignmentId: null | number;
+    formId: number;
+    structureId: number;
+    assignmentId: number;
     newPhoto?: { path: string; fileName: string; formFieldId: number };
     rangeChoicesSelection?: {
       listChoiceIds: RangeChoice[];

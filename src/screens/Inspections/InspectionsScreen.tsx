@@ -65,7 +65,7 @@ const InspectionsScreen: React.FC<{}> = () => {
           }}
           data={children}
           ItemSeparatorComponent={Divider}
-          ListHeaderComponent={() => (
+          ListHeaderComponent={
             <>
               {!!parentId && !!parent && (
                 <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
@@ -90,7 +90,7 @@ const InspectionsScreen: React.FC<{}> = () => {
 
               <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
             </>
-          )}
+          }
           renderItem={({ item }) => (
             <NavRow
               label={item.display_name}

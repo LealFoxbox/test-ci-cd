@@ -1,4 +1,4 @@
-import { compose, fromPairs, mapValues, omit, pick, sample, sampleSize, set } from 'lodash/fp';
+import { fromPairs, mapValues, omit, pick, pipe, sample, sampleSize, set } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
@@ -171,7 +171,7 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
     ended_at: null,
     guid: uuidv4(),
     flagged: false,
-    private: form.private_inspection || false,
+    private: false,
     latitude: coords.latitude,
     longitude: coords.longitude,
     fields: fromPairs(fields.map((field) => [field.formFieldId, field])),
@@ -259,20 +259,31 @@ export const initFormDraftAction = (params: FormCreationParams) => {
 
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
   PersistentUserStore.update((persistentState) => {
-    // we are returning a new state instead of using imer's features because we want to intentionally change the state object reference
-    // so that the FlatList notices changes and rerenders, this may be unnnecessary and needs more experimentation
-
-    return compose([
+    return pipe([
       // set draft as dirty
-      set(`drafts.${assignmentId}.isDirty`, true),
+      set(['drafts', assignmentId, 'isDirty'], true),
       // set started_at if not already set
       (s: PersistentState) =>
         s.drafts[assignmentId].started_at ? s : set(`drafts.${assignmentId}.started_at`, Date.now(), s),
       // set all of form's values to draft's fields but with comments as null if they are empty
       set(
-        `drafts.${assignmentId}.fields`,
+        ['drafts', assignmentId, 'fields'],
         mapValues((field) => set('comment', field.comment || null, field), formValues),
       ),
+    ])(persistentState) as PersistentState;
+  });
+};
+
+export const updateDraftFormAction = <T>(assignmentId: number, fieldName: string, value: T) => {
+  PersistentUserStore.update((persistentState) => {
+    return pipe([
+      set(['drafts', assignmentId, fieldName], value),
+      // set draft as dirty
+      set(['drafts', assignmentId, 'isDirty'], true),
+      // set started_at if not already set
+      (s: PersistentState) =>
+        s.drafts[assignmentId].started_at ? s : set(`drafts.${assignmentId}.started_at`, Date.now(), s),
+      // set all of form's values to draft's fields but with comments as null if they are empty
     ])(persistentState) as PersistentState;
   });
 };

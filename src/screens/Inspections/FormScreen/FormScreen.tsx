@@ -10,12 +10,14 @@ import RNFS from 'react-native-fs';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
+import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
-import { DraftField, DraftPhoto } from 'src/types';
+import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
-import { submitDraftAction, updateDraftFieldsAction } from 'src/pullstate/actions';
+import { useResult } from 'src/utils/useResult';
+import { submitDraftAction, updateDraftFieldsAction, updateDraftFormAction } from 'src/pullstate/actions';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -56,11 +58,30 @@ function updateSignature(
   return newValues;
 }
 
+function parseFieldsWithCategories(draft: DraftForm) {
+  const filteredFields = sortBy(
+    'position',
+    Object.values(draft.fields).filter((f) => !f.deleted),
+  );
+
+  const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
+
+  return toPairs(groupBy('category_id', filteredFields))
+    .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
+    .flatMap(([catId, values]) => [
+      catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
+      sortBy('position', values),
+    ])
+    .flat();
+}
+
 const EditFormScreen: React.FC<{}> = () => {
   const {
-    params: { formId, structureId, assignmentId, newPhoto, rangeChoicesSelection },
+    params: { assignmentId, newPhoto, rangeChoicesSelection },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>>();
   const formikBagRef = useRef<FormikProps<Record<string, DraftField>> | null>(null);
+  const theme = useTheme();
+  const navigation = useNavigation();
 
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
@@ -70,15 +91,15 @@ const EditFormScreen: React.FC<{}> = () => {
     index: -1,
   });
   const userData = PersistentUserStore.useState((s) => s.userData);
-  const draft = PersistentUserStore.useState((s) => (assignmentId ? s.drafts[assignmentId] : undefined));
+  const draft = PersistentUserStore.useState((s) => s.drafts[assignmentId]);
   const ratings = PersistentUserStore.useState((s) => s.ratings);
-  const theme = useTheme();
-
-  const navigation = useNavigation();
+  const [isFlagged, setIsFlagged] = useState(draft.flagged);
+  const [isPrivate, setIsPrivate] = useState(draft.privateInspection || draft.private);
+  const [isReady, onReady] = useResult<undefined>();
 
   useEffect(() => {
     // This is for when coming back from the signature screen
-    if (formikBagRef.current && assignmentId !== null && newPhoto && newPhoto !== previousPhoto) {
+    if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
       const newValues = updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
 
       if (newValues) {
@@ -89,12 +110,7 @@ const EditFormScreen: React.FC<{}> = () => {
 
   useEffect(() => {
     // This is for when coming back from the rating choices screen
-    if (
-      formikBagRef.current &&
-      assignmentId !== null &&
-      rangeChoicesSelection &&
-      rangeChoicesSelection !== previousRangeChoicesSelection
-    ) {
+    if (formikBagRef.current && rangeChoicesSelection && rangeChoicesSelection !== previousRangeChoicesSelection) {
       const { formFieldId, listChoiceIds } = rangeChoicesSelection;
       const formValues = formikBagRef.current.values;
       const newValues = set([formFieldId, 'list_choice_ids'], listChoiceIds, formValues);
@@ -105,7 +121,7 @@ const EditFormScreen: React.FC<{}> = () => {
     }
   }, [assignmentId, rangeChoicesSelection, previousRangeChoicesSelection]);
 
-  if (!userData || !formId || !structureId || !assignmentId || !draft) {
+  if (!userData) {
     return <View />;
   }
 
@@ -130,24 +146,9 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
   };
 
-  const filteredFields = sortBy(
-    'position',
-    Object.values(draft.fields).filter((f) => !f.deleted),
-  );
-
-  const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
-
-  const fields = toPairs(groupBy('category_id', filteredFields))
-    .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
-    .flatMap(([catId, values]) => [
-      catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
-      sortBy('position', values),
-    ])
-    .flat();
-
   const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
 
-  const hasCoordinates = draft.latitude && draft.longitude;
+  const hasCoordinates = draft.latitude !== null && draft.longitude !== null;
 
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
@@ -168,7 +169,7 @@ const EditFormScreen: React.FC<{}> = () => {
             }}
             ListHeaderComponent={
               <>
-                <Notes value={draft.notes} isCard />
+                <Notes value={draft.notes} onReady={onReady} isCard />
                 {false && deletedFields.length > 0 && (
                   <Card style={{ margin: 10 }}>
                     <Card.Title title="Not Applicable fields" />
@@ -183,7 +184,7 @@ const EditFormScreen: React.FC<{}> = () => {
                 )}
               </>
             }
-            ListFooterComponent={() => (
+            ListFooterComponent={
               <>
                 <Card style={{ margin: 10 }}>
                   <Card.Title title="Options" />
@@ -199,11 +200,11 @@ const EditFormScreen: React.FC<{}> = () => {
                               style={{ backgroundColor: theme.colors.primary, borderRadius: 8, padding: 5 }}
                             />
                           }
-                          value={draft.flagged}
+                          value={isFlagged}
                           label="Flag and Create Ticket"
                           onToggle={() => {
-                            // change draft.flagged
-                            // TODO:
+                            updateDraftFormAction(assignmentId, 'flagged', !isFlagged);
+                            setIsFlagged(!isFlagged);
                           }}
                         />
 
@@ -222,11 +223,11 @@ const EditFormScreen: React.FC<{}> = () => {
                             />
                           }
                           disabled={draft.privateInspection}
-                          value={draft.privateInspection || draft.private}
+                          value={isPrivate}
                           label="Mark as Private"
                           onToggle={() => {
-                            // change draft.private
-                            // TODO:
+                            updateDraftFormAction(assignmentId, 'private', !isPrivate);
+                            setIsPrivate(!isPrivate);
                           }}
                         />
                         <Divider />
@@ -258,8 +259,8 @@ const EditFormScreen: React.FC<{}> = () => {
                   Submit
                 </Button>
               </>
-            )}
-            data={fields}
+            }
+            data={parseFieldsWithCategories(draft)}
             keyExtractor={(item) => (isString(item) ? item : `${item.formFieldId}`)}
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,
@@ -272,6 +273,7 @@ const EditFormScreen: React.FC<{}> = () => {
           />
         )}
       </Formik>
+      {!isReady && <LoadingOverlay />}
     </View>
   );
 };

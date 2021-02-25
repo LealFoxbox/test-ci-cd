@@ -55,4 +55,6 @@ const Notes: React.FC<NotesProps> = ({ value, onReady, numberOfLines, isCard, st
   );
 };
 
-export default Notes;
+export default React.memo(Notes, (prevProps, props) => {
+  return prevProps.value === props.value;
+});
