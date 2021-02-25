@@ -37,6 +37,7 @@ const ReadMore: React.FC<
     (async () => {
       if (!measured) {
         await nextFrameAsync();
+        await nextFrameAsync();
         if (!mounted) {
           return;
         }
@@ -48,6 +49,7 @@ const ReadMore: React.FC<
         setMeasured(true);
       } else {
         if (shouldShowReadMore === null) {
+          await nextFrameAsync();
           await nextFrameAsync();
           if (!mounted) {
             return;

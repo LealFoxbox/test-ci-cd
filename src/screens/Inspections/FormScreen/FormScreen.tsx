@@ -18,12 +18,13 @@ import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
 import { submitDraftAction, updateDraftFieldsAction, updateDraftFormAction } from 'src/pullstate/actions';
+import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
 import OptionRow from './OptionRow';
 
-function updateSignature(
+async function updateSignature(
   assignmentId: number,
   newPhoto: RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>['params']['newPhoto'],
   formValues: Record<string, DraftField>,
@@ -32,12 +33,24 @@ function updateSignature(
     return;
   }
 
+  let coords: { latitude: number | null; longitude: number | null } = {
+    latitude: null,
+    longitude: null,
+  };
+
+  try {
+    const position = await getCurrentPosition();
+    coords = position.coords;
+  } catch (e) {
+    console.warn('signature getCurrentPosition failed with error: ', e);
+  }
+
   const data: DraftPhoto = {
     isFromGallery: false,
     uri: newPhoto.path,
     fileName: newPhoto.fileName,
-    latitude: null, // TODO:
-    longitude: null, // TODO:
+    latitude: coords.latitude,
+    longitude: coords.longitude,
     created_at: Date.now(),
   };
 
@@ -91,21 +104,29 @@ const EditFormScreen: React.FC<{}> = () => {
     index: -1,
   });
   const userData = PersistentUserStore.useState((s) => s.userData);
-  const draft = PersistentUserStore.useState((s) => s.drafts[assignmentId]);
+  const draft: DraftForm | undefined = PersistentUserStore.useState((s) => s.drafts[assignmentId]);
   const ratings = PersistentUserStore.useState((s) => s.ratings);
-  const [isFlagged, setIsFlagged] = useState(draft.flagged);
-  const [isPrivate, setIsPrivate] = useState(draft.privateInspection || draft.private);
+  const [isFlagged, setIsFlagged] = useState(draft?.flagged);
+  const [isPrivate, setIsPrivate] = useState(draft?.privateInspection || draft?.private);
   const [isReady, onReady] = useResult<undefined>();
 
   useEffect(() => {
-    // This is for when coming back from the signature screen
-    if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
-      const newValues = updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
+    let mounted = true;
 
-      if (newValues) {
-        formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
+    // This is for when coming back from the signature screen
+    (async () => {
+      if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
+        const newValues = await updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
+
+        if (newValues && mounted) {
+          formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
+        }
       }
-    }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [assignmentId, newPhoto, previousPhoto]);
 
   useEffect(() => {
@@ -121,7 +142,7 @@ const EditFormScreen: React.FC<{}> = () => {
     }
   }, [assignmentId, rangeChoicesSelection, previousRangeChoicesSelection]);
 
-  if (!userData) {
+  if (!userData || !draft) {
     return <View />;
   }
 
