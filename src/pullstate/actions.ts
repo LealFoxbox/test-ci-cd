@@ -1,5 +1,6 @@
-import { fromPairs, mapValues, omit, pick, pipe, sample, sampleSize, set } from 'lodash/fp';
+import { flatMap, fromPairs, mapValues, omit, pick, pipe, sample, sampleSize, set } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import RNFS from 'react-native-fs';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
@@ -8,6 +9,7 @@ import {
   DraftField,
   DraftForm,
   DraftFormUpload,
+  DraftPhoto,
   Form,
   NumberField,
   PointsField,
@@ -19,6 +21,7 @@ import {
   TextField,
   User,
 } from 'src/types';
+import { Coords } from 'src/utils/getCurrentPosition';
 
 import { initialState as downloadInitialState } from './downloadStore/initialState';
 import { DownloadStore } from './downloadStore';
@@ -110,7 +113,7 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
       deleted: false,
 
       rating_id: rating.id,
-      formFieldId: field.id,
+      formFieldId: field.line_item_id,
       weight: field.weight,
       position: field.position,
       description: field.description,
@@ -250,10 +253,28 @@ export const initFormDraftAction = (params: FormCreationParams) => {
     if (!s.drafts[params.assignmentId]) {
       const createForm = config.MOCKS.FORM ? createMockDraftForm : createEmptyDraftForm;
 
-      return set(`drafts.${params.assignmentId}`, createForm(params), s);
+      return set(['drafts', params.assignmentId], createForm(params), s);
     }
 
     return s;
+  });
+};
+
+export const deleteDraftAction = (assignmentId: number) => {
+  PersistentUserStore.update((s) => {
+    const draft = s.drafts[assignmentId];
+    const cleanedDrafts = omit([assignmentId], s.drafts);
+
+    const allPhotos = flatMap('photos', draft.fields) as DraftPhoto[];
+    allPhotos.forEach((photo) => {
+      try {
+        void RNFS.unlink(photo.uri);
+      } catch (e) {
+        console.warn('deleteDraftAction photo unlink error: ', e);
+      }
+    });
+
+    return set('drafts', cleanedDrafts, s);
   });
 };
 
@@ -271,6 +292,15 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
         mapValues((field) => set('comment', field.comment || null, field), formValues),
       ),
     ])(persistentState) as PersistentState;
+  });
+};
+
+export const updateDraftCoords = (assignmentId: number, coords: Coords) => {
+  PersistentUserStore.update((s) => {
+    return pipe(
+      set(['drafts', assignmentId, 'latitude'], coords.latitude),
+      set(['drafts', assignmentId, 'longitude'], coords.longitude),
+    )(s) as PersistentState;
   });
 };
 

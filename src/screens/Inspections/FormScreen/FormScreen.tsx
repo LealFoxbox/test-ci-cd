@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Button, Card, Chip, Divider, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, Card, Chip, Divider, useTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Formik, FormikProps } from 'formik';
@@ -17,7 +17,12 @@ import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigat
 import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
-import { submitDraftAction, updateDraftFieldsAction, updateDraftFormAction } from 'src/pullstate/actions';
+import {
+  submitDraftAction,
+  updateDraftCoords,
+  updateDraftFieldsAction,
+  updateDraftFormAction,
+} from 'src/pullstate/actions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
@@ -33,17 +38,7 @@ async function updateSignature(
     return;
   }
 
-  let coords: { latitude: number | null; longitude: number | null } = {
-    latitude: null,
-    longitude: null,
-  };
-
-  try {
-    const position = await getCurrentPosition();
-    coords = position.coords;
-  } catch (e) {
-    console.warn('signature getCurrentPosition failed with error: ', e);
-  }
+  const coords = await getCurrentPosition();
 
   const data: DraftPhoto = {
     isFromGallery: false,
@@ -108,7 +103,10 @@ const EditFormScreen: React.FC<{}> = () => {
   const ratings = PersistentUserStore.useState((s) => s.ratings);
   const [isFlagged, setIsFlagged] = useState(draft?.flagged);
   const [isPrivate, setIsPrivate] = useState(draft?.privateInspection || draft?.private);
+  const [isGpsLoading, setGpsLoading] = useState(false);
   const [isReady, onReady] = useResult<undefined>();
+
+  const hasCoordinates = !!draft && draft.latitude !== null && draft.longitude !== null;
 
   useEffect(() => {
     let mounted = true;
@@ -142,6 +140,27 @@ const EditFormScreen: React.FC<{}> = () => {
     }
   }, [assignmentId, rangeChoicesSelection, previousRangeChoicesSelection]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      if (!hasCoordinates && draft) {
+        setGpsLoading(true);
+        const coords = await getCurrentPosition();
+
+        updateDraftCoords(draft.assignmentId, coords);
+
+        if (mounted) {
+          setGpsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [draft, draft?.assignmentId, hasCoordinates]);
+
   if (!userData || !draft) {
     return <View />;
   }
@@ -168,8 +187,6 @@ const EditFormScreen: React.FC<{}> = () => {
   };
 
   const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
-
-  const hasCoordinates = draft.latitude !== null && draft.longitude !== null;
 
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
@@ -256,18 +273,24 @@ const EditFormScreen: React.FC<{}> = () => {
                     )}
                     <OptionRow
                       icon={
-                        <MaterialCommunityIcons
-                          name={hasCoordinates ? 'map-marker' : 'map-marker-off'}
-                          size={16}
-                          color={theme.colors.surface}
-                          style={{
-                            backgroundColor: hasCoordinates ? theme.colors.gps : theme.colors.error,
-                            borderRadius: 8,
-                            padding: 5,
-                          }}
-                        />
+                        isGpsLoading ? (
+                          <ActivityIndicator size="small" />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name={hasCoordinates ? 'map-marker' : 'map-marker-off'}
+                            size={16}
+                            color={theme.colors.surface}
+                            style={{
+                              backgroundColor: hasCoordinates ? theme.colors.gps : theme.colors.error,
+                              borderRadius: 8,
+                              padding: 5,
+                            }}
+                          />
+                        )
                       }
-                      label={hasCoordinates ? 'Location Found' : 'Location Not Found'}
+                      label={
+                        isGpsLoading ? 'Loading Location ...' : hasCoordinates ? 'Location Found' : 'Location Not Found'
+                      }
                     />
                   </Card.Content>
                 </Card>

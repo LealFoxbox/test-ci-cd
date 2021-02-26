@@ -3,7 +3,7 @@ import { FlatList, View } from 'react-native';
 import { Button, Divider, ProgressBar, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 import { format } from 'date-fns';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -18,7 +18,9 @@ import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
 
 const UploadsScreen: React.FC<{}> = () => {
-  const uploads = PersistentUserStore.useState((s) => s.pendingUploads.concat(sortBy('submittedAt', s.uploads)));
+  const uploads = PersistentUserStore.useState((s) =>
+    s.pendingUploads.concat(orderBy('submittedAt', 'desc', s.uploads)),
+  );
   const uploadStates = UploadStore.useState((s) => s);
   const connected = useNetworkStatus();
   const theme = useTheme();
@@ -77,7 +79,7 @@ const UploadsScreen: React.FC<{}> = () => {
 
             const gotoForm = () =>
               navigation.navigate(UPLOADS_READONLY_FORM, {
-                assignmentId: item.draft.assignmentId,
+                guid: item.draft.guid,
                 title: item.draft.name,
               });
 

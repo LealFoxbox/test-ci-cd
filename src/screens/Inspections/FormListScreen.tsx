@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Divider, Title, useTheme } from 'react-native-paper';
@@ -8,10 +8,10 @@ import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import * as dbHooks from 'src/services/mongoHooks';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import NavRow from 'src/components/NavRow';
+import SwipableRow from 'src/components/SwipableRow/SwipableRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
-import { initFormDraftAction } from 'src/pullstate/actions';
-import getCurrentPosition from 'src/utils/getCurrentPosition';
+import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/actions';
 import { useResult } from 'src/utils/useResult';
 
 import BlankScreen from './BlankScreen';
@@ -27,10 +27,9 @@ const FormListScreen: React.FC<{}> = () => {
   const [assignments, isLoadingAssignments] = dbHooks.assignments.useGetAssignments(parentId, forms);
   const theme = useTheme();
   const [isReady, onReady] = useResult<undefined>();
-  const [isFetchingGpsCoords, setIsFetchingGpsCoords] = useState(false);
   const navigation = useNavigation();
 
-  if (isLoadingAssignments || !structure) {
+  if (isLoadingAssignments) {
     return <LoadingOverlay />;
   }
 
@@ -41,8 +40,8 @@ const FormListScreen: React.FC<{}> = () => {
         justifyContent: 'center',
       }}
     >
-      {assignments.length === 0 && <BlankScreen />}
-      {assignments.length > 0 && (
+      {(assignments.length === 0 || !structure) && <BlankScreen />}
+      {assignments.length > 0 && structure && (
         <FlatList
           contentContainerStyle={{
             justifyContent: 'flex-start',
@@ -64,24 +63,13 @@ const FormListScreen: React.FC<{}> = () => {
             const label = form?.name || '';
             const hasDraft = !!drafts[item.id] && drafts[item.id].isDirty;
 
-            return (
+            const row = (
               <NavRow
                 label={label}
                 icon={hasDraft ? 'file-document' : 'file-document-outline'}
-                onPress={async () => {
+                onPress={() => {
                   if (!drafts[item.id]) {
-                    setIsFetchingGpsCoords(true);
-                    let coords: { latitude: number | null; longitude: number | null } = {
-                      latitude: null,
-                      longitude: null,
-                    };
-
-                    try {
-                      const position = await getCurrentPosition();
-                      coords = position.coords;
-                    } catch (e) {
-                      console.warn('getCurrentPosition failed with error: ', e);
-                    }
+                    const coords = { latitude: null, longitude: null };
 
                     initFormDraftAction({ form, assignmentId: item.id, ratings, coords, structure });
                   }
@@ -92,16 +80,23 @@ const FormListScreen: React.FC<{}> = () => {
                     assignmentId: item.id,
                     title: label,
                   });
-
-                  setIsFetchingGpsCoords(false);
                 }}
               />
             );
+
+            if (hasDraft) {
+              return (
+                <SwipableRow leftLabel="Delete draft" onPressLeft={() => deleteDraftAction(item.id)}>
+                  {row}
+                </SwipableRow>
+              );
+            }
+            return row;
           }}
           keyExtractor={(item) => `${item.id}`}
         />
       )}
-      {(!isReady || isFetchingGpsCoords) && <LoadingOverlay />}
+      {!isReady && <LoadingOverlay />}
     </View>
   );
 };
