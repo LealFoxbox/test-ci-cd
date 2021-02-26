@@ -107,7 +107,7 @@ export const submitInspection = (params: SubmitInspectionParams) => {
     data: {
       user_credentials: params.token,
       submission_token: draft.guid,
-      inspection_event_id: null, // TODO: check exactly what id is this
+      // inspection_event_id: null, // TODO: this id will be coming in from schedule tab
       inspection: {
         name: draft.name,
         structure_id: draft.structureId,
@@ -122,13 +122,13 @@ export const submitInspection = (params: SubmitInspectionParams) => {
           .filter((f) => !f.deleted)
           .map((f) => {
             const common = {
-              name: f.name,
-              comment: f.comment,
               rating_id: f.rating_id,
+              line_item_id: f.formFieldId,
               weight: f.weight,
               position: f.position,
-              category_id: f.category_id,
               description: f.description,
+              category_id: f.category_id,
+              comment: f.comment,
               inspection_item_photos: f.photos.map((photo) => ({
                 source_type: photo.isFromGallery ? '2' : '1',
                 temporary_url: photoUploadUrls[photo.fileName],
@@ -136,16 +136,18 @@ export const submitInspection = (params: SubmitInspectionParams) => {
                 longitude: photo.longitude,
                 created_at: formatISO(photo.created_at),
               })),
+              list_choice_ids: null,
+              number_choice: null,
             };
 
             if (f.ratingTypeId === 1) {
               return {
                 ...common,
-                deficient: f.selectedChoice?.deficient,
-                range_choice_position: f.selectedChoice?.position,
+                deficient: f.selectedChoice?.deficient || false,
+                range_choice_position: f.selectedChoice?.position || 0,
                 range_choice_min_position: f.minPosition,
                 range_choice_max_position: f.maxPosition,
-                range_choice_label: f.selectedChoice?.label,
+                range_choice_label: f.selectedChoice?.label || '',
                 score: f.selectedChoice?.score,
               };
             }

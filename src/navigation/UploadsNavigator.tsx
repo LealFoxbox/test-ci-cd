@@ -13,7 +13,7 @@ export type UploadsNavigatorParamList = {
   };
   [UPLOADS_READONLY_FORM]: {
     title: string;
-    assignmentId: number;
+    guid: string;
   };
 };
 

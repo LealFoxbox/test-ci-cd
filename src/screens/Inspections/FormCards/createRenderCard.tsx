@@ -70,17 +70,7 @@ export const createRenderCard = (
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
     const handleTapPhoto = (index: number) => setExpandedPhoto({ index, photos: draftField.photos.map((p) => p.uri) });
     const handleTakePhoto = async ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
-      let coords: { latitude: number | null; longitude: number | null } = {
-        latitude: null,
-        longitude: null,
-      };
-
-      try {
-        const position = await getCurrentPosition();
-        coords = position.coords;
-      } catch (e) {
-        console.warn('photo getCurrentPosition failed with error: ', e);
-      }
+      const coords = await getCurrentPosition();
 
       const newPhoto: DraftPhoto = {
         isFromGallery,

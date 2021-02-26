@@ -10,8 +10,8 @@ import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
-import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
+import { RATING_CHOICES_MODAL, SIGNATURE_MODAL, UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
+import { UploadsNavigatorParamList } from 'src/navigation/UploadsNavigator';
 import { DraftForm } from 'src/types';
 import { useResult } from 'src/utils/useResult';
 
@@ -83,8 +83,8 @@ const fakeFormikProps = {
 
 const ReadonlyFormScreen: React.FC<{}> = () => {
   const {
-    params: { assignmentId },
-  } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>>();
+    params: { guid },
+  } = useRoute<RouteProp<UploadsNavigatorParamList, typeof UPLOADS_READONLY_FORM>>();
   const theme = useTheme();
   const navigation = useNavigation();
 
@@ -95,8 +95,7 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
   const userData = PersistentUserStore.useState((s) => s.userData);
   const draft = PersistentUserStore.useState(
     (s) =>
-      s.pendingUploads.find((u) => u.draft.assignmentId === assignmentId)?.draft ||
-      s.uploads.find((u) => u.draft.assignmentId === assignmentId)?.draft,
+      s.pendingUploads.find((u) => u.draft.guid === guid)?.draft || s.uploads.find((u) => u.draft.guid === guid)?.draft,
   );
   const ratings = PersistentUserStore.useState((s) => s.ratings);
   const [isFlagged] = useState(draft?.flagged);
@@ -108,7 +107,7 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
   }
 
   const goToSignature = (formFieldId: number) => {
-    navigation.navigate(SIGNATURE_MODAL, { assignmentId, formFieldId });
+    navigation.navigate(SIGNATURE_MODAL, { assignmentId: draft.assignmentId, formFieldId });
   };
 
   const goToRatingChoices = ({
@@ -120,7 +119,7 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
     ratingId: number;
     formFieldId: number;
   }) => {
-    navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
+    navigation.navigate(RATING_CHOICES_MODAL, { assignmentId: draft.assignmentId, ratingId, formFieldId, title });
   };
 
   const hasCoordinates = draft.latitude !== null && draft.longitude !== null;
@@ -214,7 +213,7 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
           },
           {
             setExpandedPhoto,
-            assignmentId,
+            assignmentId: draft.assignmentId,
             ratings,
             theme,
             goToSignature,
