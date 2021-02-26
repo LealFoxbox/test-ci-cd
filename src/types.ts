@@ -152,7 +152,7 @@ export type SelectRating = Modify<
   BaseRating,
   {
     rating_type_id: 8 | 9; // 8 is a simple select, 9 is for multi-select
-    range_choices: SelectRatingChoice[]; // TODO: this needs to be filled in by the backend separately
+    range_choices: SelectRatingChoice[];
 
     // added by us
     page: number | null;

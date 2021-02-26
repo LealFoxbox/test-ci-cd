@@ -32,6 +32,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
   onDeletePhoto,
   onAddComment,
   onDelete,
+  isReadonly,
   showComment,
   allowDelete,
 }) => {
@@ -47,6 +48,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
           showCommentOption={!showComment}
           allowPhotos
           allowDelete={allowDelete}
+          isReadonly={isReadonly}
         />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
           {!!rating.prefix && <Text>{rating.prefix}</Text>}
@@ -57,6 +59,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
             placeholder="Enter a number"
             dense
             {...numberInputProps}
+            disabled={isReadonly}
           />
           {!!rating.suffix && <Text>{rating.suffix}</Text>}
         </Card.Content>
@@ -67,6 +70,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
           onTapPhoto={onTapPhoto}
           onDeletePhoto={onDeletePhoto}
           showComment={showComment}
+          isReadonly={isReadonly}
         />
       </Card>
     </Container>

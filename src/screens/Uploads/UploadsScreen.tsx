@@ -2,6 +2,7 @@ import React from 'react';
 import { FlatList, View } from 'react-native';
 import { Button, Divider, ProgressBar, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 import { sortBy } from 'lodash/fp';
 import { format } from 'date-fns';
 
@@ -11,6 +12,7 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import config from 'src/config';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
+import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
 
 import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
@@ -20,6 +22,7 @@ const UploadsScreen: React.FC<{}> = () => {
   const uploadStates = UploadStore.useState((s) => s);
   const connected = useNetworkStatus();
   const theme = useTheme();
+  const navigation = useNavigation();
 
   const deleteButtons =
     !config.MOCKS.DELETE_BUTTONS || !config.isDev ? null : (
@@ -72,6 +75,12 @@ const UploadsScreen: React.FC<{}> = () => {
           renderItem={({ item }) => {
             const { guid } = item.draft;
 
+            const gotoForm = () =>
+              navigation.navigate(UPLOADS_READONLY_FORM, {
+                assignmentId: item.draft.assignmentId,
+                title: item.draft.name,
+              });
+
             if (!item.submittedAt) {
               const { state, progress, error } = getUploadState(uploadStates, guid);
 
@@ -83,6 +92,7 @@ const UploadsScreen: React.FC<{}> = () => {
                     content={<ProgressBar progress={progress / 100} color={theme.colors.primary} />}
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
+                    onPress={gotoForm}
                     error={error}
                   />
                 );
@@ -94,6 +104,7 @@ const UploadsScreen: React.FC<{}> = () => {
                     content={item.draft.locationPath}
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
+                    onPress={gotoForm}
                     error={error}
                   />
                 );
@@ -106,6 +117,7 @@ const UploadsScreen: React.FC<{}> = () => {
                   content={item.draft.locationPath}
                   icon="file-document-outline"
                   IconComponent={MaterialCommunityIcons}
+                  onPress={gotoForm}
                 />
               );
             }

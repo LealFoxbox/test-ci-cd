@@ -31,7 +31,7 @@ interface RowProps {
   disabled?: boolean;
 }
 
-const Row: React.FC<RowProps> = ({
+const UploadRow: React.FC<RowProps> = ({
   head,
   title,
   content,
@@ -71,4 +71,4 @@ const Row: React.FC<RowProps> = ({
   return <Container>{row}</Container>;
 };
 
-export default Row;
+export default UploadRow;

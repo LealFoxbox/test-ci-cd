@@ -290,6 +290,7 @@ const EditFormScreen: React.FC<{}> = () => {
               theme,
               goToSignature,
               goToRatingChoices,
+              isReadonly: false,
             })}
           />
         )}

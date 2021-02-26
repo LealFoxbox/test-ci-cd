@@ -23,6 +23,7 @@ const TextCard: React.FC<TextCardProps> = ({
   onDeletePhoto,
   onDelete,
   allowDelete,
+  isReadonly,
 }) => {
   return (
     <Container>
@@ -35,6 +36,7 @@ const TextCard: React.FC<TextCardProps> = ({
           showCommentOption={false}
           allowPhotos
           allowDelete={allowDelete}
+          isReadonly={isReadonly}
         />
         <CardFooter
           id={id}
@@ -43,6 +45,7 @@ const TextCard: React.FC<TextCardProps> = ({
           photos={photos}
           onTapPhoto={onTapPhoto}
           onDeletePhoto={onDeletePhoto}
+          isReadonly={isReadonly}
         />
       </Card>
     </Container>
