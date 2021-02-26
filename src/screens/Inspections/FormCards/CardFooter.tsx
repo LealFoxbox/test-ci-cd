@@ -26,6 +26,7 @@ interface CardFooterProps {
   onDeletePhoto: (photo: DraftPhoto) => void;
   showComment: boolean;
   isSignature?: boolean;
+  isReadonly: boolean;
 }
 
 const CardFooter: React.FC<CardFooterProps> = ({
@@ -34,6 +35,7 @@ const CardFooter: React.FC<CardFooterProps> = ({
   commentInputProps,
   showComment,
   isSignature,
+  isReadonly,
   onTapPhoto,
   onDeletePhoto,
 }) => {
@@ -47,6 +49,7 @@ const CardFooter: React.FC<CardFooterProps> = ({
             style={{ marginBottom: 10 }}
             keyboardType="default"
             autoCapitalize="none"
+            disabled={isReadonly}
             dense
             {...commentInputProps}
             value={commentInputProps.value || ''}
@@ -85,19 +88,21 @@ const CardFooter: React.FC<CardFooterProps> = ({
                   />
                 )}
               </TouchableOpacity>
-              <IconButton
-                size={20}
-                icon="delete-outline"
-                style={{
-                  position: 'absolute',
-                  top: -12,
-                  right: -12,
-                  backgroundColor: theme.colors.backdrop,
-                  elevation: 1,
-                }}
-                color={theme.colors.surface}
-                onPress={() => onDeletePhoto(item)}
-              />
+              {!isReadonly && (
+                <IconButton
+                  size={20}
+                  icon="delete-outline"
+                  style={{
+                    position: 'absolute',
+                    top: -12,
+                    right: -12,
+                    backgroundColor: theme.colors.backdrop,
+                    elevation: 1,
+                  }}
+                  color={theme.colors.surface}
+                  onPress={() => onDeletePhoto(item)}
+                />
+              )}
             </View>
           )}
         />

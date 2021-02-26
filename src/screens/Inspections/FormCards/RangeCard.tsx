@@ -34,6 +34,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
   onDeletePhoto,
   onAddComment,
   onDelete,
+  isReadonly,
   showComment,
   allowDelete,
 }) => {
@@ -45,6 +46,18 @@ const RangeCard: React.FC<RangeCardProps> = ({
 
   const theme = useTheme();
 
+  const openButton = (
+    <Button
+      onPress={openMenu}
+      mode="contained"
+      dark
+      disabled={isReadonly}
+      color={selectedRangeChoice?.deficient ? theme.colors.deficient : theme.colors.primary}
+    >
+      {selectedRangeChoice?.label}
+    </Button>
+  );
+
   return (
     <Container>
       <Card>
@@ -55,36 +68,27 @@ const RangeCard: React.FC<RangeCardProps> = ({
           onAddComment={onAddComment}
           onDelete={onDelete}
           showCommentOption={!showComment}
-          allowPhotos
           allowDelete={allowDelete}
+          isReadonly={isReadonly}
+          allowPhotos
         />
         <Card.Content>
-          <Menu
-            visible={visible}
-            onDismiss={closeMenu}
-            anchor={
-              <Button
-                onPress={openMenu}
-                mode="contained"
-                dark
-                color={selectedRangeChoice?.deficient ? theme.colors.deficient : theme.colors.primary}
-              >
-                {selectedRangeChoice?.label}
-              </Button>
-            }
-          >
-            {sortBy('position', rangeChoices).map((choice) => (
-              <Menu.Item
-                key={choice.id}
-                onPress={() => {
-                  closeMenu();
-                  onChoicePress(choice);
-                }}
-                title={choice.label}
-                titleStyle={{ color: choice.deficient ? theme.colors.deficient : theme.colors.text }}
-              />
-            ))}
-          </Menu>
+          {isReadonly && openButton}
+          {!isReadonly && (
+            <Menu visible={visible} onDismiss={closeMenu} anchor={openButton}>
+              {sortBy('position', rangeChoices).map((choice) => (
+                <Menu.Item
+                  key={choice.id}
+                  onPress={() => {
+                    closeMenu();
+                    onChoicePress(choice);
+                  }}
+                  title={choice.label}
+                  titleStyle={{ color: choice.deficient ? theme.colors.deficient : theme.colors.text }}
+                />
+              ))}
+            </Menu>
+          )}
         </Card.Content>
         <CardFooter
           id={id}
@@ -93,6 +97,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
           photos={photos}
           onTapPhoto={onTapPhoto}
           onDeletePhoto={onDeletePhoto}
+          isReadonly={isReadonly}
         />
       </Card>
     </Container>

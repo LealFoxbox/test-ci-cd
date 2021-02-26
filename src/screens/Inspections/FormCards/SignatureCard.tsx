@@ -29,6 +29,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   onAddComment,
   showComment,
   allowDelete,
+  isReadonly,
 }) => {
   return (
     <Container>
@@ -41,9 +42,10 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
           showCommentOption={!showComment}
           allowPhotos={false}
           allowDelete={allowDelete}
+          isReadonly={isReadonly}
         />
         <Card.Content>
-          <Button onPress={onOpen} mode="contained" dark>
+          <Button onPress={onOpen} mode="contained" dark disabled={isReadonly}>
             Tap to sign
           </Button>
         </Card.Content>
@@ -55,6 +57,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
           onTapPhoto={onTapPhoto}
           onDeletePhoto={onDeletePhoto}
           isSignature
+          isReadonly={isReadonly}
         />
       </Card>
     </Container>

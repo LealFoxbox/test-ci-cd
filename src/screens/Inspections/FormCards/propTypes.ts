@@ -13,6 +13,7 @@ export interface TextCardProps {
   onDeletePhoto: (photo: DraftPhoto) => void;
   onDelete: () => void;
   allowDelete: boolean;
+  isReadonly: boolean;
 }
 
 export interface BaseCardProps extends TextCardProps {

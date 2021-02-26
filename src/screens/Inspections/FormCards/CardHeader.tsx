@@ -7,6 +7,7 @@ import MoreButton, { MoreButtonProps } from './MoreButton';
 interface CardHeaderProps extends MoreButtonProps {
   name: string;
   description: string | null;
+  isReadonly: boolean;
 }
 
 const CardHeader: React.FC<CardHeaderProps> = ({
@@ -18,6 +19,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
   showCommentOption,
   allowPhotos,
   allowDelete,
+  isReadonly,
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingVertical: 10 }}>
@@ -29,14 +31,16 @@ const CardHeader: React.FC<CardHeaderProps> = ({
         subtitle={description}
         subtitleStyle={{ fontSize: 14 }}
       />
-      <MoreButton
-        onTakePhoto={onTakePhoto}
-        onAddComment={onAddComment}
-        onDelete={onDelete}
-        showCommentOption={showCommentOption}
-        allowPhotos={allowPhotos}
-        allowDelete={allowDelete}
-      />
+      {!isReadonly && (
+        <MoreButton
+          onTakePhoto={onTakePhoto}
+          onAddComment={onAddComment}
+          onDelete={onDelete}
+          showCommentOption={showCommentOption}
+          allowPhotos={allowPhotos}
+          allowDelete={allowDelete}
+        />
+      )}
     </View>
   );
 };

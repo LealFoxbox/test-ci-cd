@@ -22,6 +22,7 @@ interface CreateRenderCardParams {
   assignmentId: number;
   ratings: Record<string, Rating>;
   theme: ReactNativePaper.Theme;
+  isReadonly: boolean;
   goToSignature: (formFieldId: number) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
 }
@@ -44,7 +45,15 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
 
 export const createRenderCard = (
   { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
-  { setExpandedPhoto, assignmentId, ratings, theme, goToSignature, goToRatingChoices }: CreateRenderCardParams,
+  {
+    setExpandedPhoto,
+    assignmentId,
+    ratings,
+    theme,
+    isReadonly,
+    goToSignature,
+    goToRatingChoices,
+  }: CreateRenderCardParams,
 ): ListRenderItem<DraftField | string> => {
   return ({ item: draftField }) => {
     if (typeof draftField === 'string') {
@@ -131,6 +140,7 @@ export const createRenderCard = (
       onDeletePhoto: handleDeletePhoto,
       onDelete: handleDelete,
       allowDelete,
+      isReadonly,
     };
 
     const baseCardProps = {

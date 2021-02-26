@@ -60,7 +60,6 @@ const ReadMore: React.FC<
             return;
           }
 
-          // TODO: this was triggered on an unmounted component somehow
           setShouldShowReadMore((_fullHeight.current || 0) > limitedHeight);
         } else {
           await nextFrameAsync();

@@ -55,9 +55,6 @@ const InspectionsNavigator: React.FC = () => {
         name={INSPECTIONS_FORM}
         component={InspectionFormScreen}
         initialParams={{
-          formId: null,
-          structureId: null,
-          assignmentId: null,
           title: 'Inspections',
         }}
       />
