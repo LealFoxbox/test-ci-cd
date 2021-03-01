@@ -251,7 +251,7 @@ function createMockDraftForm(params: FormCreationParams) {
 export const initFormDraftAction = (params: FormCreationParams) => {
   PersistentUserStore.update((s) => {
     if (!s.drafts[params.assignmentId]) {
-      const createForm = config.MOCKS.FORM ? createMockDraftForm : createEmptyDraftForm;
+      const createForm = config.MOCKS.FORM && config.isDev ? createMockDraftForm : createEmptyDraftForm;
 
       return set(['drafts', params.assignmentId], createForm(params), s);
     }
