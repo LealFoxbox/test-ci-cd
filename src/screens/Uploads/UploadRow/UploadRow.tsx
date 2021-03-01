@@ -22,7 +22,6 @@ interface RowProps {
   head: string;
   title: string;
   content: React.ReactNode;
-  error?: string | null;
   accessibilityLabel?: string;
   icon: string;
   IconComponent?: typeof MaterialIcons;
@@ -35,7 +34,6 @@ const UploadRow: React.FC<RowProps> = ({
   head,
   title,
   content,
-  error,
   accessibilityLabel,
   icon,
   IconComponent = MaterialIcons,
@@ -45,8 +43,7 @@ const UploadRow: React.FC<RowProps> = ({
   const theme = useTheme();
   const row = (
     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
-      {!error && <IconComponent name={icon} size={24} color={theme.colors.placeholder} />}
-      {error && <MaterialIcons name="error" size={24} color={theme.colors.error} />}
+      <IconComponent name={icon} size={24} color={theme.colors.placeholder} />
       <Card.Content style={{ flex: 1 }}>
         <Paragraph>{head.toUpperCase()}</Paragraph>
         <Title>{title}</Title>

@@ -10,10 +10,19 @@ import { DraftPhoto, PendingUpload } from 'src/types';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { UploadStoreState } from 'src/pullstate/uploadStore/initialState';
+import usePrevious from 'src/utils/usePrevious';
 
 import { presignPhotos, submitInspection, uploadPhotos } from '../api/uploads';
 
-import { savePhotoUploadUrl, setFormSubmittedAction, setUploadProgress, setUploadingStateAction } from './actions';
+import {
+  cleanUploadErrorsAction,
+  finishPhotoUploadAction,
+  removeUploadingPhotoAction,
+  savePhotoUploadUrlAction,
+  setFormSubmittedAction,
+  setUploadingErrorAction,
+  setUploadingFieldAction,
+} from './actions';
 
 const FLAGS = {
   loggedIn: false,
@@ -49,7 +58,7 @@ async function photoUploader(
   photo: DraftPhoto,
   nextPercentage: number,
 ) {
-  setUploadingStateAction(upload, 'photos');
+  setUploadingFieldAction(upload, 'state', 'photos');
 
   console.warn('photoUploader init of file ', photo.fileName);
 
@@ -59,6 +68,7 @@ async function photoUploader(
     file = await RNFS.readFile(photo.uri, 'base64');
   } catch (e) {
     console.warn('photoUploader: file read error for photoupload: ', e);
+    removeUploadingPhotoAction(upload, photo);
   }
 
   if (file) {
@@ -89,10 +99,11 @@ async function photoUploader(
       if (!uploadPhotoError) {
         console.warn('photoUploader success with file ', photo.fileName);
 
-        savePhotoUploadUrl(upload, photo.fileName, data['object-url']);
-        setUploadProgress(upload, nextPercentage);
+        savePhotoUploadUrlAction(upload, photo.fileName, data['object-url']);
+        finishPhotoUploadAction(upload, nextPercentage);
       } else {
         console.warn('photoUploader uploadPhotoError: ', uploadPhotoError);
+        setUploadingErrorAction(upload, `Could not upload ${photo.fileName}`);
       }
     } else {
       console.warn(
@@ -101,14 +112,15 @@ async function photoUploader(
         ' and presign is ',
         presign ? ' correctly set' : ' undefined',
       );
+      setUploadingErrorAction(upload, `Could not presign ${photo.fileName}`);
     }
+  } else {
+    setUploadingFieldAction(upload, 'state', null);
   }
-
-  setUploadingStateAction(upload, null);
 }
 
 async function formUploader(token: string, companyId: string, pendingUpload: PendingUpload) {
-  setUploadingStateAction(pendingUpload, 'form');
+  setUploadingFieldAction(pendingUpload, 'state', 'form');
 
   console.warn('formUploader init: ', pendingUpload.draft.guid);
 
@@ -118,7 +130,9 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
     console.warn('formUploader SUCCESS!');
     setFormSubmittedAction(pendingUpload);
   } else {
-    console.warn('formUploader submitError: ', submitError);
+    console.warn(`Could not submit draft guid ${pendingUpload.draft.guid} with submitError: `, submitError);
+
+    setUploadingErrorAction(pendingUpload, `Could not submit`);
   }
 }
 
@@ -130,6 +144,13 @@ export function useUploader() {
   const pendingUploads = PersistentUserStore.useState((s) => s.pendingUploads);
   const uploadStoreState = UploadStore.useState((s) => s);
   const connected = useNetworkStatus();
+  const prevConnected = usePrevious(connected);
+
+  useEffect(() => {
+    if (!prevConnected && connected) {
+      cleanUploadErrorsAction();
+    }
+  }, [connected, prevConnected]);
 
   useEffect(() => {
     if (!token) {
@@ -138,9 +159,9 @@ export function useUploader() {
       FLAGS.loggedIn = true;
       if (inspectionsEnabled && connected) {
         const currentUpload = getCurrentUpload(pendingUploads, uploadStoreState);
-        const state = currentUpload && getUploadState(uploadStoreState, currentUpload?.draft.guid).state;
+        const uploadState = currentUpload && getUploadState(uploadStoreState, currentUpload?.draft.guid).state;
 
-        if (currentUpload && state === null) {
+        if (currentUpload && uploadState === null) {
           const { index, length, photoUpload } = getPhotoUpload(currentUpload);
 
           if (photoUpload) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BackHandler } from 'react-native';
 import { WebView, WebViewNavigation, WebViewProps } from 'react-native-webview';
 import { IconButton, Title, useTheme } from 'react-native-paper';
@@ -38,18 +38,20 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
     });
   }, [headerRight, navigation]);
 
-  useFocusEffect(() => {
-    const handleBackButton = () => {
-      webRef.current?.goBack();
-      return true;
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackButton = () => {
+        webRef.current?.goBack();
+        return true;
+      };
 
-    BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+      BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
-    };
-  });
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+      };
+    }, []),
+  );
 
   useEffect(() => {
     if (!prevConnected && connected && showError) {

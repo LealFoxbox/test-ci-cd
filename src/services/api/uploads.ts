@@ -4,7 +4,7 @@ import { formatISO } from 'date-fns';
 
 import { PendingUpload, PresignedPhoto } from 'src/types';
 
-import { baseRaxConfig, getApiUrl } from './utils';
+import { bigDownloadRaxConfig, getApiUrl } from './utils';
 
 export interface PresignPhotosParams {
   photoUrls: string[];
@@ -27,7 +27,7 @@ export const presignPhotos = (params: PresignPhotosParams) => {
         name: url,
       })),
     },
-    raxConfig: baseRaxConfig,
+    raxConfig: bigDownloadRaxConfig,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -183,7 +183,7 @@ export const submitInspection = (params: SubmitInspectionParams) => {
           }),
       },
     },
-    raxConfig: baseRaxConfig,
+    raxConfig: bigDownloadRaxConfig,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',

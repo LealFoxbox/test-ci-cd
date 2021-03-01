@@ -25,7 +25,7 @@
     "@react-navigation/material-bottom-tabs": "^5.3.10",
     "@react-navigation/native": "^5.8.10",
     "@react-navigation/stack": "^5.12.8",
-    "@sentry/react-native": "^2.1.0",
+    "@sentry/react-native": "^2.2.1",
     "@types/react-native-background-downloader": "^2.3.3",
     "@types/react-native-signature-capture": "^0.4.1",
     "@types/react-native-vector-icons": "^6.4.6",

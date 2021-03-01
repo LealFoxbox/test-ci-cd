@@ -2,7 +2,7 @@ import React from 'react';
 import { FlatList, View } from 'react-native';
 import { Button, Divider, ProgressBar, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { orderBy } from 'lodash/fp';
 import { format } from 'date-fns';
 
@@ -13,6 +13,7 @@ import config from 'src/config';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
 import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
+import { cleanUploadErrorsAction } from 'src/services/uploader/actions';
 
 import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
@@ -25,6 +26,8 @@ const UploadsScreen: React.FC<{}> = () => {
   const connected = useNetworkStatus();
   const theme = useTheme();
   const navigation = useNavigation();
+
+  useFocusEffect(cleanUploadErrorsAction);
 
   const deleteButtons =
     !config.MOCKS.DELETE_BUTTONS || !config.isDev ? null : (
@@ -86,7 +89,7 @@ const UploadsScreen: React.FC<{}> = () => {
             if (!item.submittedAt) {
               const { state, progress, error } = getUploadState(uploadStates, guid);
 
-              if (state !== null || progress > 0) {
+              if (!error && state !== null) {
                 return (
                   <UploadRow
                     head="uploading..."
@@ -95,7 +98,6 @@ const UploadsScreen: React.FC<{}> = () => {
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
                     onPress={gotoForm}
-                    error={error}
                   />
                 );
               } else {
@@ -107,7 +109,6 @@ const UploadsScreen: React.FC<{}> = () => {
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
                     onPress={gotoForm}
-                    error={error}
                   />
                 );
               }

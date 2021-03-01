@@ -1,12 +1,13 @@
-import { findIndex, omit, set } from 'lodash/fp';
+import RNFS from 'react-native-fs';
+import { find, findIndex, mapValues, omit, set } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { UploadStore } from 'src/pullstate/uploadStore';
-import { UploadState } from 'src/pullstate/uploadStore/initialState';
+import { UploadStoreState } from 'src/pullstate/uploadStore/initialState';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
-import { PendingUpload } from 'src/types';
+import { DraftPhoto, PendingUpload } from 'src/types';
 
-export const savePhotoUploadUrl = (upload: PendingUpload, fileName: string, url: string) => {
+export const savePhotoUploadUrlAction = (upload: PendingUpload, fileName: string, url: string) => {
   PersistentUserStore.update((s) => {
     const { guid } = upload.draft;
     const index = findIndex({ draft: { guid } }, s.pendingUploads);
@@ -17,13 +18,13 @@ export const savePhotoUploadUrl = (upload: PendingUpload, fileName: string, url:
         pendingUploads: set([index, 'photoUploadUrls', fileName], url, s.pendingUploads),
       };
     } else {
-      console.warn('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
-      throw new Error('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
+      console.warn('savePhotoUploadUrlAction error: pendingUpload doesnt exist in state');
+      throw new Error('savePhotoUploadUrlAction error: pendingUpload doesnt exist in state');
     }
   });
 };
 
-export const setUploadingStateAction = (upload: PendingUpload, newUploadingState: UploadState) => {
+export const setUploadingFieldAction = <T>(upload: PendingUpload, fieldName: keyof UploadStoreState, value: T) => {
   UploadStore.update((s) => {
     const { guid } = upload.draft;
 
@@ -31,13 +32,13 @@ export const setUploadingStateAction = (upload: PendingUpload, newUploadingState
       ...s,
       [guid]: {
         ...getUploadState(s, guid),
-        state: newUploadingState,
+        [fieldName]: value,
       },
     };
   });
 };
 
-export function setUploadProgress(upload: PendingUpload, progress: number) {
+export function setUploadingErrorAction(upload: PendingUpload, error: string) {
   UploadStore.update((s) => {
     const { guid } = upload.draft;
 
@@ -45,7 +46,23 @@ export function setUploadProgress(upload: PendingUpload, progress: number) {
       ...s,
       [guid]: {
         ...getUploadState(s, guid),
-        progress,
+        error,
+        state: null,
+      },
+    };
+  });
+}
+
+export function finishPhotoUploadAction(upload: PendingUpload, progress: number) {
+  UploadStore.update((s) => {
+    const { guid } = upload.draft;
+
+    return {
+      ...s,
+      [guid]: {
+        ...getUploadState(s, guid),
+        progress: progress,
+        state: null,
       },
     };
   });
@@ -66,5 +83,43 @@ export function setFormSubmittedAction(upload: PendingUpload) {
     const { guid } = upload.draft;
 
     return omit([guid], s);
+  });
+}
+
+export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPhoto) {
+  try {
+    void RNFS.unlink(photo.uri);
+  } catch (e) {
+    console.warn('removeUploadingPhotoAction RNFS.unlink error: ', e);
+  }
+
+  PersistentUserStore.update((s) => {
+    const { guid } = upload.draft;
+    const index = findIndex({ draft: { guid } }, s.pendingUploads);
+
+    if (index === -1) {
+      console.warn('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
+      throw new Error('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
+    }
+
+    const fields = s.pendingUploads[index].draft.fields;
+
+    const fieldKey = find((key) => {
+      return findIndex({ uri: photo.uri }, fields[key].photos) !== -1;
+    }, Object.keys(fields));
+
+    if (fieldKey === undefined) {
+      console.warn('savePhotoUploadUrl error: photo doesnt exist in state');
+      throw new Error('savePhotoUploadUrl error: photo doesnt exist in state');
+    }
+
+    const newPhotos = fields[fieldKey].photos.filter((p) => p.uri !== photo.uri);
+    return set(['pendingUploads', index, 'draft', 'fields', fieldKey, 'photos'], newPhotos, s);
+  });
+}
+
+export function cleanUploadErrorsAction() {
+  UploadStore.update((s) => {
+    return mapValues((u) => ({ ...u, error: null }), s);
   });
 }
