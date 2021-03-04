@@ -2,7 +2,7 @@ import React from 'react';
 import { Paragraph, Title } from 'react-native-paper';
 
 import { styled } from 'src/paperTheme';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 
 export const BlankContentContainer = styled.View`
   flex: 1;
@@ -12,7 +12,7 @@ export const BlankContentContainer = styled.View`
 `;
 
 const BlankScreen: React.FC = () => {
-  const userData = PersistentUserStore.useState((s) => s.userData);
+  const userData = LoginStore.useState((s) => s.userData);
 
   return (
     <BlankContentContainer>

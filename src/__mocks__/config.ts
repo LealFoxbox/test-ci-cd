@@ -20,8 +20,6 @@ const config = {
     },
   ],
   PARSED_LOCALES: 'en',
-  BACKEND_BASE_URL: 'https://google.com',
-  BACKEND_API_URL: 'https://google.com',
   PLATFORM: 'android',
   MOCKS: {
     DB: true,
@@ -41,8 +39,16 @@ const config = {
   },
 };
 
-export const setEnv = (isStaging: boolean) => {
-  config.isStaging = isStaging;
+export const getApiUrl = (_isStaging: boolean) => {
+  return 'http://google.com';
+};
+
+export const getBaseUrl = (_isStaging: boolean) => {
+  return 'http://google.com';
+};
+
+export const getMockFlags = (_isStaging: boolean) => {
+  return config.MOCKS;
 };
 
 export default config;

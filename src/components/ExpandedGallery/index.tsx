@@ -123,6 +123,7 @@ function ExpandedGallery({
         }}
         style={[styles.container, { opacity, backgroundColor }]}
       >
+        {/* @ts-ignore*/}
         <Animated.View style={[styles.header, { transform: headerTransform }]}>
           {typeof HeaderComponent !== 'undefined' ? (
             React.createElement(HeaderComponent, {
@@ -163,9 +164,11 @@ function ExpandedGallery({
             />
           )}
           onMomentumScrollEnd={onScroll}
-          keyExtractor={(imageSrc) => imageSrc?.uri || `${imageSrc}`}
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-return
+          keyExtractor={(imageSrc: any) => imageSrc?.uri || `${imageSrc}`}
         />
         {typeof FooterComponent !== 'undefined' && (
+          // @ts-ignore
           <Animated.View style={[styles.footer, { transform: footerTransform }]}>
             {React.createElement(FooterComponent, {
               imageIndex: currentImageIndex,

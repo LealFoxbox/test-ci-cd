@@ -27,7 +27,7 @@ interface CreateRenderCardParams {
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
 }
 
-function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
+function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | undefined) {
   const { length } = listChoiceIds;
 
   if (length > 1) {
@@ -35,10 +35,10 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating) {
   }
 
   if (length === 0) {
-    return rating.name;
+    return rating?.name || '';
   }
 
-  const choice = find({ id: listChoiceIds[0] }, rating.range_choices);
+  const choice = find({ id: listChoiceIds[0] }, rating?.range_choices);
 
   return choice?.name || 'Error in selection';
 }
@@ -65,7 +65,7 @@ export const createRenderCard = (
     }
 
     const fieldValue = values[draftField.formFieldId];
-    const rating = ratings[fieldValue.rating_id];
+    const rating = ratings[fieldValue.rating_id] as Rating | undefined;
 
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
     const handleTapPhoto = (index: number) => setExpandedPhoto({ index, photos: draftField.photos.map((p) => p.uri) });
@@ -172,14 +172,18 @@ export const createRenderCard = (
           {...baseCardProps}
           ratingName={getListCardButtonName(fieldValue.list_choice_ids, rating as SelectRating)}
           onOpen={() =>
-            goToRatingChoices({ title: rating.name, ratingId: rating.id, formFieldId: fieldValue.formFieldId })
+            goToRatingChoices({
+              title: rating?.name || '',
+              ratingId: rating?.id || 0,
+              formFieldId: fieldValue.formFieldId,
+            })
           }
         />
       );
     }
 
     if (fieldValue.ratingTypeId === 7 || fieldValue.ratingTypeId === 1) {
-      const rangeChoices = rating.range_choices as RangeChoice[];
+      const rangeChoices = (rating?.range_choices || []) as RangeChoice[];
 
       const selectedRangeChoice = fieldValue.selectedChoice || find({ default: true }, rangeChoices) || null;
 

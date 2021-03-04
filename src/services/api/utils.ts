@@ -2,16 +2,14 @@ import { AxiosError } from 'axios';
 import * as rax from 'retry-axios';
 import { getOr } from 'lodash/fp';
 
-import config from 'src/config';
+import { getApiUrl as getConfigApi } from 'src/config';
+import { LoginStore } from 'src/pullstate/loginStore';
 
 export type ApiError = AxiosError<{ message: string; error: string }>;
 
 export function getApiUrl(companyId: string) {
-  return `https://${companyId}.${config.BACKEND_API_URL}`;
-}
-
-export function getBaseUrl(companyId: string) {
-  return `https://${companyId}.${config.BACKEND_BASE_URL}`;
+  const isStaging = LoginStore.getRawState().isStaging;
+  return `https://${companyId}.${getConfigApi(isStaging)}`;
 }
 
 export const baseRaxConfig: rax.RaxConfig['raxConfig'] = {

@@ -51,7 +51,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
           isReadonly={isReadonly}
         />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-          {!!rating.prefix && <Text>{rating.prefix}</Text>}
+          {!!rating?.prefix && <Text>{rating.prefix}</Text>}
           <TextInput
             style={{ marginBottom: 10, flex: 1, marginHorizontal: 5 }}
             keyboardType="decimal-pad"
@@ -61,7 +61,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
             {...numberInputProps}
             disabled={isReadonly}
           />
-          {!!rating.suffix && <Text>{rating.suffix}</Text>}
+          {!!rating?.suffix && <Text>{rating.suffix}</Text>}
         </Card.Content>
         <CardFooter
           id={id}

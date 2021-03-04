@@ -246,7 +246,6 @@ const usePanResponder = ({
 
       if (isTapGesture && currentScale > initialScale) {
         const { x, y } = currentTranslate;
-        const { dx, dy } = gestureState;
         const [topBound, leftBound, bottomBound, rightBound] = getBounds(currentScale);
 
         let nextTranslateX = x + dx;

@@ -4,7 +4,7 @@ import RNFS from 'react-native-fs';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
-import config from 'src/config';
+import config, { getMockFlags } from 'src/config';
 import {
   DraftField,
   DraftForm,
@@ -23,13 +23,21 @@ import {
 } from 'src/types';
 import { Coords } from 'src/utils/getCurrentPosition';
 
-import { initialState as downloadInitialState } from './downloadStore/initialState';
+import { LoginStore } from './loginStore';
+import { initialState as loginInitialState } from './loginStore/initialState';
 import { DownloadStore } from './downloadStore';
+import { initialState as downloadInitialState } from './downloadStore/initialState';
+import { UploadStore } from './uploadStore';
+import { initialState as uploadInitialState } from './uploadStore/initialState';
+import { PersistentUserStore, initPersistentStore } from './persistentStore';
 import { PersistentState, initialState as persistentInitialState } from './persistentStore/initialState';
-import { PersistentUserStore } from './persistentStore';
 
-export const loginAction = (user: User) => {
-  PersistentUserStore.update((s) => {
+let persistentStoreUnsub = () => {};
+
+export const loginAction = async (user: User) => {
+  persistentStoreUnsub = await initPersistentStore(user.id);
+
+  LoginStore.update((s) => {
     return {
       ...s,
       userData: user,
@@ -42,19 +50,30 @@ export const logoutAction = async () => {
   await deleteAllJSONFiles();
   await cleanMongo();
 
-  PersistentUserStore.update(() => {
+  LoginStore.update((s) => {
     return {
-      ...persistentInitialState,
+      ...loginInitialState,
+      isStaging: s.isStaging,
       status: 'shouldLogIn',
     };
   });
+
+  PersistentUserStore.update((s) => {
+    return { ...s, ...omit(['drafts', 'pendingUploads', 'uploads'], persistentInitialState) };
+  });
+
+  persistentStoreUnsub();
+
+  PersistentUserStore.update(() => persistentInitialState);
+  DownloadStore.update(() => downloadInitialState);
+  UploadStore.update(() => uploadInitialState);
 };
 
-export const setStagingAction = (isStaging: boolean) => {
-  PersistentUserStore.update((s) => {
+export const toggleStagingAction = () => {
+  LoginStore.update((s) => {
     return {
       ...s,
-      isStaging,
+      isStaging: !s.isStaging,
     };
   });
 };
@@ -98,6 +117,7 @@ export async function clearInspectionsDataAction() {
 
 interface FormCreationParams {
   form: Form;
+  isStaging: boolean;
   assignmentId: number;
   ratings: Record<string, Rating>;
   structure: Structure;
@@ -106,13 +126,13 @@ interface FormCreationParams {
 
 function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }: FormCreationParams) {
   const fields = form.inspection_form_items.map((field) => {
-    const rating = ratings[field.rating_id];
+    const rating = ratings[field.rating_id] as Rating | undefined;
 
     const baseField = {
       name: field.display_name,
       deleted: false,
 
-      rating_id: rating.id,
+      rating_id: rating?.id,
       formFieldId: field.line_item_id,
       weight: field.weight,
       position: field.position,
@@ -121,19 +141,19 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
       comment: null,
       photos: [],
 
-      ratingTypeId: rating.rating_type_id,
+      ratingTypeId: rating?.rating_type_id,
     };
 
-    switch (rating.rating_type_id) {
+    switch (rating?.rating_type_id) {
       case 1:
         return {
           ...baseField,
           selectedChoice: null,
-          minPosition: rating.range_choices.reduce(
+          minPosition: rating?.range_choices.reduce(
             (acc, curr) => Math.min(curr.position, acc),
-            rating.range_choices[0]?.position || Infinity,
+            rating?.range_choices[0]?.position || Infinity,
           ),
-          maxPosition: rating.range_choices.reduce((acc, curr) => Math.max(curr.position, acc), 0),
+          maxPosition: rating?.range_choices.reduce((acc, curr) => Math.max(curr.position, acc), 0),
         } as ScoreField;
 
       case 3:
@@ -201,7 +221,7 @@ function createMockDraftForm(params: FormCreationParams) {
     started_at: Date.now(),
     isDirty: true,
     fields: mapValues((field) => {
-      const rating = params.ratings[field.rating_id];
+      const rating = params.ratings[field.rating_id] as Rating | undefined;
 
       const baseField = {
         ...field,
@@ -209,7 +229,7 @@ function createMockDraftForm(params: FormCreationParams) {
         photos: [],
       };
 
-      switch (rating.rating_type_id) {
+      switch (rating?.rating_type_id) {
         case 1:
           return {
             ...baseField,
@@ -251,7 +271,8 @@ function createMockDraftForm(params: FormCreationParams) {
 export const initFormDraftAction = (params: FormCreationParams) => {
   PersistentUserStore.update((s) => {
     if (!s.drafts[params.assignmentId]) {
-      const createForm = config.MOCKS.FORM && config.isDev ? createMockDraftForm : createEmptyDraftForm;
+      const createForm =
+        getMockFlags(params.isStaging).FORM && config.isDev ? createMockDraftForm : createEmptyDraftForm;
 
       return set(['drafts', params.assignmentId], createForm(params), s);
     }

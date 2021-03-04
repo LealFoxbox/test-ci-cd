@@ -98,8 +98,8 @@ export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPh
     const index = findIndex({ draft: { guid } }, s.pendingUploads);
 
     if (index === -1) {
-      console.warn('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
-      throw new Error('savePhotoUploadUrl error: pendingUpload doesnt exist in state');
+      console.warn('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
+      throw new Error('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
     }
 
     const fields = s.pendingUploads[index].draft.fields;
@@ -109,8 +109,8 @@ export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPh
     }, Object.keys(fields));
 
     if (fieldKey === undefined) {
-      console.warn('savePhotoUploadUrl error: photo doesnt exist in state');
-      throw new Error('savePhotoUploadUrl error: photo doesnt exist in state');
+      console.warn('removeUploadingPhotoAction error: photo doesnt exist in pendingUploads');
+      throw new Error('removeUploadingPhotoAction error: photo doesnt exist in pendingUploads');
     }
 
     const newPhotos = fields[fieldKey].photos.filter((p) => p.uri !== photo.uri);

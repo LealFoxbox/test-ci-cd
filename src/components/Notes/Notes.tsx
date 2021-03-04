@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { View, ViewStyle } from 'react-native';
 import { Paragraph, useTheme } from 'react-native-paper';
 
-import config from 'src/config';
+import { getMockFlags } from 'src/config';
+import { LoginStore } from 'src/pullstate/loginStore';
 
 import ReadMore from './ReadMore';
 
@@ -18,7 +19,8 @@ const mockString =
   'This is an email test support@google.com. This a phone number test +542234751111 (+54)2234751111 542234751111 2234751111 475-1111 4751111. This is a url test http://www.google.com --- google.com/search?q=google+search';
 
 const Notes: React.FC<NotesProps> = ({ value, onReady, numberOfLines, isCard, style }) => {
-  const content = !config.MOCKS.NOTES || value ? value : mockString;
+  const isStaging = LoginStore.useState((s) => s.isStaging);
+  const content = !getMockFlags(isStaging).NOTES || value ? value : mockString;
   const theme = useTheme();
 
   useEffect(() => {

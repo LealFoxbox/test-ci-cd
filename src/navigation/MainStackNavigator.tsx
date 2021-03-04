@@ -7,7 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
 import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 
 import InspectionsNavigator from './InspectionsNavigator';
 import ScheduleNavigator from './ScheduleNavigator';
@@ -44,7 +44,7 @@ const MainStack = createStackNavigator<MainNavigatorParamList>();
 
 const TabStackNavigator: React.FC = () => {
   const { colors } = useTheme();
-  const userData = PersistentUserStore.useState((s) => s.userData);
+  const userData = LoginStore.useState((s) => s.userData);
 
   if (!userData) {
     return null;

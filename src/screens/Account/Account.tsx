@@ -8,6 +8,7 @@ import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import ConnectionBanner from 'src/components/ConnectionBanner';
@@ -35,12 +36,12 @@ const metadata = `
 `;
 
 const AccountScreen: React.FC = () => {
-  const userData = PersistentUserStore.useState((s) => s.userData);
-  const isStaging = PersistentUserStore.useState((s) => s.isStaging);
+  const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
   const lastUpdated = PersistentUserStore.useState((s) => s.lastUpdated);
+  const progress = DownloadStore.useState((s) => s.progress);
+
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
-  const { progress } = DownloadStore.useState((s) => s);
   const navigation = useNavigation();
   const connected = useNetworkStatus();
 

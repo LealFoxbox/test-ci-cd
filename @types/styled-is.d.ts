@@ -8,6 +8,5 @@ declare module 'styled-is' {
   export function isOr<T>(...propName: BooleanProps<T>[]);
   export function isSomeNot<T>(...propName: BooleanProps<T>[]);
 
-  // eslint-disable-next-line import/no-default-export
   export default function is<T>(...propName: BooleanProps<T>[]);
 }

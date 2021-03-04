@@ -7,9 +7,10 @@ import { orderBy } from 'lodash/fp';
 import { format } from 'date-fns';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import config from 'src/config';
+import config, { getMockFlags } from 'src/config';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
 import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
@@ -23,6 +24,7 @@ const UploadsScreen: React.FC<{}> = () => {
     s.pendingUploads.concat(orderBy('submittedAt', 'desc', s.uploads)),
   );
   const uploadStates = UploadStore.useState((s) => s);
+  const isStaging = LoginStore.useState((s) => s.isStaging);
   const connected = useNetworkStatus();
   const theme = useTheme();
   const navigation = useNavigation();
@@ -30,7 +32,7 @@ const UploadsScreen: React.FC<{}> = () => {
   useFocusEffect(cleanUploadErrorsAction);
 
   const deleteButtons =
-    !config.MOCKS.DELETE_BUTTONS || !config.isDev ? null : (
+    !config.isDev || !getMockFlags(isStaging).DELETE_BUTTONS ? null : (
       <View style={{ flexDirection: 'row' }}>
         <Button
           onPress={() =>

@@ -22,7 +22,7 @@ async function deleteFile(file: ReadDirItem) {
   try {
     await RNFS.unlink(file.path);
   } catch (e) {
-    console.warn('delete error ', e, ' for file ', file.path);
+    console.warn('deleteFile function: error ', e, ' for file ', file.path);
   }
 }
 

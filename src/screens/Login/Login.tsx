@@ -11,11 +11,11 @@ import ErrorMessage from 'src/components/ErrorMessage';
 import { ScrollView } from 'src/components/KeyboardAware';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { UserResponse, authenticate } from 'src/services/api/user';
-import config from 'src/config';
+import config, { getBaseUrl } from 'src/config';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { ApiError } from 'src/services/api/utils';
-import { clearInspectionsDataAction, loginAction, setStagingAction } from 'src/pullstate/actions';
+import { loginAction, toggleStagingAction } from 'src/pullstate/actions';
 import { styled } from 'src/paperTheme';
 
 import StagingDialog from './StagingDialog';
@@ -45,7 +45,7 @@ const SignInSchema = Yup.object().shape({
 const authenticateError = 'Your username or password appears to be incorrect for this account';
 
 const LoginScreen: React.FC<{}> = () => {
-  const isStaging = PersistentUserStore.useState((s) => s.isStaging);
+  const isStaging = LoginStore.useState((s) => s.isStaging);
   const [authError, setAuthError] = useState('');
   const connected = useNetworkStatus();
   const [visible, setVisible] = React.useState(false);
@@ -58,9 +58,7 @@ const LoginScreen: React.FC<{}> = () => {
     onSuccess: async (userData) => {
       if (userData.status === 200 && userData.data.user) {
         setAuthError('');
-        setStagingAction(isStaging);
-        await clearInspectionsDataAction();
-        loginAction(userData.data.user);
+        await loginAction(userData.data.user);
       } else {
         setAuthError(authenticateError);
       }
@@ -88,15 +86,7 @@ const LoginScreen: React.FC<{}> = () => {
     if (!isLoading) {
       setAuthError('');
 
-      if (isStaging) {
-        PersistentUserStore.update((s) => {
-          s.isStaging = false;
-        });
-      } else {
-        PersistentUserStore.update((s) => {
-          s.isStaging = true;
-        });
-      }
+      toggleStagingAction();
     }
   };
 
@@ -129,7 +119,7 @@ const LoginScreen: React.FC<{}> = () => {
               keyboardType="default"
               autoCapitalize="none"
               dense
-              right={<TextInput.Affix text={`.${config.BACKEND_BASE_URL}`} />}
+              right={<TextInput.Affix text={`.${getBaseUrl(isStaging)}`} />}
               /* @ts-ignore */
               render={(props) => <NativeTextInput {...props} textAlign="right" />}
               label="Account Name"

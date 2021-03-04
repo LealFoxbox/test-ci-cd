@@ -5,7 +5,7 @@ import { MutableRefObject } from 'react';
 import RNFS from 'react-native-fs';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 
-import config from 'src/config';
+import { getMockFlags } from 'src/config';
 import { updateAssignmentsMeta, updateStructuresMeta } from 'src/pullstate/actions';
 
 import { FetchAssignmentsResponse, mockAssignmentsPage } from '../api/assignments';
@@ -18,7 +18,7 @@ import { PERCENTAGES } from './percentages';
 
 const dir = RNBackgroundDownloader.directories.documents;
 
-export async function refreshDb() {
+export async function refreshDb(isStaging: boolean) {
   const allFiles = await RNFS.readDir(dir);
   const structuresPathList = getOurTypeFiles(allFiles, 'structures').map((f) => f.path);
 
@@ -32,12 +32,12 @@ export async function refreshDb() {
       await structuresDb.insertPage(downloadedContent.structures);
       updateStructuresMeta(i + 1, structuresPathList.length);
     } catch (e) {
-      console.log('refreshDb structures error: ', e);
+      console.warn('refreshDb structures error: ', e);
     }
     i += 1;
   }
 
-  if (config.MOCKS.DATA_STRUCTURES) {
+  if (getMockFlags(isStaging).DATA_STRUCTURES) {
     updateStructuresMeta(15.777, structuresPathList.length);
     i = 0;
     while (i < 20) {
@@ -45,7 +45,7 @@ export async function refreshDb() {
         console.log('MOCKING STRUCTURES ', i);
         await structuresDb.insertPage(mockStructuresPage());
       } catch (e) {
-        console.log('refreshDb structures error: ', e);
+        console.warn('refreshDb structures error while mocking: ', e);
       }
       i += 1;
     }
@@ -64,12 +64,12 @@ export async function refreshDb() {
       await assignmentsDb.insertPage(downloadedContent.inspection_form_assignments);
       updateAssignmentsMeta(i + 1, assignmentsPathList.length);
     } catch (e) {
-      console.log('refreshDb assignments error: ', e);
+      console.warn('refreshDb assignments error: ', e);
     }
     i += 1;
   }
 
-  if (config.MOCKS.DATA_ASSIGNMENTS) {
+  if (getMockFlags(isStaging).DATA_ASSIGNMENTS) {
     updateAssignmentsMeta(15.777, assignmentsPathList.length);
     i = 0;
     while (i < 20) {
@@ -77,7 +77,7 @@ export async function refreshDb() {
         console.log('MOCKING ASSIGNMENTS', i);
         await assignmentsDb.insertPage(mockAssignmentsPage());
       } catch (e) {
-        console.log('refreshDb assignments error: ', e);
+        console.warn('refreshDb assignments error while mocking: ', e);
       }
       i += 1;
     }
