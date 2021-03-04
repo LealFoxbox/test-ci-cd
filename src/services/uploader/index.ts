@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useEffect } from 'react';
 import RNFS from 'react-native-fs';
 import { flatMap } from 'lodash/fp';
@@ -61,7 +62,7 @@ async function photoUploader(
 ) {
   setUploadingFieldAction(upload, 'state', 'photos');
 
-  console.warn('photoUploader init of file ', photo.fileName);
+  console.log('photoUploader init of file ', photo.fileName);
 
   let file: string | undefined;
 
@@ -98,7 +99,7 @@ async function photoUploader(
       }
 
       if (!uploadPhotoError) {
-        console.warn('photoUploader success with file ', photo.fileName);
+        console.log('photoUploader success with file ', photo.fileName);
 
         savePhotoUploadUrlAction(upload, photo.fileName, data['object-url']);
         finishPhotoUploadAction(upload, nextPercentage);
@@ -123,12 +124,12 @@ async function photoUploader(
 async function formUploader(token: string, companyId: string, pendingUpload: PendingUpload) {
   setUploadingFieldAction(pendingUpload, 'state', 'form');
 
-  console.warn('formUploader init: ', pendingUpload.draft.guid);
+  console.log('formUploader init: ', pendingUpload.draft.guid);
 
   const [submitError] = await axiosCatchTo(submitInspection({ pendingUpload, token, companyId }));
 
   if (!submitError) {
-    console.warn('formUploader SUCCESS!');
+    console.log('formUploader SUCCESS!');
     setFormSubmittedAction(pendingUpload);
   } else {
     console.warn(`Could not submit draft guid ${pendingUpload.draft.guid} with submitError: `, submitError);

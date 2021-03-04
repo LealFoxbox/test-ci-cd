@@ -8,6 +8,6 @@ export const openURL = (url: string) => {
   try {
     void Linking.openURL(url);
   } catch (err) {
-    console.error('A linking error occurred: ', err);
+    console.error('openURL error: ', err);
   }
 };

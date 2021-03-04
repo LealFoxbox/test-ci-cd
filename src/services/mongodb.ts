@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { filter, find, uniqBy } from 'lodash/fp';

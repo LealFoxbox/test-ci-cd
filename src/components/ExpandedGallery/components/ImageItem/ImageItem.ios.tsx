@@ -79,7 +79,7 @@ const ImageItem = ({
         onRequestClose();
       }
     },
-    [scaled],
+    [onRequestClose, onZoom, swipeToCloseEnabled],
   );
 
   const onScroll = ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -134,6 +134,7 @@ const ImageItem = ({
           onLongPress={onLongPressHandler}
           delayLongPress={delayLongPress}
         >
+          {/* @ts-ignore */}
           <Animated.Image source={imageSrc} style={imageStylesWithOpacity} onLoad={() => setLoaded(true)} />
         </TouchableWithoutFeedback>
       </ScrollView>

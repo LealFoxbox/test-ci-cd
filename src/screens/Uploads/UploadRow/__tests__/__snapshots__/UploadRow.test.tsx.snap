@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Row should render 1`] = `
+exports[`UploadRow should render 1`] = `
 <View
   style={
     Array [
@@ -24,13 +24,26 @@ exports[`Row should render 1`] = `
       }
     }
   >
-    <View
+    <Text
+      allowFontScaling={false}
       style={
-        Object {
-          "marginRight": 24,
-        }
+        Array [
+          Object {
+            "color": "rgba(0, 0, 0, 0.54)",
+            "fontSize": 24,
+          },
+          undefined,
+          Object {
+            "fontFamily": "Material Icons",
+            "fontStyle": "normal",
+            "fontWeight": "normal",
+          },
+          Object {},
+        ]
       }
-    />
+    >
+      ?
+    </Text>
     <View
       style={
         Array [
@@ -44,47 +57,6 @@ exports[`Row should render 1`] = `
         ]
       }
     >
-      <Text
-        style={
-          Array [
-            Object {
-              "color": "#000000",
-              "fontFamily": "System",
-              "fontWeight": "400",
-              "textAlign": "left",
-            },
-            Array [
-              Object {
-                "color": "rgba(0, 0, 0, 0.87)",
-                "fontFamily": "System",
-                "fontWeight": "500",
-                "textAlign": "left",
-                "writingDirection": "ltr",
-              },
-              Array [
-                Object {
-                  "fontSize": 20,
-                  "letterSpacing": 0.15,
-                  "lineHeight": 30,
-                  "marginVertical": 2,
-                },
-                undefined,
-              ],
-              Array [
-                Object {
-                  "fontSize": 20,
-                  "letterSpacing": 0.15,
-                  "lineHeight": 30,
-                  "marginVertical": 2,
-                },
-                undefined,
-              ],
-            ],
-          ]
-        }
-      >
-        label
-      </Text>
       <Text
         style={
           Array [
@@ -124,8 +96,50 @@ exports[`Row should render 1`] = `
           ]
         }
       >
-        value
+        HEAD
       </Text>
+      <Text
+        style={
+          Array [
+            Object {
+              "color": "#000000",
+              "fontFamily": "System",
+              "fontWeight": "400",
+              "textAlign": "left",
+            },
+            Array [
+              Object {
+                "color": "rgba(0, 0, 0, 0.87)",
+                "fontFamily": "System",
+                "fontWeight": "500",
+                "textAlign": "left",
+                "writingDirection": "ltr",
+              },
+              Array [
+                Object {
+                  "fontSize": 20,
+                  "letterSpacing": 0.15,
+                  "lineHeight": 30,
+                  "marginVertical": 2,
+                },
+                undefined,
+              ],
+              Array [
+                Object {
+                  "fontSize": 20,
+                  "letterSpacing": 0.15,
+                  "lineHeight": 30,
+                  "marginVertical": 2,
+                },
+                undefined,
+              ],
+            ],
+          ]
+        }
+      >
+        title
+      </Text>
+      <View />
     </View>
   </View>
 </View>

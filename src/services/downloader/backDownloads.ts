@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { checkForExistingDownloads, directories, download } from 'react-native-background-downloader';
 import { format } from 'date-fns';
 

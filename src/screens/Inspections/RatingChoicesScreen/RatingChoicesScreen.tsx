@@ -67,7 +67,7 @@ const RatingChoicesScreen: React.FC = () => {
     try {
       flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
     } catch (error) {
-      console.warn('Rating Choices scrollToTop error: ', error);
+      console.warn('Rating Choices Screen scrollToTop error: ', error);
     }
   }, [flatListRef]);
 

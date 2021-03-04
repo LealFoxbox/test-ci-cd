@@ -62,7 +62,7 @@ function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: (
           const newUri = await fileUrlCopy(response.uri, fileName);
           onTakePhoto && onTakePhoto({ uri: newUri, fileName }, isAttachment);
         } else {
-          console.warn('No uri??');
+          console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
         }
       }
     };

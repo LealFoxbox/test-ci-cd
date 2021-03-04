@@ -32,7 +32,7 @@ export async function refreshDb(isStaging: boolean) {
       await structuresDb.insertPage(downloadedContent.structures);
       updateStructuresMeta(i + 1, structuresPathList.length);
     } catch (e) {
-      console.log('refreshDb structures error: ', e);
+      console.warn('refreshDb structures error: ', e);
     }
     i += 1;
   }
@@ -45,7 +45,7 @@ export async function refreshDb(isStaging: boolean) {
         console.log('MOCKING STRUCTURES ', i);
         await structuresDb.insertPage(mockStructuresPage());
       } catch (e) {
-        console.log('refreshDb structures error: ', e);
+        console.warn('refreshDb structures error while mocking: ', e);
       }
       i += 1;
     }
@@ -64,7 +64,7 @@ export async function refreshDb(isStaging: boolean) {
       await assignmentsDb.insertPage(downloadedContent.inspection_form_assignments);
       updateAssignmentsMeta(i + 1, assignmentsPathList.length);
     } catch (e) {
-      console.log('refreshDb assignments error: ', e);
+      console.warn('refreshDb assignments error: ', e);
     }
     i += 1;
   }
@@ -77,7 +77,7 @@ export async function refreshDb(isStaging: boolean) {
         console.log('MOCKING ASSIGNMENTS', i);
         await assignmentsDb.insertPage(mockAssignmentsPage());
       } catch (e) {
-        console.log('refreshDb assignments error: ', e);
+        console.warn('refreshDb assignments error while mocking: ', e);
       }
       i += 1;
     }
