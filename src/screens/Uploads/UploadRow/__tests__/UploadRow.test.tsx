@@ -6,7 +6,7 @@ import UploadRow from '../UploadRow';
 
 describe('UploadRow', () => {
   it('should render', () => {
-    const result = render(<UploadRow head="head" title="title" content={<View />} icon="user" />);
+    const result = render(<UploadRow head="head" title="title" content={<View />} icon="article" />);
 
     expect(result).toMatchSnapshot();
   });
