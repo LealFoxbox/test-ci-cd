@@ -268,17 +268,26 @@ async function ratingChoicesDownload(token: string, subdomain: string) {
         PersistentUserStore.update((s) => {
           if (nextDownload) {
             const id = nextDownload.ratingId;
-            // TODO: investigate a way to remove the type casting
+            const rating = s.ratings[id] as SelectRating | undefined;
 
-            (s.ratings[id] as any) = {
-              ...s.ratings[id],
-              range_choices: ((s.ratings[id] as SelectRating)?.range_choices || []).concat(data.list_choices),
-              lastDownloaded: ((s.ratings[id] as SelectRating)?.lastDownloaded || []).concat(Date.now()),
-              page: data.meta.current_page,
-              totalPages: data.meta.total_pages,
+            if (!rating) {
+              throw new Error(`ratingChoicesDownload error: rating id ${id} doesn't exist in ratings`);
+            }
+
+            return {
+              ...s,
+              ratings: {
+                ...s.ratings,
+                [id]: {
+                  ...rating,
+                  range_choices: (rating.range_choices || []).concat(data.list_choices),
+                  lastDownloaded: (rating.lastDownloaded || []).concat(Date.now()),
+                  page: data.meta.current_page,
+                  totalPages: data.meta.total_pages,
+                },
+              },
+              lastUpdated: Date.now(),
             };
-
-            s.lastUpdated = Date.now();
           }
         });
 

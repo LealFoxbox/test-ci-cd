@@ -1,6 +1,5 @@
 import React from 'react';
-import { Paragraph } from 'react-native-paper';
-import { Switch } from 'react-native-gesture-handler';
+import { Paragraph, Switch, useTheme } from 'react-native-paper';
 
 import { styled } from 'src/paperTheme';
 
@@ -21,11 +20,14 @@ interface OptionRowProps {
 }
 
 const OptionRow: React.FC<OptionRowProps> = ({ label, icon, disabled, value, onToggle }) => {
+  const theme = useTheme();
   return (
     <Container>
       {icon}
       <Paragraph style={{ flex: 1, marginHorizontal: 10 }}>{label}</Paragraph>
-      {value !== undefined && onToggle && <Switch disabled={disabled} value={value} onValueChange={onToggle} />}
+      {value !== undefined && onToggle && (
+        <Switch disabled={disabled} value={value} onValueChange={onToggle} color={theme.colors.success} />
+      )}
     </Container>
   );
 };

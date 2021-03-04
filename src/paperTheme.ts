@@ -5,6 +5,7 @@ import * as styledComponents from 'styled-components/native';
 const customColors = {
   deficient: '#FF3333',
   gps: '#007AFE',
+  success: '#34C759',
 };
 
 type CustomColors = typeof customColors;
