@@ -304,6 +304,7 @@ const EditFormScreen: React.FC<{}> = () => {
                   color={theme.colors.success}
                   dark
                   style={{ marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
+                  icon="arrow-up-circle"
                 >
                   Submit
                 </Button>

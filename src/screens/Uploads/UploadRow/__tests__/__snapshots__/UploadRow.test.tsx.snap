@@ -42,7 +42,7 @@ exports[`UploadRow should render 1`] = `
         ]
       }
     >
-      ?
+      
     </Text>
     <View
       style={
