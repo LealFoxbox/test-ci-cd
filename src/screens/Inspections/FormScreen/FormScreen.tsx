@@ -301,8 +301,9 @@ const EditFormScreen: React.FC<{}> = () => {
                 <Button
                   onPress={formikProps.handleSubmit}
                   mode="contained"
+                  color={theme.colors.success}
                   dark
-                  style={{ width: 120, alignSelf: 'flex-end', marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
+                  style={{ marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
                 >
                   Submit
                 </Button>

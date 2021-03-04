@@ -191,6 +191,7 @@ exports[`WebViewScreen should render 1`] = `
                             "onSurface": "#FF9400",
                             "placeholder": "rgba(0, 0, 0, 0.54)",
                             "primary": "#FF9400",
+                            "success": "#34C759",
                             "surface": "#FFFFFF",
                             "text": "#000000",
                           },
