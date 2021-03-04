@@ -2,7 +2,7 @@ import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { filter, find, uniqBy } from 'lodash/fp';
 
-import config from 'src/config';
+import config, { getMockFlags } from 'src/config';
 import { Assignment, Structure } from 'src/types';
 
 type StructuresDb = ReturnType<typeof createStructureDb>;
@@ -206,8 +206,8 @@ export function createAssignmentDb() {
   };
 }
 
-export const structuresDb: StructuresDb = !config.MOCKS.DB ? createStructureDb() : createStructureMock();
-export const assignmentsDb: AssignmentDb = !config.MOCKS.DB ? createAssignmentDb() : createAssignmentMock();
+export const structuresDb: StructuresDb = !getMockFlags(true).DB ? createStructureDb() : createStructureMock();
+export const assignmentsDb: AssignmentDb = !getMockFlags(true).DB ? createAssignmentDb() : createAssignmentMock();
 
 export async function cleanMongo() {
   await structuresDb.clean();

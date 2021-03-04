@@ -33,14 +33,19 @@ const fuseOptions = {
   keys: ['name'],
 };
 
+const emptyChoices: SelectRatingChoice[] = [];
+
 const RatingChoicesScreen: React.FC = () => {
   const {
     params: { assignmentId, ratingId, formFieldId },
   } = useRoute<RouteProp<MainNavigatorParamList, typeof RATING_CHOICES_MODAL>>();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const rating = PersistentUserStore.useState((s) => s.ratings[ratingId] as SelectRating);
-  const draft = PersistentUserStore.useState((s) => (assignmentId ? s.drafts[assignmentId] : undefined));
+  const { rating, draft } = PersistentUserStore.useState((s) => ({
+    draft: assignmentId ? s.drafts[assignmentId] : undefined,
+    rating: s.ratings[ratingId] as SelectRating | undefined,
+  }));
+
   const listChoiceIds = (draft?.fields[formFieldId] as SelectField)?.list_choice_ids || [];
 
   const [selection, setSelection] = useState(listChoiceIds);
@@ -48,14 +53,15 @@ const RatingChoicesScreen: React.FC = () => {
   const navigation = useNavigation();
   const theme = useTheme();
 
-  const isMultiSelect = rating.rating_type_id === 9;
-  const [ratingChoices, setRatingChoices] = useState(sortBy('position', rating.range_choices));
+  const rangeChoices = rating?.range_choices || emptyChoices;
+  const isMultiSelect = rating?.rating_type_id === 9;
+  const [ratingChoices, setRatingChoices] = useState(sortBy('position', rangeChoices));
   const fuse = useRef(new Fuse(ratingChoices, fuseOptions));
   const flatListRef = useRef<FlatList<SelectRatingChoice>>(null);
 
   useEffect(() => {
-    fuse.current = new Fuse(rating.range_choices, fuseOptions);
-  }, [rating.range_choices]);
+    fuse.current = new Fuse(rangeChoices, fuseOptions);
+  }, [rangeChoices]);
 
   const scrollToTop = useCallback(() => {
     try {
@@ -75,7 +81,7 @@ const RatingChoicesScreen: React.FC = () => {
 
         if (!searchStr) {
           // empty search query
-          setRatingChoices(sortBy('position', rating.range_choices));
+          setRatingChoices(sortBy('position', rangeChoices));
         } else {
           setRatingChoices(map('item', fuse.current?.search(searchStr) || []));
         }
@@ -83,7 +89,7 @@ const RatingChoicesScreen: React.FC = () => {
       300,
       { leading: false, trailing: true },
     ),
-    [scrollToTop, rating.range_choices],
+    [scrollToTop, rangeChoices],
   );
 
   const handleChangeSearch = (text: string) => {

@@ -4,6 +4,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
 import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
@@ -57,7 +58,17 @@ async function getMissingForms(forms: Record<string, Form>) {
   return [];
 }
 
-export async function dbDownload(token: string, subdomain: string, totalPages: MutableRefObject<DbTotalPages>) {
+export async function dbDownload({
+  token,
+  subdomain,
+  totalPages,
+  isStaging,
+}: {
+  token: string;
+  subdomain: string;
+  totalPages: MutableRefObject<DbTotalPages>;
+  isStaging: boolean;
+}) {
   console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
   setDownloading('db');
   await waitForExistingDownloads();
@@ -91,7 +102,7 @@ export async function dbDownload(token: string, subdomain: string, totalPages: M
   if (!erroredOut) {
     setProgress(PERCENTAGES.dbLoad[0]);
 
-    FLAGS.loggedIn && (await refreshDb());
+    FLAGS.loggedIn && (await refreshDb(isStaging));
 
     setProgress((PERCENTAGES.dbLoad[0] + PERCENTAGES.dbLoad[1]) * 0.5);
 
@@ -261,8 +272,8 @@ async function ratingChoicesDownload(token: string, subdomain: string) {
 
             (s.ratings[id] as any) = {
               ...s.ratings[id],
-              range_choices: (s.ratings[id] as SelectRating).range_choices.concat(data.list_choices),
-              lastDownloaded: (s.ratings[id] as SelectRating).lastDownloaded.concat(Date.now()),
+              range_choices: ((s.ratings[id] as SelectRating)?.range_choices || []).concat(data.list_choices),
+              lastDownloaded: ((s.ratings[id] as SelectRating)?.lastDownloaded || []).concat(Date.now()),
               page: data.meta.current_page,
               totalPages: data.meta.total_pages,
             };
@@ -291,18 +302,27 @@ async function ratingChoicesDownload(token: string, subdomain: string) {
   setDownloading(null);
 }
 
-export function useDownloader() {
+export function useDownloader(): ReturnType<typeof useTrigger> {
   const [shouldTrigger, setShouldTrigger] = useTrigger();
-  const token = PersistentUserStore.useState((s) => s.userData?.single_access_token);
-  const inspectionsEnabled = PersistentUserStore.useState((s) => s.userData?.features.inspection_feature.enabled);
-  const subdomain = PersistentUserStore.useState((s) => s.userData?.account.subdomain);
-  const forms = PersistentUserStore.useState((s) => s.forms);
-  const ratings = PersistentUserStore.useState((s) => s.ratings);
-  const isRatingsBaseDownloaded = PersistentUserStore.useState(selectIsRatingsBaseDownloaded);
-  const isRatingsComplete = PersistentUserStore.useState(selectIsRatingsComplete);
-  const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
-  const downloading = DownloadStore.useState((s) => s.downloading);
-  const downloadError = DownloadStore.useState((s) => s.error);
+  const { token, inspectionsEnabled, subdomain, isStaging } = LoginStore.useState((s) => ({
+    token: s.userData?.single_access_token,
+    inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
+    subdomain: s.userData?.account.subdomain,
+    isStaging: s.isStaging,
+  }));
+  const { forms, ratings, isRatingsBaseDownloaded, isRatingsComplete, isMongoComplete } = PersistentUserStore.useState(
+    (s) => ({
+      forms: s.forms,
+      ratings: s.ratings,
+      isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
+      isRatingsComplete: selectIsRatingsComplete(s),
+      isMongoComplete: selectMongoComplete(s),
+    }),
+  );
+  const { downloading, downloadError } = DownloadStore.useState((s) => ({
+    downloading: s.downloading,
+    downloadError: s.error,
+  }));
   const isMongoLoaded = useIsMongoLoaded();
   const connected = useNetworkStatus();
 
@@ -319,7 +339,7 @@ export function useDownloader() {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
-            void dbDownload(token, subdomain, totalPages);
+            void dbDownload({ token, subdomain, totalPages, isStaging });
           } else {
             DownloadStore.update((s) => {
               if (s.progress < PERCENTAGES.forms[0]) {
@@ -358,7 +378,8 @@ export function useDownloader() {
     connected,
     isRatingsComplete,
     isRatingsBaseDownloaded,
+    isStaging,
   ]);
 
-  return setShouldTrigger;
+  return [shouldTrigger, setShouldTrigger];
 }

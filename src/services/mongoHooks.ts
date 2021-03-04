@@ -12,10 +12,9 @@ interface InspectionData {
 }
 
 export const structures = {
-  useGet(id: number | null): [Structure | null, boolean] {
+  useGet(id: number | null, isMongoComplete: boolean): [Structure | null, boolean] {
     const [data, setData] = useState<Structure | null>(null);
     const [isLoading, setIsloading] = useState(true);
-    const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
 
     useEffect(() => {
       let mounted = true;
@@ -47,15 +46,18 @@ export const structures = {
   useInspection(parentId: number | null): [InspectionData, boolean, boolean] {
     const [data, setData] = useState<InspectionData>({ parent: null, children: [] });
     const [isLoading, setIsloading] = useState(true);
-    const isMongoComplete = PersistentUserStore.useState(selectMongoComplete);
+    const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
+      initialized: s.initialized,
+      isMongoComplete: selectMongoComplete(s),
+    }));
 
     useEffect(() => {
       let mounted = true;
 
       (async () => {
         await structuresDb.loadPromise;
-        if (isMongoComplete) {
-          setIsloading(true);
+        if (initialized && isMongoComplete) {
+          mounted && setIsloading(true);
 
           if (parentId) {
             const newData = {
@@ -82,13 +84,13 @@ export const structures = {
             }
           }
         }
-        mounted && setIsloading(false);
+        mounted && initialized && setIsloading(false);
       })();
 
       return () => {
         mounted = false;
       };
-    }, [parentId, isMongoComplete]);
+    }, [parentId, isMongoComplete, initialized]);
 
     return [data, isLoading, isMongoComplete];
   },
@@ -117,11 +119,11 @@ export const assignments = {
           }
         }
         mounted && setIsloading(false);
-
-        return () => {
-          mounted = false;
-        };
       })();
+
+      return () => {
+        mounted = false;
+      };
     }, [forms, id]);
 
     return [data, isLoading];

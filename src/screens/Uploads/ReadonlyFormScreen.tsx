@@ -10,6 +10,7 @@ import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { RATING_CHOICES_MODAL, SIGNATURE_MODAL, UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
 import { UploadsNavigatorParamList } from 'src/navigation/UploadsNavigator';
 import { DraftForm } from 'src/types';
@@ -92,12 +93,12 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
     photos: [],
     index: -1,
   });
-  const userData = PersistentUserStore.useState((s) => s.userData);
-  const draft = PersistentUserStore.useState(
-    (s) =>
+  const userData = LoginStore.useState((s) => s.userData);
+  const { draft, ratings } = PersistentUserStore.useState((s) => ({
+    ratings: s.ratings,
+    draft:
       s.pendingUploads.find((u) => u.draft.guid === guid)?.draft || s.uploads.find((u) => u.draft.guid === guid)?.draft,
-  );
-  const ratings = PersistentUserStore.useState((s) => s.ratings);
+  }));
   const [isFlagged] = useState(draft?.flagged);
   const [isPrivate] = useState(draft?.privateInspection || draft?.private);
   const [isReady, onReady] = useResult<undefined>();

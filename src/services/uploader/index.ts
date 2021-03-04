@@ -3,6 +3,7 @@ import RNFS from 'react-native-fs';
 import { flatMap } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { useTrigger } from 'src/utils/useTrigger';
 import { axiosCatchTo } from 'src/utils/catchTo';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
@@ -136,11 +137,13 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
   }
 }
 
-export function useUploader() {
+export function useUploader(): ReturnType<typeof useTrigger> {
   const [shouldTrigger, setShouldTrigger] = useTrigger();
-  const token = PersistentUserStore.useState((s) => s.userData?.single_access_token);
-  const inspectionsEnabled = PersistentUserStore.useState((s) => s.userData?.features.inspection_feature.enabled);
-  const subdomain = PersistentUserStore.useState((s) => s.userData?.account.subdomain);
+  const { token, inspectionsEnabled, subdomain } = LoginStore.useState((s) => ({
+    token: s.userData?.single_access_token,
+    inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
+    subdomain: s.userData?.account.subdomain,
+  }));
   const pendingUploads = PersistentUserStore.useState((s) => s.pendingUploads);
   const uploadStoreState = UploadStore.useState((s) => s);
   const connected = useNetworkStatus();
@@ -175,5 +178,5 @@ export function useUploader() {
     }
   }, [shouldTrigger, token, subdomain, inspectionsEnabled, connected, pendingUploads, uploadStoreState]);
 
-  return setShouldTrigger;
+  return [shouldTrigger, setShouldTrigger];
 }

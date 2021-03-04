@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 
 import WebViewScreen from 'src/components/WebViewScreen';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { User } from 'src/types';
 
 function getTicketsUri(user: User) {
@@ -10,7 +10,7 @@ function getTicketsUri(user: User) {
 }
 
 const TicketsScreen: React.FC<{}> = () => {
-  const userData = PersistentUserStore.useState((s) => s.userData);
+  const userData = LoginStore.useState((s) => s.userData);
 
   if (!userData) {
     return <View />;

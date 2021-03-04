@@ -12,6 +12,7 @@ import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import { DraftField, DraftForm, DraftPhoto } from 'src/types';
@@ -87,10 +88,15 @@ const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newPhoto, rangeChoicesSelection },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>>();
+  const userData = LoginStore.useState((s) => s.userData);
+  const { draft, ratings } = PersistentUserStore.useState((s) => ({
+    ratings: s.ratings,
+    draft: s.drafts[assignmentId] as DraftForm | undefined,
+  }));
+
   const formikBagRef = useRef<FormikProps<Record<string, DraftField>> | null>(null);
   const theme = useTheme();
   const navigation = useNavigation();
-
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
 
@@ -98,9 +104,7 @@ const EditFormScreen: React.FC<{}> = () => {
     photos: [],
     index: -1,
   });
-  const userData = PersistentUserStore.useState((s) => s.userData);
-  const draft: DraftForm | undefined = PersistentUserStore.useState((s) => s.drafts[assignmentId]);
-  const ratings = PersistentUserStore.useState((s) => s.ratings);
+
   const [isFlagged, setIsFlagged] = useState(draft?.flagged);
   const [isPrivate, setIsPrivate] = useState(draft?.privateInspection || draft?.private);
   const [isGpsLoading, setGpsLoading] = useState(false);

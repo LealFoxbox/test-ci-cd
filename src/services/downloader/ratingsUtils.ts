@@ -7,8 +7,8 @@ import { isMilisecondsExpired } from 'src/utils/expiration';
 
 import { PERCENTAGES } from './percentages';
 
-export function isSelectRating(rating: Rating) {
-  return rating.rating_type_id === 8 || rating.rating_type_id === 9;
+export function isSelectRating(rating: Rating | undefined) {
+  return rating?.rating_type_id === 8 || rating?.rating_type_id === 9;
 }
 
 export const isRatingExpired = (selectRating: SelectRating) => {
@@ -16,7 +16,7 @@ export const isRatingExpired = (selectRating: SelectRating) => {
 };
 
 export const isRatingComplete = (selectRating: SelectRating) => {
-  return selectRating.page !== null && selectRating.page === selectRating.totalPages && !isRatingExpired(selectRating);
+  return selectRating.page !== null && selectRating.page === selectRating.totalPages;
 };
 
 export function getSelectRatings(ratings: Record<string, Rating>) {
@@ -27,19 +27,13 @@ export const selectIsRatingsBaseDownloaded = (s: PersistentState) => {
   return !isEmpty(s.ratings) && s.ratingsDownloaded !== null && !isMilisecondsExpired(s.ratingsDownloaded);
 };
 
-export const selectIsRatingsComplete = (s: PersistentState) =>
-  selectIsRatingsBaseDownloaded(s) &&
-  Object.values(s.ratings).reduce((acc, curr) => {
-    if (!acc) {
-      return false;
-    }
+export const selectIsRatingsComplete = (s: PersistentState) => {
+  if (isEmpty(s.ratings) || s.ratingsDownloaded === null) {
+    return false;
+  }
 
-    if (!isSelectRating(curr)) {
-      return true;
-    }
-
-    return isRatingComplete(curr as SelectRating);
-  }, true);
+  return Object.values(s.ratings).every((curr) => !isSelectRating(curr) || isRatingComplete(curr as SelectRating));
+};
 
 export function cleanExpiredIncompleteRatings() {
   PersistentUserStore.update((s) => {
@@ -60,7 +54,7 @@ export function getNextRatingChoicesDownload() {
   const selectRatings = sortBy('id', getSelectRatings(PersistentUserStore.getRawState().ratings));
   const [start, end] = PERCENTAGES.ratings;
 
-  const i = selectRatings.findIndex((r) => !isRatingComplete(r));
+  const i = selectRatings.findIndex((r) => !isRatingComplete(r) || isRatingExpired(r));
 
   if (i !== -1) {
     const r = selectRatings[i];

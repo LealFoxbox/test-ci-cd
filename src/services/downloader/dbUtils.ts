@@ -5,7 +5,7 @@ import { MutableRefObject } from 'react';
 import RNFS from 'react-native-fs';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 
-import config from 'src/config';
+import { getMockFlags } from 'src/config';
 import { updateAssignmentsMeta, updateStructuresMeta } from 'src/pullstate/actions';
 
 import { FetchAssignmentsResponse, mockAssignmentsPage } from '../api/assignments';
@@ -18,7 +18,7 @@ import { PERCENTAGES } from './percentages';
 
 const dir = RNBackgroundDownloader.directories.documents;
 
-export async function refreshDb() {
+export async function refreshDb(isStaging: boolean) {
   const allFiles = await RNFS.readDir(dir);
   const structuresPathList = getOurTypeFiles(allFiles, 'structures').map((f) => f.path);
 
@@ -37,7 +37,7 @@ export async function refreshDb() {
     i += 1;
   }
 
-  if (config.MOCKS.DATA_STRUCTURES) {
+  if (getMockFlags(isStaging).DATA_STRUCTURES) {
     updateStructuresMeta(15.777, structuresPathList.length);
     i = 0;
     while (i < 20) {
@@ -69,7 +69,7 @@ export async function refreshDb() {
     i += 1;
   }
 
-  if (config.MOCKS.DATA_ASSIGNMENTS) {
+  if (getMockFlags(isStaging).DATA_ASSIGNMENTS) {
     updateAssignmentsMeta(15.777, assignmentsPathList.length);
     i = 0;
     while (i < 20) {

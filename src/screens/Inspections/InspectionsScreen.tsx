@@ -6,7 +6,7 @@ import { FlatList, View } from 'react-native';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { LoginStore } from 'src/pullstate/loginStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
@@ -25,15 +25,14 @@ const Container = styled.View`
 `;
 
 const InspectionsScreen: React.FC<{}> = () => {
-  const userData = PersistentUserStore.useState((s) => s.userData);
   const {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
-  const { progress, error } = DownloadStore.useState((s) => s);
-  const [{ parent, children }, isLoading, isComplete] = dbHooks.structures.useInspection(parentId);
-  const theme = useTheme();
+  const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
+  const [{ parent, children: childrenStructures }, isLoading, isComplete] = dbHooks.structures.useInspection(parentId);
+  const userData = LoginStore.useState((s) => s.userData);
   const [isReady, onReady] = useResult<undefined>();
-
+  const theme = useTheme();
   const navigation = useNavigation();
 
   if (!userData) {
@@ -54,45 +53,48 @@ const InspectionsScreen: React.FC<{}> = () => {
 
   return (
     <Container theme={theme}>
-      {children.length === 0 && <BlankScreen />}
-      {children.length > 0 && (
-        <FlatList
-          contentContainerStyle={{
-            justifyContent: 'flex-start',
-          }}
-          data={children}
-          ItemSeparatorComponent={Divider}
-          ListHeaderComponent={
-            <>
-              {!!parentId && !!parent && (
-                <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
-                  {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
-                </View>
-              )}
+      {childrenStructures.length === 0 ? (
+        <BlankScreen />
+      ) : (
+        <>
+          <FlatList
+            contentContainerStyle={{
+              justifyContent: 'flex-start',
+            }}
+            data={childrenStructures}
+            ItemSeparatorComponent={Divider}
+            ListHeaderComponent={
+              <>
+                {!!parentId && !!parent && (
+                  <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
+                    {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
+                  </View>
+                )}
 
-              <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
-            </>
-          }
-          renderItem={({ item }) => (
-            <NavRow
-              label={item.display_name}
-              onPress={() => {
-                if (item.active_children_count > 0) {
-                  navigation.navigate({
-                    name: INSPECTIONS_HOME,
-                    key: `${parentId || 'base'}`,
-                    params: { parentId: item.id, title: item.display_name },
-                  });
-                } else {
-                  navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
-                }
-              }}
-            />
-          )}
-          keyExtractor={(item) => `${item.id}`}
-        />
+                <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
+              </>
+            }
+            renderItem={({ item }) => (
+              <NavRow
+                label={item.display_name}
+                onPress={() => {
+                  if (item.active_children_count > 0) {
+                    navigation.navigate({
+                      name: INSPECTIONS_HOME,
+                      key: `${parentId || 'base'}`,
+                      params: { parentId: item.id, title: item.display_name },
+                    });
+                  } else {
+                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
+                  }
+                }}
+              />
+            )}
+            keyExtractor={(item) => `${item.id}`}
+          />
+          {!isReady && <LoadingOverlay />}
+        </>
       )}
-      {!isReady && <LoadingOverlay />}
     </Container>
   );
 };

@@ -12,7 +12,6 @@ const prodApiUrl = 'orangeqc.com/api/v4';
 
 interface Config {
   isDev: boolean;
-  isStaging: boolean;
   APP_NAME: string;
   APP_VERSION: string;
   APP_BUILD: string;
@@ -23,8 +22,6 @@ interface Config {
   PLATFORM: typeof Platform.OS;
   LOCALES: Locale[];
   PARSED_LOCALES: string;
-  BACKEND_BASE_URL: string;
-  BACKEND_API_URL: string;
   MOCKS: {
     DB: boolean;
     DATA_STRUCTURES: boolean; // reproduces a huge data load on the app
@@ -47,7 +44,6 @@ interface Config {
 
 const config: Config = {
   isDev: __DEV__,
-  isStaging: false,
   APP_NAME: appName,
   APP_VERSION: getVersion(),
   APP_BUILD: getBuildNumber(),
@@ -57,8 +53,6 @@ const config: Config = {
   BUNDLE_ID: getBundleId(),
   LOCALES: getLocales(),
   PARSED_LOCALES: map('languageTag', getLocales()).join(', '),
-  BACKEND_BASE_URL: '',
-  BACKEND_API_URL: '',
   PLATFORM: Platform.OS,
   MOCKS: {
     DB: false,
@@ -80,23 +74,28 @@ const config: Config = {
   },
 };
 
-// TODO: replace this with function getUrls(isStaging: boolean) => { base, api }
-// and getMockFlags(isStaging: boolean) => MOCKS
-
-export const setEnv = (isStaging: boolean) => {
+export const getApiUrl = (isStaging: boolean) => {
   if (!isStaging) {
-    config.isStaging = false;
-    config.BACKEND_BASE_URL = prodBaseUrl;
-    config.BACKEND_API_URL = prodApiUrl;
-    config.MOCKS = mapValues(() => false, config.MOCKS) as Config['MOCKS'];
-  } else {
-    config.isStaging = true;
-    config.BACKEND_BASE_URL = stagingBaseurl;
-    config.BACKEND_API_URL = stagingApiUrl;
+    return prodApiUrl;
   }
+
+  return stagingApiUrl;
 };
 
-// let's set the urls. Devs get set to staging by default.
-setEnv(config.isDev);
+export const getBaseUrl = (isStaging: boolean) => {
+  if (!isStaging) {
+    return prodBaseUrl;
+  }
+
+  return stagingBaseurl;
+};
+
+export const getMockFlags = (isStaging: boolean) => {
+  if (!isStaging) {
+    mapValues(() => false, config.MOCKS) as Config['MOCKS'];
+  }
+
+  return config.MOCKS;
+};
 
 export default config;

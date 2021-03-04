@@ -1,12 +1,7 @@
-import config from 'src/config';
-import { DraftForm, Form, PendingUpload, Rating, User } from 'src/types';
-
-export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
+import { DraftForm, Form, PendingUpload, Rating } from 'src/types';
 
 export type PersistentState = {
-  status: UserSessionStatus;
-  userData: User | null;
-  isStaging: boolean;
+  initialized: boolean;
   forms: Record<string, Form>; // the key is formId
   ratings: Record<string, Rating>; // the key is ratingId
   ratingsDownloaded: null | number;
@@ -26,9 +21,7 @@ export type PersistentState = {
 };
 
 export const initialState: PersistentState = {
-  status: 'starting',
-  userData: null,
-  isStaging: config.isStaging,
+  initialized: false,
   forms: {},
   ratings: {},
   ratingsDownloaded: null,
