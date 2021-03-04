@@ -63,8 +63,8 @@ const config: Config = {
     DOWNLOAD_ASSIGNMENTS: false,
     DOWNLOAD_FORMS: false,
     NOTES: false,
-    FORM: true,
-    DELETE_BUTTONS: true,
+    FORM: false,
+    DELETE_BUTTONS: false,
   },
   MOCK_LIMITS: {
     MAX_STRUCTURES: 100000,
