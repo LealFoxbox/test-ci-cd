@@ -247,7 +247,6 @@ export interface DraftForm {
 }
 
 export interface DraftFormUpload extends DraftForm {
-  started_at: number;
   ended_at: number;
 }
 
