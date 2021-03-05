@@ -1,7 +1,7 @@
 import { AxiosError, AxiosPromise, AxiosResponse } from 'axios';
 
-export function catchTo<T, E>(promise: Promise<T>): Promise<[E, undefined] | [null, T]> {
-  return promise
+export function catchTo<T, E>(fn: () => Promise<T>): Promise<[E, undefined] | [null, T]> {
+  return fn()
     .then((data): [null, T] => [null, data])
     .catch((err: E) => {
       return [err, undefined];
@@ -9,10 +9,10 @@ export function catchTo<T, E>(promise: Promise<T>): Promise<[E, undefined] | [nu
 }
 
 export async function axiosCatchTo<T>(
-  promise: AxiosPromise<T>,
+  fn: () => AxiosPromise<T>,
 ): Promise<[AxiosError, undefined] | [null, AxiosResponse<T>]> {
   try {
-    const response = await promise;
+    const response = await fn();
     return [null, response];
   } catch (err) {
     return [err as AxiosError, undefined];

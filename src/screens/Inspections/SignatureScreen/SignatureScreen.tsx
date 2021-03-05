@@ -59,7 +59,7 @@ const SignatureScreen: React.FC = () => {
               navigation.navigate(INSPECTIONS_FORM, { newPhoto: { path, fileName, formFieldId } });
             })
             .catch((err) => {
-              console.warn('Signature Screen RNFS writefile error: ', JSON.stringify(err));
+              console.warn('Signature Screen RNFS writefile error: ', err);
             });
         }}
         onDragEvent={() => {

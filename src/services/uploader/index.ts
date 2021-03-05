@@ -74,7 +74,7 @@ async function photoUploader(
   }
 
   if (file) {
-    const [presignPhotoError, presign] = await axiosCatchTo(
+    const [presignPhotoError, presign] = await axiosCatchTo(() =>
       presignPhotos({
         photoUrls: [photo.fileName],
         token,
@@ -126,7 +126,7 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
 
   console.log('formUploader init: ', pendingUpload.draft.guid);
 
-  const [submitError] = await axiosCatchTo(submitInspection({ pendingUpload, token, companyId }));
+  const [submitError] = await axiosCatchTo(() => submitInspection({ pendingUpload, token, companyId }));
 
   if (!submitError) {
     console.log('formUploader SUCCESS!');

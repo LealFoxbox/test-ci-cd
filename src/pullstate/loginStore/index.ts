@@ -16,16 +16,18 @@ void restoreStoredData().then(async (state: LoginState) => {
   if (!state.userData) {
     void logoutAction();
   } else {
+    const companyId = state.userData.account.subdomain;
+    const token = state.userData.single_access_token;
     // refetch user
-    const [error, response] = await axiosCatchTo(
+    const [error, response] = await axiosCatchTo(() =>
       fetchtUser({
-        companyId: state.userData.account.subdomain,
-        token: state.userData.single_access_token,
+        companyId,
+        token,
       }),
     );
 
     if (error || !response) {
-      console.warn('fetchtUser error ', JSON.stringify(error));
+      console.warn('fetchtUser error ', error);
       if (error?.response?.status === 401) {
         void logoutAction();
       } else {
