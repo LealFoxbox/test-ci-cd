@@ -148,7 +148,7 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
       case 1:
         return {
           ...baseField,
-          selectedChoice: null,
+          selectedChoice: rating?.range_choices.find((c) => c.default) || null,
           minPosition: rating?.range_choices.reduce(
             (acc, curr) => Math.min(curr.position, acc),
             rating?.range_choices[0]?.position || Infinity,
@@ -171,7 +171,7 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
         return {
           ...baseField,
 
-          selectedChoice: null,
+          selectedChoice: rating?.range_choices.find((c) => c.default) || null,
         } as PointsField;
       case 8:
       case 9:
