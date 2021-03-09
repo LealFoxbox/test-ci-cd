@@ -7,6 +7,7 @@ import { clearInspectionsDataAction } from 'src/pullstate/actions';
 import { useUploader } from 'src/services/uploader';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { requestLocationPermission } from 'src/utils/getCurrentPosition';
 
 import AuthNavigator from './AuthNavigator';
 import MainStackNavigator from './MainStackNavigator';
@@ -32,6 +33,7 @@ function AppNavigator() {
       const inspectionFeature = userData.features.inspection_feature.enabled;
 
       if (inspectionFeature) {
+        void requestLocationPermission();
         triggerDownload();
         triggerUpload();
       } else if (inspectionFeature === false) {
