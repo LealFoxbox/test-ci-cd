@@ -6,6 +6,7 @@ const customColors = {
   deficient: '#FF3333',
   gps: '#007AFE',
   success: '#34C759',
+  secondaryText: '#888',
 };
 
 type CustomColors = typeof customColors;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Divider, Title, useTheme } from 'react-native-paper';
+import { Divider, Text, Title, useTheme } from 'react-native-paper';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -74,7 +74,8 @@ const FormListScreen: React.FC<{}> = () => {
               const row = (
                 <NavRow
                   label={label}
-                  icon={hasDraft ? 'file-document' : 'file-document-outline'}
+                  icon="file-document-outline"
+                  content={hasDraft ? <Text style={{ color: theme.colors.deficient }}>Draft</Text> : null}
                   onPress={() => {
                     if (!drafts[item.id]) {
                       const coords = { latitude: null, longitude: null };

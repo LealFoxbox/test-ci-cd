@@ -234,6 +234,7 @@ export interface DraftForm {
   ended_at: number | null;
   guid: string; // random unique token created in the frontend. It's basically `${Date.now()}${uniqueId('')}`
   isDirty: boolean;
+  lastModified: number | null;
   notes: string | null;
   categories: Record<string, string>; // key is categoryId, values is the name
   privateInspection: boolean;

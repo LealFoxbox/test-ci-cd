@@ -14,12 +14,13 @@ const Container = styled.TouchableOpacity`
 
 interface RowProps {
   label: string;
+  content?: React.ReactNode;
   accessibilityLabel?: string;
   icon?: string;
   onPress: () => void;
 }
 
-const NavRow: React.FC<RowProps> = ({ accessibilityLabel, label, icon, onPress }) => {
+const NavRow: React.FC<RowProps> = ({ accessibilityLabel, label, content, icon, onPress }) => {
   const theme = useTheme();
 
   return (
@@ -34,6 +35,7 @@ const NavRow: React.FC<RowProps> = ({ accessibilityLabel, label, icon, onPress }
         )}
         <Card.Content style={{ flex: 1 }}>
           <Text>{label}</Text>
+          {content || null}
         </Card.Content>
         <MaterialIcons name="chevron-right" size={24} color={theme.colors.placeholder} />
       </View>

@@ -8,7 +8,7 @@ import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
-import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
+import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
@@ -80,7 +80,7 @@ const InspectionsScreen: React.FC<{}> = () => {
                 onPress={() => {
                   if (item.active_children_count > 0) {
                     navigation.navigate({
-                      name: INSPECTIONS_HOME,
+                      name: INSPECTIONS_CHILDREN,
                       key: `${parentId || 'base'}`,
                       params: { parentId: item.id, title: item.display_name },
                     });

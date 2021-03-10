@@ -113,7 +113,7 @@ export const submitInspection = (params: SubmitInspectionParams) => {
         name: draft.name,
         structure_id: draft.structureId,
         inspection_form_id: draft.formId,
-        started_at: formatISO(draft.started_at || draft.ended_at),
+        started_at: formatISO(draft.started_at || draft.lastModified || draft.ended_at),
         ended_at: formatISO(draft.ended_at),
         flagged: draft.flagged,
         private: draft.private,

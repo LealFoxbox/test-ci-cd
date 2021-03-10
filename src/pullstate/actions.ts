@@ -192,6 +192,7 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
     structureId: structure.id,
     started_at: null,
     ended_at: null,
+    lastModified: null,
     guid: uuidv4(),
     flagged: false,
     private: false,
@@ -219,6 +220,7 @@ function createMockDraftForm(params: FormCreationParams) {
   return {
     ...emptyDraftForm,
     started_at: Date.now(),
+    lastModified: Date.now(),
     isDirty: true,
     fields: mapValues((field) => {
       const rating = params.ratings[field.rating_id] as Rating | undefined;
@@ -306,7 +308,9 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
       set(['drafts', assignmentId, 'isDirty'], true),
       // set started_at if not already set
       (s: PersistentState) =>
-        s.drafts[assignmentId].started_at ? s : set(`drafts.${assignmentId}.started_at`, Date.now(), s),
+        s.drafts[assignmentId].started_at ? s : set(['drafts', assignmentId, 'started_at'], Date.now(), s),
+      // update lastModified
+      (s: PersistentState) => set(['drafts', assignmentId, 'lastModified'], Date.now(), s),
       // set all of form's values to draft's fields but with comments as null if they are empty
       set(
         ['drafts', assignmentId, 'fields'],
@@ -333,7 +337,9 @@ export const updateDraftFormAction = <T>(assignmentId: number, fieldName: string
       set(['drafts', assignmentId, 'isDirty'], true),
       // set started_at if not already set
       (s: PersistentState) =>
-        s.drafts[assignmentId].started_at ? s : set(`drafts.${assignmentId}.started_at`, Date.now(), s),
+        s.drafts[assignmentId].started_at ? s : set(['drafts', assignmentId, 'started_at'], Date.now(), s),
+      // update lastModified
+      (s: PersistentState) => set(['drafts', assignmentId, 'lastModified'], Date.now(), s),
       // set all of form's values to draft's fields but with comments as null if they are empty
     ])(persistentState) as PersistentState;
   });

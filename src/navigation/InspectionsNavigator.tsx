@@ -1,17 +1,21 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useTheme } from 'react-native-paper';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
 import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
+import DraftsScreen from 'src/screens/Inspections/DraftsScreen';
 import Header from 'src/components/Header';
 import { RangeChoice } from 'src/types';
 
-import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
+import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
 export type InspectionsNavigatorParamList = {
-  [INSPECTIONS_HOME]: {
-    parentId: null | number;
+  [INSPECTIONS_HOME]: { parentId: null | number; title: string; hasSubheader: boolean };
+  [INSPECTIONS_CHILDREN]: {
+    parentId: number;
     title: string;
   };
   [INSPECTIONS_FORM_LIST]: {
@@ -31,6 +35,33 @@ export type InspectionsNavigatorParamList = {
   };
 };
 
+const TabNav = createMaterialTopTabNavigator();
+
+function InspectionTabsNavigator() {
+  const theme = useTheme();
+
+  return (
+    <TabNav.Navigator
+      tabBarOptions={{
+        activeTintColor: theme.colors.surface,
+        inactiveTintColor: `${theme.colors.surface}AA`,
+        indicatorStyle: { backgroundColor: theme.colors.surface },
+        style: { backgroundColor: theme.colors.primary },
+        labelStyle: { fontWeight: 'bold' },
+      }}
+    >
+      <TabNav.Screen
+        name="Areas"
+        component={InspectionsScreen}
+        initialParams={{
+          parentId: null,
+        }}
+      />
+      <TabNav.Screen name="Drafts" component={DraftsScreen} />
+    </TabNav.Navigator>
+  );
+}
+
 const Stack = createStackNavigator<InspectionsNavigatorParamList>();
 
 const InspectionsNavigator: React.FC = () => {
@@ -38,9 +69,17 @@ const InspectionsNavigator: React.FC = () => {
     <Stack.Navigator screenOptions={{ header: Header }}>
       <Stack.Screen
         name={INSPECTIONS_HOME}
-        component={InspectionsScreen}
+        component={InspectionTabsNavigator}
         initialParams={{
           parentId: null,
+          title: 'Inspections',
+          hasSubheader: true,
+        }}
+      />
+      <Stack.Screen
+        name={INSPECTIONS_CHILDREN}
+        component={InspectionsScreen}
+        initialParams={{
           title: 'Inspections',
         }}
       />
