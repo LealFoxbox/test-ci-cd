@@ -13,14 +13,21 @@ import { RangeChoice } from 'src/types';
 import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
 
 export type InspectionsNavigatorParamList = {
-  [INSPECTIONS_HOME]: { parentId: null | number; title: string; hasSubheader: boolean };
+  [INSPECTIONS_HOME]: {
+    parentId: null | number;
+    title: string;
+    hasSubheader: boolean;
+    hasSearch: boolean;
+  };
   [INSPECTIONS_CHILDREN]: {
     parentId: number;
     title: string;
+    hasSearch: boolean;
   };
   [INSPECTIONS_FORM_LIST]: {
     parentId: number;
     title: string;
+    hasSearch: boolean;
   };
   [INSPECTIONS_FORM]: {
     title: string;
@@ -74,6 +81,7 @@ const InspectionsNavigator: React.FC = () => {
           parentId: null,
           title: 'Inspections',
           hasSubheader: true,
+          hasSearch: true,
         }}
       />
       <Stack.Screen
@@ -81,6 +89,7 @@ const InspectionsNavigator: React.FC = () => {
         component={InspectionsScreen}
         initialParams={{
           title: 'Inspections',
+          hasSearch: true,
         }}
       />
       <Stack.Screen
