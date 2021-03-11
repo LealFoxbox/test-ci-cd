@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { map } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
-import { Assignment, Form, Structure } from 'src/types';
+import { Assignment, Form, Structure, User } from 'src/types';
 
 import { assignmentsDb, structuresDb } from './mongodb';
 
@@ -43,7 +44,7 @@ export const structures = {
     return [data, isLoading];
   },
 
-  useInspection(parentId: number | null): [InspectionData, boolean, boolean] {
+  useInspection(parentId: number | null, userData: User | null): [InspectionData, boolean, boolean] {
     const [data, setData] = useState<InspectionData>({ parent: null, children: [] });
     const [isLoading, setIsloading] = useState(true);
     const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
@@ -67,20 +68,23 @@ export const structures = {
 
             mounted && setData(newData);
           } else {
-            const children = await structuresDb.getBase();
-            if (mounted) {
-              if (children.length > 1) {
+            const showChildren = !!userData?.settings.display_supervisory_structure_children;
+            const supervisoryStructures = userData?.supervisory_structures || [];
+
+            if (!showChildren) {
+              const baseStructures = await structuresDb.getMultiple(map('id', supervisoryStructures));
+              mounted &&
                 setData({
                   parent: null,
-                  children,
+                  children: baseStructures,
                 });
-              } else {
-                const newData = {
-                  parent: (await structuresDb.get(children[0].id)) || null,
-                  children: await structuresDb.getChildren(children[0].id),
-                };
-                mounted && setData(newData);
-              }
+            } else {
+              const baseId = supervisoryStructures[0]?.id || null;
+              const newData = {
+                parent: (await structuresDb.get(baseId)) || null,
+                children: await structuresDb.getChildren(baseId),
+              };
+              mounted && setData(newData);
             }
           }
         }
@@ -90,7 +94,13 @@ export const structures = {
       return () => {
         mounted = false;
       };
-    }, [parentId, isMongoComplete, initialized]);
+    }, [
+      parentId,
+      isMongoComplete,
+      initialized,
+      userData?.supervisory_structures,
+      userData?.settings.display_supervisory_structure_children,
+    ]);
 
     return [data, isLoading, isMongoComplete];
   },

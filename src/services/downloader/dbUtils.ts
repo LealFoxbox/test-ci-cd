@@ -1,9 +1,7 @@
 /* eslint-disable no-console */
-/* eslint-disable import/no-named-as-default-member */
 
-import { MutableRefObject } from 'react';
 import RNFS from 'react-native-fs';
-import RNBackgroundDownloader from 'react-native-background-downloader';
+import { directories } from 'react-native-background-downloader';
 
 import { getMockFlags } from 'src/config';
 import { updateAssignmentsMeta, updateStructuresMeta } from 'src/pullstate/actions';
@@ -16,7 +14,7 @@ import { MetaFile, findNextPage, findValidFile, getOurTypeFiles } from './fileUt
 import { DownloadType } from './backDownloads';
 import { PERCENTAGES } from './percentages';
 
-const dir = RNBackgroundDownloader.directories.documents;
+const dir = directories.documents;
 
 export async function refreshDb(isStaging: boolean) {
   const allFiles = await RNFS.readDir(dir);
@@ -90,46 +88,45 @@ export interface DbTotalPages {
   assignments: number | null;
 }
 
-export async function updateDBTotalPages(totalPages: MutableRefObject<DbTotalPages>, type: DownloadType) {
+export async function getTotalPages(type: DownloadType) {
   const validFile = await findValidFile<MetaFile>(type);
 
   if (validFile) {
-    totalPages.current[type] = validFile.meta.total_pages;
-    return true;
+    return validFile.meta.total_pages;
   }
 
-  return false;
+  return null;
 }
 
-export async function getNextDbDownload(totalPages: MutableRefObject<DbTotalPages>) {
+export async function getNextDbDownload(totalPages: DbTotalPages) {
   const allFiles = await RNFS.readDir(dir);
   const nextStructuresPage = findNextPage(allFiles, 'structures');
 
-  if (!totalPages.current.structures || nextStructuresPage <= totalPages.current.structures) {
-    console.log('getNextDbDownload: structures ', nextStructuresPage, ' out of ', totalPages.current.structures);
+  if (!totalPages.structures || nextStructuresPage <= totalPages.structures) {
+    console.log('getNextDbDownload: structures ', nextStructuresPage, ' out of ', totalPages.structures);
     const [start, end] = PERCENTAGES.structures;
 
     return {
       type: 'structures' as DownloadType,
       page: nextStructuresPage,
-      progress: !totalPages.current.structures
+      progress: !totalPages.structures
         ? start + nextStructuresPage * 2
-        : start + ((end - start) * nextStructuresPage) / totalPages.current.structures,
+        : start + ((end - start) * nextStructuresPage) / totalPages.structures,
     };
   }
 
   const nextAssignmentsPage = findNextPage(allFiles, 'assignments');
 
-  if (!totalPages.current.assignments || nextAssignmentsPage <= totalPages.current.assignments) {
-    console.log('getNextDbDownload: assignments ', nextAssignmentsPage, ' out of ', totalPages.current.assignments);
+  if (!totalPages.assignments || nextAssignmentsPage <= totalPages.assignments) {
+    console.log('getNextDbDownload: assignments ', nextAssignmentsPage, ' out of ', totalPages.assignments);
     const [start, end] = PERCENTAGES.assignments;
 
     return {
       type: 'assignments' as DownloadType,
       page: nextAssignmentsPage,
-      progress: !totalPages.current.assignments
+      progress: !totalPages.assignments
         ? start + nextAssignmentsPage * 2
-        : start + ((end - start) * nextAssignmentsPage) / totalPages.current.assignments,
+        : start + ((end - start) * nextAssignmentsPage) / totalPages.assignments,
     };
   }
 

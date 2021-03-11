@@ -29,8 +29,11 @@ const InspectionsScreen: React.FC<{}> = () => {
     params: { parentId },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
-  const [{ parent, children: childrenStructures }, isLoading, isComplete] = dbHooks.structures.useInspection(parentId);
   const userData = LoginStore.useState((s) => s.userData);
+  const [{ parent, children: childrenStructures }, isLoading, isComplete] = dbHooks.structures.useInspection(
+    parentId,
+    userData,
+  );
   const [isReady, onReady] = useResult<undefined>();
   const theme = useTheme();
   const navigation = useNavigation();
