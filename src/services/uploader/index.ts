@@ -139,7 +139,7 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
 }
 
 export function useUploader(): ReturnType<typeof useTrigger> {
-  const [shouldTrigger, setShouldTrigger] = useTrigger();
+  const [shouldTrigger, setShouldTrigger, resetTrigger] = useTrigger();
   const { token, inspectionsEnabled, subdomain } = LoginStore.useState((s) => ({
     token: s.userData?.single_access_token,
     inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
@@ -158,7 +158,10 @@ export function useUploader(): ReturnType<typeof useTrigger> {
 
   useEffect(() => {
     if (!token) {
-      FLAGS.loggedIn = false;
+      if (FLAGS.loggedIn) {
+        FLAGS.loggedIn = false;
+        resetTrigger();
+      }
     } else if (shouldTrigger && subdomain) {
       FLAGS.loggedIn = true;
       if (inspectionsEnabled && connected) {
@@ -177,7 +180,7 @@ export function useUploader(): ReturnType<typeof useTrigger> {
         }
       }
     }
-  }, [shouldTrigger, token, subdomain, inspectionsEnabled, connected, pendingUploads, uploadStoreState]);
+  }, [shouldTrigger, token, subdomain, inspectionsEnabled, connected, pendingUploads, uploadStoreState, resetTrigger]);
 
-  return [shouldTrigger, setShouldTrigger];
+  return [shouldTrigger, setShouldTrigger, resetTrigger];
 }
