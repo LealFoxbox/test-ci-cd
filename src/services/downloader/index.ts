@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { isEmpty } from 'lodash/fp';
 
 import { DownloadStore } from 'src/pullstate/downloadStore';
@@ -18,7 +18,7 @@ import { assignmentsDb } from '../mongodb';
 import { useIsMongoLoaded } from '../mongoHooks';
 
 import { downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
-import { DbTotalPages, getNextDbDownload, refreshDb, updateDBTotalPages } from './dbUtils';
+import { getNextDbDownload, getTotalPages, refreshDb } from './dbUtils';
 import { deleteAllJSONFiles, deleteInvalidFiles } from './fileUtils';
 import {
   cleanExpiredIncompleteRatings,
@@ -61,12 +61,10 @@ async function getMissingForms(forms: Record<string, Form>) {
 export async function dbDownload({
   token,
   subdomain,
-  totalPages,
   isStaging,
 }: {
   token: string;
   subdomain: string;
-  totalPages: MutableRefObject<DbTotalPages>;
   isStaging: boolean;
 }) {
   console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
@@ -74,28 +72,34 @@ export async function dbDownload({
   await waitForExistingDownloads();
   // TODO: if a page was outdated, wouldn't that mean we'd need to redownload EVERYTHING?
   await deleteInvalidFiles();
-  await updateDBTotalPages(totalPages, 'structures');
-  await updateDBTotalPages(totalPages, 'assignments');
+
+  const totalPages = {
+    structures: await getTotalPages('structures'),
+    assignments: await getTotalPages('assignments'),
+  };
 
   let nextDownload = await getNextDbDownload(totalPages);
   let erroredOut = false;
 
   while (nextDownload && FLAGS.loggedIn && !erroredOut) {
-    if (nextDownload) {
-      setProgress(nextDownload.progress);
-    }
+    setProgress(nextDownload.progress);
+
+    const { type } = nextDownload;
 
     try {
-      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type: nextDownload.type });
+      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type });
       await timeoutPromise(200);
 
-      if (!totalPages.current[nextDownload.type]) {
-        await updateDBTotalPages(totalPages, nextDownload.type);
+      if (!totalPages[type]) {
+        totalPages[type] = await getTotalPages(type);
       }
-      nextDownload = await getNextDbDownload(totalPages);
     } catch (e) {
-      console.warn(nextDownload?.type, ' error on page ', nextDownload?.page, ' with: ', e);
+      console.warn(nextDownload.type, ' error on page ', nextDownload.page, ' with: ', e);
       erroredOut = true;
+    }
+
+    if (!erroredOut) {
+      nextDownload = await getNextDbDownload(totalPages);
     }
   }
 
@@ -312,7 +316,7 @@ async function ratingChoicesDownload(token: string, subdomain: string) {
 }
 
 export function useDownloader(): ReturnType<typeof useTrigger> {
-  const [shouldTrigger, setShouldTrigger] = useTrigger();
+  const [shouldTrigger, setShouldTrigger, resetTrigger] = useTrigger();
   const { token, inspectionsEnabled, subdomain, isStaging } = LoginStore.useState((s) => ({
     token: s.userData?.single_access_token,
     inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
@@ -335,20 +339,18 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
   const isMongoLoaded = useIsMongoLoaded();
   const connected = useNetworkStatus();
 
-  const totalPages = useRef<DbTotalPages>({
-    structures: null,
-    assignments: null,
-  });
-
   useEffect(() => {
     (async () => {
       if (!token) {
-        FLAGS.loggedIn = false;
+        if (FLAGS.loggedIn) {
+          FLAGS.loggedIn = false;
+          resetTrigger();
+        }
       } else if (isMongoLoaded && shouldTrigger && subdomain) {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
-            void dbDownload({ token, subdomain, totalPages, isStaging });
+            void dbDownload({ token, subdomain, isStaging });
           } else {
             DownloadStore.update((s) => {
               if (s.progress < PERCENTAGES.forms[0]) {
@@ -388,7 +390,8 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
     isRatingsComplete,
     isRatingsBaseDownloaded,
     isStaging,
+    resetTrigger,
   ]);
 
-  return [shouldTrigger, setShouldTrigger];
+  return [shouldTrigger, setShouldTrigger, resetTrigger];
 }

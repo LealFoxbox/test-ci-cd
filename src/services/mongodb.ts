@@ -34,9 +34,9 @@ export function createStructureMock() {
       });
     },
 
-    getBase() {
+    getMultiple(ids: number[]) {
       return new Promise<Structure[]>((resolve) => {
-        resolve(filter((s) => !s.ancestry, data));
+        resolve(filter((s) => ids.includes(s.id), data));
       });
     },
 
@@ -131,15 +131,18 @@ export function createStructureDb() {
       });
     },
 
-    get(id: number) {
+    get(id: number | null) {
       return db.findOne({ id }).exec() as Promise<Structure | undefined>;
     },
 
-    getBase() {
-      return db.find({ ancestry: null }).sort({ display_name: 1 }).exec() as Promise<Structure[]>;
+    getMultiple(ids: number[]) {
+      return db
+        .find({ id: { $in: ids } })
+        .sort({ display_name: 1 })
+        .exec() as Promise<Structure[]>;
     },
 
-    getChildren(id: number) {
+    getChildren(id: number | null) {
       return db.find({ parent_id: id }).sort({ display_name: 1 }).exec() as Promise<Structure[]>;
     },
   };
