@@ -1,29 +1,68 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StackHeaderProps } from '@react-navigation/stack';
 import { Appbar } from 'react-native-paper';
+
+import SearchHeader from './SearchHeader';
 
 type Params = undefined | { title: string; hasSubheader: boolean; hasSearch: boolean };
 
 const Header: React.FC<StackHeaderProps> = ({ navigation, previous, scene }) => {
   const params = scene.route.params as Params;
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const hasSearchEnabled = !!params?.hasSearch;
   const left = scene.descriptor.options.headerLeft || null;
   const right = scene.descriptor.options.headerRight || null;
-  const searchButton = !params?.hasSearch ? null : (
-    <Appbar.Action
-      icon="magnify"
-      onPress={() => {
-        console.warn(Math.random());
-      }}
-    />
-  );
+
+  function getLeft() {
+    if (typeof left === 'function') {
+      return left({});
+    }
+
+    if (left) {
+      return left;
+    }
+
+    if (previous) {
+      return (
+        <Appbar.BackAction
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
+      );
+    }
+
+    return null;
+  }
+
+  function getRight() {
+    if (hasSearchEnabled && !showSearchInput) {
+      return (
+        <Appbar.Action
+          icon="magnify"
+          onPress={() => {
+            setShowSearchInput(true);
+          }}
+        />
+      );
+    }
+
+    if (typeof right === 'function') {
+      return right({});
+    }
+
+    return right;
+  }
+
+  if (hasSearchEnabled && showSearchInput) {
+    return <SearchHeader onClose={() => setShowSearchInput(false)} hasSubheader={!!params?.hasSubheader} />;
+  }
 
   return (
     <Appbar.Header dark style={{ elevation: params?.hasSubheader ? 0 : 4 }}>
-      {typeof left === 'function'
-        ? left({})
-        : left || (!!previous && <Appbar.BackAction onPress={() => navigation.goBack()} />)}
-      <Appbar.Content title={params?.title} />
-      {typeof right === 'function' ? right({}) : right || searchButton}
+      {getLeft()}
+      <Appbar.Content title={params?.title} style={{ flex: 1 }} />
+      {getRight()}
     </Appbar.Header>
   );
 };

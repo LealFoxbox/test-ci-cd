@@ -6,7 +6,7 @@ import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
 import { Title } from 'react-native-paper';
 
-import { updateDraftFieldsAction } from 'src/pullstate/actions';
+import { updateDraftFieldsAction } from 'src/pullstate/formActions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 

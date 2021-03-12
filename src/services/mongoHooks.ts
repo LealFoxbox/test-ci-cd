@@ -44,6 +44,39 @@ export const structures = {
     return [data, isLoading];
   },
 
+  useGetAll(): [Structure[], boolean, boolean] {
+    const [data, setData] = useState<Structure[]>([]);
+    const [isLoading, setIsloading] = useState(true);
+    const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
+      initialized: s.initialized,
+      isMongoComplete: selectMongoComplete(s),
+    }));
+
+    useEffect(() => {
+      let mounted = true;
+
+      (async () => {
+        if (initialized && isMongoComplete) {
+          await structuresDb.loadPromise;
+          if (!mounted) {
+            return;
+          }
+          setData(await structuresDb.getAll());
+          if (!mounted) {
+            return;
+          }
+          setIsloading(false);
+        }
+      })();
+
+      return () => {
+        mounted = false;
+      };
+    }, [initialized, isMongoComplete]);
+
+    return [data, isLoading, isMongoComplete && initialized];
+  },
+
   useInspection(parentId: number | null, userData: User | null): [InspectionData, boolean, boolean] {
     const [data, setData] = useState<InspectionData>({ parent: null, children: [] });
     const [isLoading, setIsloading] = useState(true);

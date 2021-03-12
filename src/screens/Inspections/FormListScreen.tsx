@@ -7,7 +7,7 @@ import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNa
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
-import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/actions';
+import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/formActions';
 import * as dbHooks from 'src/services/mongoHooks';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import { useResult } from 'src/utils/useResult';

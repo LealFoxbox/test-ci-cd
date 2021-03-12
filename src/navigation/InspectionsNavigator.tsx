@@ -89,7 +89,6 @@ const InspectionsNavigator: React.FC = () => {
         component={InspectionsScreen}
         initialParams={{
           title: 'Inspections',
-          hasSearch: true,
         }}
       />
       <Stack.Screen

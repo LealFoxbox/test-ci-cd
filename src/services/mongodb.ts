@@ -34,6 +34,12 @@ export function createStructureMock() {
       });
     },
 
+    getAll() {
+      return new Promise<Structure[]>((resolve) => {
+        resolve(data);
+      });
+    },
+
     getMultiple(ids: number[]) {
       return new Promise<Structure[]>((resolve) => {
         resolve(filter((s) => ids.includes(s.id), data));
@@ -70,6 +76,12 @@ export function createAssignmentMock() {
     get(id: number) {
       return new Promise<Assignment | undefined>((resolve) => {
         resolve(find({ id }, data));
+      });
+    },
+
+    getAll() {
+      return new Promise<Assignment[]>((resolve) => {
+        resolve(data);
       });
     },
 
@@ -135,6 +147,10 @@ export function createStructureDb() {
       return db.findOne({ id }).exec() as Promise<Structure | undefined>;
     },
 
+    getAll() {
+      return db.find({}).exec() as Promise<Structure[]>;
+    },
+
     getMultiple(ids: number[]) {
       return db
         .find({ id: { $in: ids } })
@@ -190,6 +206,10 @@ export function createAssignmentDb() {
           }
         });
       });
+    },
+
+    getAll() {
+      return db.find({}).exec() as Promise<Assignment[]>;
     },
 
     get(id: number) {

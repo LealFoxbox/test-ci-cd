@@ -293,6 +293,8 @@ async function ratingChoicesDownload(token: string, subdomain: string) {
               lastUpdated: Date.now(),
             };
           }
+
+          return s;
         });
 
         setProgress(nextDownload.progress);

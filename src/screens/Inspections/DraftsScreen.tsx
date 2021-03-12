@@ -8,7 +8,7 @@ import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { styled } from 'src/paperTheme';
 import SwipableRow from 'src/components/SwipableRow';
-import { deleteDraftAction } from 'src/pullstate/actions';
+import { deleteDraftAction } from 'src/pullstate/formActions';
 
 import DraftRow from './DraftRow';
 
