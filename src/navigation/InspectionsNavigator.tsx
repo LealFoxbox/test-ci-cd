@@ -18,11 +18,13 @@ export type InspectionsNavigatorParamList = {
     title: string;
     hasSubheader: boolean;
     hasSearch: boolean;
+    showLocationPath: boolean;
   };
   [INSPECTIONS_CHILDREN]: {
     parentId: number;
     title: string;
     hasSearch: boolean;
+    showLocationPath: boolean;
   };
   [INSPECTIONS_FORM_LIST]: {
     parentId: number;
@@ -82,6 +84,7 @@ const InspectionsNavigator: React.FC = () => {
           title: 'Inspections',
           hasSubheader: true,
           hasSearch: true,
+          showLocationPath: true,
         }}
       />
       <Stack.Screen
@@ -89,6 +92,7 @@ const InspectionsNavigator: React.FC = () => {
         component={InspectionsScreen}
         initialParams={{
           title: 'Inspections',
+          showLocationPath: false,
         }}
       />
       <Stack.Screen
