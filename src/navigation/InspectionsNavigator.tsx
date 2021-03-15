@@ -13,6 +13,7 @@ export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
     parentId: null | number;
     title: string;
+    showLocationPath: boolean;
   };
   [INSPECTIONS_FORM_LIST]: {
     parentId: number;
@@ -42,6 +43,7 @@ const InspectionsNavigator: React.FC = () => {
         initialParams={{
           parentId: null,
           title: 'Inspections',
+          showLocationPath: true,
         }}
       />
       <Stack.Screen
