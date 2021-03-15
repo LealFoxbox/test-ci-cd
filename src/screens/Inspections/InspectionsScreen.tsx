@@ -26,7 +26,7 @@ const Container = styled.View`
 
 const InspectionsScreen: React.FC<{}> = () => {
   const {
-    params: { parentId },
+    params: { parentId, showLocationPath },
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
   const userData = LoginStore.useState((s) => s.userData);
@@ -79,13 +79,13 @@ const InspectionsScreen: React.FC<{}> = () => {
             }
             renderItem={({ item }) => (
               <NavRow
-                label={item.display_name}
+                label={showLocationPath ? item.location_path || item.display_name : item.display_name}
                 onPress={() => {
                   if (item.active_children_count > 0) {
                     navigation.navigate({
                       name: INSPECTIONS_HOME,
                       key: `${parentId || 'base'}`,
-                      params: { parentId: item.id, title: item.display_name },
+                      params: { parentId: item.id, title: item.display_name, showLocationPath: false },
                     });
                   } else {
                     navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
