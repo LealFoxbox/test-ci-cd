@@ -3,6 +3,8 @@ import { omit, pick } from 'lodash/fp';
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
 import { User } from 'src/types';
+import { fetchtUser } from 'src/services/api/user';
+import { axiosCatchTo } from 'src/utils/catchTo';
 
 import { LoginStore } from './loginStore';
 import { initialState as loginInitialState } from './loginStore/initialState';
@@ -15,14 +17,17 @@ import { initialState as persistentInitialState } from './persistentStore/initia
 
 let persistentStoreUnsub = () => {};
 
-export const loginAction = async (user: User) => {
+export const loginAction = async ({ user, outdatedUserData }: { user: User; outdatedUserData?: boolean }) => {
   persistentStoreUnsub = await initPersistentStore(user.id);
 
   LoginStore.update((s) => {
+    const newOutDatedUserData = typeof outdatedUserData === 'boolean' ? outdatedUserData : !!s.outdatedUserData;
+
     return {
       ...s,
       userData: user,
       status: 'loggedIn',
+      outdatedUserData: newOutDatedUserData,
     };
   });
 };
@@ -77,7 +82,19 @@ export const updateAssignmentsMeta = (currentPage: number, totalPages: number) =
   });
 };
 
-export async function clearInspectionsDataAction() {
+export async function clearInspectionsDataAction({
+  invalidateUserData,
+  companyId,
+  token,
+}: {
+  invalidateUserData?: boolean;
+  companyId?: string;
+  token?: string;
+}) {
+  if (invalidateUserData) {
+    LoginStore.update((s) => ({ ...s, outdatedUserData: true }));
+  }
+
   await deleteAllJSONFiles();
   await cleanMongo();
 
@@ -92,4 +109,27 @@ export async function clearInspectionsDataAction() {
       ),
     };
   });
+
+  if (invalidateUserData) {
+    // refetch user
+    const [error, response] = await axiosCatchTo(() =>
+      fetchtUser({
+        companyId: companyId || '',
+        token: token || '',
+      }),
+    );
+
+    if (error || !response) {
+      DownloadStore.update((s) => ({
+        ...s,
+        error: error?.toString() || 'There was an error rechecking your permissions',
+      }));
+    } else {
+      LoginStore.update((s) => ({
+        ...s,
+        userData: response.data.user,
+        outdatedUserData: false,
+      }));
+    }
+  }
 }

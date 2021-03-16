@@ -6,11 +6,13 @@ export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logou
 export type LoginState = {
   status: UserSessionStatus;
   userData: User | null;
+  outdatedUserData: boolean;
   isStaging: boolean;
 };
 
 export const initialState: LoginState = {
   status: 'starting',
   userData: null,
+  outdatedUserData: false,
   isStaging: config.isDev,
 };

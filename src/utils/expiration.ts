@@ -1,5 +1,5 @@
 export const EXPIRATION_SECONDS = 60 * 60 * 24; // one day in seconds
-export const EXPIRATION_MILISECONDS = 60 * 60 * 24 * 1000; // one day in miliseconds
+export const EXPIRATION_MILISECONDS = EXPIRATION_SECONDS * 1000; // one day in miliseconds
 
 export function getUnixSeconds() {
   return Date.now() * 0.001;

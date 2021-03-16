@@ -3,7 +3,8 @@ import { Button, Title } from 'react-native-paper';
 
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { styled } from 'src/paperTheme';
-import { DownloadStore } from 'src/pullstate/downloadStore';
+import { clearInspectionsDataAction } from 'src/pullstate/actions';
+import { User } from 'src/types';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 const MessageContainer = styled.View`
@@ -13,7 +14,7 @@ const MessageContainer = styled.View`
   padding: 30px;
 `;
 
-const ErrorScreen: React.FC<{}> = () => {
+const ErrorScreen: React.FC<{ userData: User }> = ({ userData }) => {
   const connected = useNetworkStatus();
 
   return (
@@ -30,10 +31,10 @@ const ErrorScreen: React.FC<{}> = () => {
           accessibilityLabel="download"
           icon="cloud-download"
           onPress={() => {
-            // this triggers a retry
-            DownloadStore.update((s) => {
-              s.progress = 0;
-              s.error = null;
+            void clearInspectionsDataAction({
+              invalidateUserData: true,
+              companyId: userData.account.subdomain,
+              token: userData.single_access_token,
             });
           }}
         >

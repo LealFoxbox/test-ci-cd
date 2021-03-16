@@ -37,7 +37,7 @@ function AppNavigator() {
         triggerDownload();
         triggerUpload();
       } else if (inspectionFeature === false) {
-        void clearInspectionsDataAction();
+        void clearInspectionsDataAction({});
       }
     }
   }, [userData, triggerDownload, triggerUpload, status, persistentStoreIsInitialized]);

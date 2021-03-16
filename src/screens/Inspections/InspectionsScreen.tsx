@@ -43,7 +43,7 @@ const InspectionsScreen: React.FC<{}> = () => {
   }
 
   if (error) {
-    return <ErrorScreen />;
+    return <ErrorScreen userData={userData} />;
   }
 
   if (isLoading) {
@@ -85,7 +85,11 @@ const InspectionsScreen: React.FC<{}> = () => {
                     navigation.navigate({
                       name: INSPECTIONS_CHILDREN,
                       key: `${parentId || 'base'}`,
-                      params: { parentId: item.id, title: item.display_name },
+                      params: {
+                        parentId: item.id,
+                        title: item.display_name,
+                        showLocationPath: false,
+                      },
                     });
                   } else {
                     navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });

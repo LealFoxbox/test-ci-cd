@@ -1,4 +1,4 @@
-import { isEmpty, sortBy } from 'lodash/fp';
+import { defer, isEmpty, sortBy } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { PersistentState } from 'src/pullstate/persistentStore/initialState';
@@ -24,50 +24,56 @@ export function getSelectRatings(ratings: Record<string, Rating>) {
 }
 
 export const selectIsRatingsBaseDownloaded = (s: PersistentState) => {
-  return !isEmpty(s.ratings) && s.ratingsDownloaded !== null && !isMilisecondsExpired(s.ratingsDownloaded);
-};
-
-export const selectIsRatingsComplete = (s: PersistentState) => {
-  if (isEmpty(s.ratings) || s.ratingsDownloaded === null) {
-    return false;
-  }
-
-  return Object.values(s.ratings).every((curr) => !isSelectRating(curr) || isRatingComplete(curr as SelectRating));
+  return !isEmpty(s.ratings) && s.ratingsDownloaded !== null;
 };
 
 export function cleanExpiredIncompleteRatings() {
-  PersistentUserStore.update((s) => {
-    const selectRatings = getSelectRatings(s.ratings);
+  return new Promise<boolean>((resolve) => {
+    PersistentUserStore.update((s) => {
+      const ratingBaseExpired = isMilisecondsExpired(s.ratingsDownloaded);
 
-    selectRatings.forEach((r) => {
-      if (isRatingExpired(r) && r.page !== null && r.page !== r.totalPages) {
-        s.ratings[r.id].range_choices = [];
-        (s.ratings[r.id] as SelectRating).page = null;
-        (s.ratings[r.id] as SelectRating).totalPages = null;
-        (s.ratings[r.id] as SelectRating).lastDownloaded = [];
+      if (ratingBaseExpired || getSelectRatings(s.ratings).some(isRatingExpired)) {
+        defer(() => resolve(true));
+        return {
+          ...s,
+          ratings: {},
+          ratingsDownloaded: null,
+        };
       }
+      defer(() => resolve(false));
+      return s;
     });
   });
 }
 
-export function getNextRatingChoicesDownload() {
-  const selectRatings = sortBy('id', getSelectRatings(PersistentUserStore.getRawState().ratings));
-  const [start, end] = PERCENTAGES.ratings;
+export interface RatingChoicesDownload {
+  progress: number;
+  ratingId: number;
+  page: number;
+  totalPages: number | null;
+}
 
-  const i = selectRatings.findIndex((r) => !isRatingComplete(r) || isRatingExpired(r));
+export function getNextRatingChoicesDownload(ratings: Record<string, Rating>): RatingChoicesDownload | null {
+  const selectRatings = sortBy('id', getSelectRatings(ratings));
+  const [start, end] = PERCENTAGES.ratingChoices;
+
+  const i = selectRatings.findIndex((r) => !isRatingComplete(r));
 
   if (i !== -1) {
     const r = selectRatings[i];
     const page = r.page ? r.page + 1 : 1;
-
     const chunk = (end - start) / selectRatings.length;
-    const progress = !r.totalPages ? start + chunk * i + page * 2 : start + chunk * i + (chunk * page) / r.totalPages;
+    const minFakeProgress = Math.max(1, Math.min(chunk, (page * chunk) / 5));
+
+    const progress = !r.totalPages
+      ? start + chunk * i + minFakeProgress
+      : start + chunk * i + (chunk * page) / r.totalPages;
 
     return {
       progress,
       ratingId: r.id,
       page,
-      totalPages: r.totalPages,
+      totalPages: r.totalPages, // only used for console.logging
     };
   }
 
