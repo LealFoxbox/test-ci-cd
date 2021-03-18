@@ -5,12 +5,20 @@ import { useTheme } from 'react-native-paper';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
+import InspectionSearchScreen from 'src/screens/Inspections/SearchScreen';
 import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import DraftsScreen from 'src/screens/Inspections/DraftsScreen';
+import SearchHeader from 'src/components/SearchHeader';
 import Header from 'src/components/Header';
 import { RangeChoice } from 'src/types';
 
-import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from './screenNames';
+import {
+  INSPECTIONS_CHILDREN,
+  INSPECTIONS_FORM,
+  INSPECTIONS_FORM_LIST,
+  INSPECTIONS_HOME,
+  INSPECTIONS_SEARCH_RESULTS,
+} from './screenNames';
 
 export type InspectionsNavigatorParamList = {
   [INSPECTIONS_HOME]: {
@@ -19,6 +27,10 @@ export type InspectionsNavigatorParamList = {
     hasSubheader: boolean;
     hasSearch: boolean;
     showLocationPath: boolean;
+  };
+  [INSPECTIONS_SEARCH_RESULTS]: {
+    hasSearch: true;
+    searchInput: string;
   };
   [INSPECTIONS_CHILDREN]: {
     parentId: number;
@@ -94,6 +106,15 @@ const InspectionsNavigator: React.FC = () => {
           title: 'Inspections',
           showLocationPath: false,
         }}
+      />
+      <Stack.Screen
+        name={INSPECTIONS_SEARCH_RESULTS}
+        component={InspectionSearchScreen}
+        initialParams={{
+          hasSearch: true,
+          searchInput: '',
+        }}
+        options={{ header: SearchHeader }}
       />
       <Stack.Screen
         name={INSPECTIONS_FORM_LIST}

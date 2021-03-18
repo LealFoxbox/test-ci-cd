@@ -9,6 +9,16 @@ import { Assignment, Structure } from 'src/types';
 type StructuresDb = ReturnType<typeof createStructureDb>;
 type AssignmentDb = ReturnType<typeof createAssignmentDb>;
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function createSearchRegex(s: string) {
+  // TODO: use this regex instead
+  // https://regexr.com/335fm
+  return new RegExp(escapeRegExp(s), 'i');
+}
+
 export function createStructureMock() {
   let data: Structure[] = [];
 
@@ -31,6 +41,13 @@ export function createStructureMock() {
     get(id: number) {
       return new Promise<Structure | undefined>((resolve) => {
         resolve(find({ id }, data));
+      });
+    },
+
+    search(input: string) {
+      const r = createSearchRegex(input);
+      return new Promise<Structure[]>((resolve) => {
+        resolve(data.filter((s) => r.test(s.display_name)));
       });
     },
 
@@ -141,6 +158,10 @@ export function createStructureDb() {
           }
         });
       });
+    },
+
+    search(input: string) {
+      return db.find({ display_name: createSearchRegex(input) }).exec() as Promise<Structure[]>;
     },
 
     get(id: number | null) {

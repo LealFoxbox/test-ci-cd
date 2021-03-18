@@ -48,7 +48,6 @@ const CardFooter: React.FC<CardFooterProps> = ({
           <TextInput
             style={{ marginBottom: 10 }}
             keyboardType="default"
-            autoCapitalize="none"
             disabled={isReadonly}
             dense
             {...commentInputProps}

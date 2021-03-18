@@ -25,6 +25,7 @@ import {
   getNextRatingChoicesDownload,
   isSelectRating,
   selectIsRatingsBaseDownloaded,
+  selectRatingsComplete,
 } from './ratingsUtils';
 import { PERCENTAGES } from './percentages';
 import { getNextFormDownload } from './formUtils';
@@ -270,12 +271,15 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
     isStaging: s.isStaging,
     outdatedUserData: s.outdatedUserData,
   }));
-  const { forms, ratings, isRatingsBaseDownloaded, isMongoComplete } = PersistentUserStore.useState((s) => ({
-    forms: s.forms,
-    ratings: s.ratings,
-    isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
-    isMongoComplete: selectMongoComplete(s),
-  }));
+  const { forms, ratings, isRatingsBaseDownloaded, isRatingsComplete, isMongoComplete } = PersistentUserStore.useState(
+    (s) => ({
+      forms: s.forms,
+      ratings: s.ratings,
+      isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
+      isMongoComplete: selectMongoComplete(s),
+      isRatingsComplete: selectRatingsComplete(s),
+    }),
+  );
   const { downloading, downloadError } = DownloadStore.useState((s) => ({
     downloading: s.downloading,
     downloadError: s.error,
@@ -294,11 +298,8 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
-            // eslint-disable-next-line no-constant-condition
-            if (true) {
-              // FIRST TIME WE ARE TRYING TO DOWNLOAD DB
-              FLAGS.errors = 0;
-            }
+            // FIRST TIME WE ARE TRYING TO DOWNLOAD DB
+            FLAGS.errors = 0;
 
             // TODO: db refactor, use getNextDbDownload outside dbDownload instead
 
@@ -314,7 +315,7 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
 
             if (nextForm) {
               void formsDownload(nextForm, token, subdomain);
-            } else {
+            } else if (!isRatingsComplete) {
               const wasCleaned = await cleanExpiredIncompleteRatings();
               // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
               if (!wasCleaned) {
@@ -330,6 +331,8 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
                   }
                 }
               }
+            } else {
+              advanceProgress(100);
             }
           }
         }
@@ -343,6 +346,7 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
     isMongoComplete,
     isMongoLoaded,
     isRatingsBaseDownloaded,
+    isRatingsComplete,
     isStaging,
     outdatedUserData,
     ratings,

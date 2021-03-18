@@ -1,30 +1,31 @@
 import React from 'react';
-import { Divider, useTheme } from 'react-native-paper';
+import { Divider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { FlatList } from 'react-native';
 import { sortBy } from 'lodash/fp';
 
 import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { styled } from 'src/paperTheme';
+import { styled, withTheme } from 'src/paperTheme';
 import SwipableRow from 'src/components/SwipableRow';
 import { deleteDraftAction } from 'src/pullstate/formActions';
 
 import DraftRow from './DraftRow';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  justify-content: center;
-`;
+const Container = withTheme(
+  styled.View`
+    flex: 1;
+    background-color: ${({ theme }) => theme.colors.background};
+    justify-content: center;
+  `,
+);
 
 const DraftsScreen: React.FC<{}> = () => {
-  const theme = useTheme();
   const navigation = useNavigation();
   const drafts = PersistentUserStore.useState((s) => sortBy('started_at', Object.values(s.drafts)));
 
   return (
-    <Container theme={theme}>
+    <Container>
       <FlatList
         contentContainerStyle={{
           justifyContent: 'flex-start',

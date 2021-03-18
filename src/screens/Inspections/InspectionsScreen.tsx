@@ -1,7 +1,7 @@
 import React from 'react';
-import { Divider, Title, useTheme } from 'react-native-paper';
+import { Divider, Title } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { FlatList, View } from 'react-native';
+import { FlatList } from 'react-native';
 
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import NavRow from 'src/components/NavRow';
@@ -12,17 +12,27 @@ import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 's
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
-import { styled } from 'src/paperTheme';
+import { styled, withTheme } from 'src/paperTheme';
 
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
 import BlankScreen from './BlankScreen';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  justify-content: center;
-`;
+const Container = withTheme(
+  styled.View`
+    flex: 1;
+    background-color: ${({ theme }) => theme.colors.background};
+    justify-content: center;
+  `,
+);
+
+const TitleContainer = withTheme(
+  styled.View`
+    background-color: ${({ theme }) => theme.colors.surface};
+    padding-horizontal: 30;
+    padding-top: 30;
+  `,
+);
 
 const InspectionsScreen: React.FC<{}> = () => {
   const {
@@ -35,11 +45,10 @@ const InspectionsScreen: React.FC<{}> = () => {
     userData,
   );
   const [isReady, onReady] = useResult<undefined>();
-  const theme = useTheme();
   const navigation = useNavigation();
 
   if (!userData) {
-    return <Container theme={theme} />;
+    return <Container />;
   }
 
   if (error) {
@@ -55,7 +64,7 @@ const InspectionsScreen: React.FC<{}> = () => {
   }
 
   return (
-    <Container theme={theme}>
+    <Container>
       {childrenStructures.length === 0 ? (
         <BlankScreen />
       ) : (
@@ -69,9 +78,9 @@ const InspectionsScreen: React.FC<{}> = () => {
             ListHeaderComponent={
               <>
                 {!!parentId && !!parent && (
-                  <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
+                  <TitleContainer>
                     {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
-                  </View>
+                  </TitleContainer>
                 )}
 
                 <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />

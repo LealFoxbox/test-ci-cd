@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { StackHeaderProps } from '@react-navigation/stack';
 import { Appbar } from 'react-native-paper';
 
-import SearchHeader from './SearchHeader';
+import SearchHeader from '../SearchHeader';
 
 type Params = undefined | { title: string; hasSubheader: boolean; hasSearch: boolean };
 
-const Header: React.FC<StackHeaderProps> = ({ navigation, previous, scene }) => {
-  const params = scene.route.params as Params;
+const Header: React.FC<StackHeaderProps> = (props) => {
+  const params = props.scene.route.params as Params;
   const [showSearchInput, setShowSearchInput] = useState(false);
   const hasSearchEnabled = !!params?.hasSearch;
-  const left = scene.descriptor.options.headerLeft || null;
-  const right = scene.descriptor.options.headerRight || null;
+  const left = props.scene.descriptor.options.headerLeft || null;
+  const right = props.scene.descriptor.options.headerRight || null;
 
   function getLeft() {
     if (typeof left === 'function') {
@@ -22,11 +22,11 @@ const Header: React.FC<StackHeaderProps> = ({ navigation, previous, scene }) => 
       return left;
     }
 
-    if (previous) {
+    if (props.previous) {
       return (
         <Appbar.BackAction
           onPress={() => {
-            navigation.goBack();
+            props.navigation.goBack();
           }}
         />
       );
@@ -55,7 +55,7 @@ const Header: React.FC<StackHeaderProps> = ({ navigation, previous, scene }) => 
   }
 
   if (hasSearchEnabled && showSearchInput) {
-    return <SearchHeader onClose={() => setShowSearchInput(false)} hasSubheader={!!params?.hasSubheader} />;
+    return <SearchHeader {...props} onClose={() => setShowSearchInput(false)} isInspection />;
   }
 
   return (
