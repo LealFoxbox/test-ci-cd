@@ -20,8 +20,8 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
   const hasSubheader = !!params?.hasSubheader;
   const searchInput = SearchStore.useState((s) => s.searchInput);
 
-  const handleChangeResults = (r: Structure[]) => {
-    SearchStore.update((s) => ({ ...s, isLoading: false, showResults: true, results: r }));
+  const makeChangeResultsHandler = (input: string) => (r: Structure[]) => {
+    SearchStore.update((s) => ({ ...s, isLoading: false, showResults: true, results: r, lastSearch: input }));
 
     if (isInspection && searchInput) {
       navigation.navigate(INSPECTIONS_SEARCH_RESULTS);
@@ -31,15 +31,9 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (!searchInput) {
-        // empty search query
-        SearchStore.update((s) => ({
-          ...s,
-          showResults: false,
-        }));
-      } else {
+      if (searchInput) {
         SearchStore.update((s) => ({ ...s, isLoading: true }));
-        void structuresDb.search(searchInput.trim()).then(handleChangeResults);
+        void structuresDb.search(searchInput.trim()).then(makeChangeResultsHandler(searchInput));
       }
     }, 300);
 
@@ -50,7 +44,12 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
   }, [searchInput]);
 
   const handleChangeSearch = (text: string) => {
-    SearchStore.update((s) => ({ ...s, searchInput: text }));
+    SearchStore.update((s) => {
+      if (!text) {
+        return { ...s, searchInput: text, showResults: false };
+      }
+      return { ...s, searchInput: text };
+    });
   };
 
   const handleClose = () => {

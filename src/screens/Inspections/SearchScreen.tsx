@@ -59,9 +59,9 @@ const Row: React.FC<Structure> = React.memo((props) => {
 });
 
 const SearchScreen: React.FC<{}> = () => {
-  const { results, searchInput, isLoading, showResults } = SearchStore.useState((s) => ({
+  const { results, lastSearch, isLoading, showResults } = SearchStore.useState((s) => ({
     results: s.results,
-    searchInput: s.searchInput,
+    lastSearch: s.lastSearch,
     isLoading: s.isLoading,
     showResults: s.showResults,
   }));
@@ -82,7 +82,7 @@ const SearchScreen: React.FC<{}> = () => {
   if (results.length === 0) {
     return (
       <Container>
-        <BlankScreen searchInput={searchInput} />
+        <BlankScreen searchInput={lastSearch} />
       </Container>
     );
   }
