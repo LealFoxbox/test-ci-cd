@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { filter, find, uniqBy, words } from 'lodash/fp';
+import { escapeRegExp, filter, find, uniqBy, words } from 'lodash/fp';
 
 import config, { getMockFlags } from 'src/config';
 import { Assignment, Structure } from 'src/types';
@@ -9,11 +9,7 @@ import { Assignment, Structure } from 'src/types';
 type StructuresDb = ReturnType<typeof createStructureDb>;
 type AssignmentDb = ReturnType<typeof createAssignmentDb>;
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function createSearchRegex(s: string) {
+export function createSearchRegex(s: string) {
   // TODO: use this regex instead
   // https://regexr.com/335fm
   return new RegExp(
