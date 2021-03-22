@@ -51,9 +51,9 @@ function splitWord(input: string, word: string) {
       return [input.slice(lastIndex - word.length, lastIndex)];
     }
 
-    lastIndex += value.length;
+    lastIndex += value.length + word.length;
 
-    return [value, input.slice(lastIndex, lastIndex + word.length)];
+    return [value, input.slice(lastIndex - word.length, lastIndex)];
   });
 }
 
@@ -62,13 +62,9 @@ const Row: React.FC<RowProps> = React.memo((props) => {
 
   const boldWords = words(props.searchInput).map((w) => w.toLowerCase());
 
+  const textLabel = props.location_path || props.display_name;
   const label = boldWords
-    .reduce(
-      (acc, boldWord) => {
-        return acc.flatMap((value) => splitWord(value, boldWord));
-      },
-      [props.location_path || props.display_name],
-    )
+    .reduce((acc, boldWord) => acc.flatMap((value) => splitWord(value, boldWord)), [textLabel])
     .map((section, i) => {
       if (boldWords.includes(section.toLowerCase())) {
         return (

@@ -1,175 +1,69 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { map } from 'lodash/fp';
 
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
-import { selectMongoComplete } from 'src/pullstate/selectors';
-import { Assignment, Form, Structure, User } from 'src/types';
+import { useResultAsync } from 'src/utils/useResult';
+import { Form, User } from 'src/types';
 
 import { assignmentsDb, structuresDb } from './mongodb';
 
-interface InspectionData {
-  parent: Structure | null;
-  children: Structure[];
-}
-
 export const structures = {
-  useGet(id: number | null, isMongoComplete: boolean): [Structure | null, boolean] {
-    const [data, setData] = useState<Structure | null>(null);
-    const [isLoading, setIsloading] = useState(true);
-
-    useEffect(() => {
-      let mounted = true;
-
-      (async () => {
-        if (isMongoComplete) {
-          if (id) {
-            await structuresDb.loadPromise;
-            if (!mounted) {
-              return;
-            }
-            setData((await structuresDb.get(id)) || null);
-            if (!mounted) {
-              return;
-            }
-          }
-          setIsloading(false);
-        }
-      })();
-
-      return () => {
-        mounted = false;
-      };
-    }, [id, isMongoComplete]);
-
-    return [data, isLoading];
+  useGet(id: number | null, isMongoComplete: boolean) {
+    const fn = useCallback(async () => {
+      await structuresDb.loadPromise;
+      return structuresDb.get(id);
+    }, [id]);
+    return useResultAsync(fn, isMongoComplete);
   },
 
-  useGetAll(): [Structure[], boolean, boolean] {
-    const [data, setData] = useState<Structure[]>([]);
-    const [isLoading, setIsloading] = useState(true);
-    const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
-      initialized: s.initialized,
-      isMongoComplete: selectMongoComplete(s),
-    }));
+  useInspection(parentId: number | null, userData: User | null, shouldQuery: boolean) {
+    const supervisoryChildren = !!userData?.settings.display_supervisory_structure_children;
+    const supervisoryStructures = userData?.supervisory_structures;
 
-    useEffect(() => {
-      let mounted = true;
+    const fn = useCallback(async () => {
+      await structuresDb.loadPromise;
 
-      (async () => {
-        if (initialized && isMongoComplete) {
-          await structuresDb.loadPromise;
-          if (!mounted) {
-            return;
-          }
-          setData(await structuresDb.getAll());
-          if (!mounted) {
-            return;
-          }
-          setIsloading(false);
+      if (parentId) {
+        return {
+          parent: (await structuresDb.get(parentId)) || null,
+          children: await structuresDb.getChildren(parentId),
+        };
+      } else {
+        const showChildren = supervisoryChildren;
+        const s = supervisoryStructures || [];
+
+        if (!showChildren) {
+          const baseStructures = await structuresDb.getMultiple(map('id', s));
+          return {
+            parent: null,
+            children: baseStructures,
+          };
+        } else {
+          const baseId = s[0]?.id || null;
+          return {
+            parent: (await structuresDb.get(baseId)) || null,
+            children: await structuresDb.getChildren(baseId),
+          };
         }
-      })();
+      }
+    }, [parentId, supervisoryChildren, supervisoryStructures]);
 
-      return () => {
-        mounted = false;
-      };
-    }, [initialized, isMongoComplete]);
+    const [data, isLoading] = useResultAsync(fn, shouldQuery);
 
-    return [data, isLoading, isMongoComplete && initialized];
-  },
-
-  useInspection(parentId: number | null, userData: User | null): [InspectionData, boolean, boolean] {
-    const [data, setData] = useState<InspectionData>({ parent: null, children: [] });
-    const [isLoading, setIsloading] = useState(true);
-    const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
-      initialized: s.initialized,
-      isMongoComplete: selectMongoComplete(s),
-    }));
-
-    useEffect(() => {
-      let mounted = true;
-
-      (async () => {
-        await structuresDb.loadPromise;
-        if (initialized && isMongoComplete) {
-          mounted && setIsloading(true);
-
-          if (parentId) {
-            const newData = {
-              parent: (await structuresDb.get(parentId)) || null,
-              children: await structuresDb.getChildren(parentId),
-            };
-
-            mounted && setData(newData);
-          } else {
-            const showChildren = !!userData?.settings.display_supervisory_structure_children;
-            const supervisoryStructures = userData?.supervisory_structures || [];
-
-            if (!showChildren) {
-              const baseStructures = await structuresDb.getMultiple(map('id', supervisoryStructures));
-              mounted &&
-                setData({
-                  parent: null,
-                  children: baseStructures,
-                });
-            } else {
-              const baseId = supervisoryStructures[0]?.id || null;
-              const newData = {
-                parent: (await structuresDb.get(baseId)) || null,
-                children: await structuresDb.getChildren(baseId),
-              };
-              mounted && setData(newData);
-            }
-          }
-        }
-        mounted && initialized && setIsloading(false);
-      })();
-
-      return () => {
-        mounted = false;
-      };
-    }, [
-      parentId,
-      isMongoComplete,
-      initialized,
-      userData?.supervisory_structures,
-      userData?.settings.display_supervisory_structure_children,
-    ]);
-
-    return [data, isLoading, isMongoComplete];
+    return [data || { parent: null, children: [] }, isLoading] as const;
   },
 };
 
 export const assignments = {
-  useGetAssignments(id: number | null, forms: Record<string, Form>): [Assignment[], boolean] {
-    const [data, setData] = useState<Assignment[]>([]);
-    const [isLoading, setIsloading] = useState(true);
+  useGetAssignments(id: number | null, forms: Record<string, Form>) {
+    const fn = useCallback(async () => {
+      const result = await assignmentsDb.getAssignments(id);
 
-    useEffect(() => {
-      let mounted = true;
-
-      (async () => {
-        if (id) {
-          await assignmentsDb.loadPromise;
-          if (mounted) {
-            const result = await assignmentsDb.getAssignments(id);
-
-            mounted &&
-              setData(
-                result.sort((a, b) => {
-                  return forms[a.inspection_form_id].name.localeCompare(forms[b.inspection_form_id].name);
-                }),
-              );
-          }
-        }
-        mounted && setIsloading(false);
-      })();
-
-      return () => {
-        mounted = false;
-      };
+      return result.sort((a, b) => {
+        return forms[a.inspection_form_id].name.localeCompare(forms[b.inspection_form_id].name);
+      });
     }, [forms, id]);
 
-    return [data, isLoading];
+    return useResultAsync(fn, !!id);
   },
 };
 

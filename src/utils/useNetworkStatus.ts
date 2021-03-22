@@ -5,15 +5,20 @@ export const useNetworkStatus = () => {
   const [connected, setConnected] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const setNetworkStatus = ({ isInternetReachable, isConnected }: NetInfoState) => {
-      setConnected(typeof isInternetReachable === 'boolean' ? isInternetReachable : isConnected);
+      mounted && setConnected(typeof isInternetReachable === 'boolean' ? isInternetReachable : isConnected);
     };
 
     void NetInfo.fetch().then(setNetworkStatus);
 
     const unsubscribe = NetInfo.addEventListener(setNetworkStatus);
 
-    return unsubscribe;
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   return connected;

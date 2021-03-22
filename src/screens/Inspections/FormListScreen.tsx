@@ -46,7 +46,7 @@ const FormListScreen: React.FC<{}> = () => {
         justifyContent: 'center',
       }}
     >
-      {assignments.length === 0 || !structure ? (
+      {assignments?.length === 0 || !structure ? (
         <BlankScreen />
       ) : (
         <>

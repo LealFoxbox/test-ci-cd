@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Appbar, TextInput } from 'react-native-paper';
 import { StackHeaderProps } from '@react-navigation/stack';
+import { words } from 'lodash/fp';
 
 import { transparentTheme } from 'src/paperTheme';
 import { SearchStore } from 'src/pullstate/searchStore';
@@ -13,6 +14,10 @@ interface SearchHeaderProps extends StackHeaderProps {
   isInspection?: boolean;
 }
 
+function hasWords(input: string) {
+  return words(input).length > 0;
+}
+
 type Params = undefined | { hasSubheader: boolean };
 
 const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation, isInspection }) => {
@@ -23,7 +28,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
   const makeChangeResultsHandler = (input: string) => (r: Structure[]) => {
     SearchStore.update((s) => ({ ...s, isLoading: false, showResults: true, results: r, lastSearch: input }));
 
-    if (isInspection && searchInput) {
+    if (isInspection && hasWords(searchInput)) {
       navigation.navigate(INSPECTIONS_SEARCH_RESULTS);
       onClose && onClose();
     }
@@ -31,9 +36,9 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (searchInput) {
+      if (hasWords(searchInput)) {
         SearchStore.update((s) => ({ ...s, isLoading: true }));
-        void structuresDb.search(searchInput.trim()).then(makeChangeResultsHandler(searchInput));
+        void structuresDb.search(searchInput).then(makeChangeResultsHandler(searchInput));
       }
     }, 300);
 
@@ -45,7 +50,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
 
   const handleChangeSearch = (text: string) => {
     SearchStore.update((s) => {
-      if (!text) {
+      if (!hasWords(text)) {
         return { ...s, searchInput: text, showResults: false };
       }
       return { ...s, searchInput: text };

@@ -13,6 +13,8 @@ import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigat
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
 import { styled, withTheme } from 'src/paperTheme';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { selectMongoComplete } from 'src/pullstate/selectors';
 
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
@@ -29,8 +31,8 @@ const Container = withTheme(
 const TitleContainer = withTheme(
   styled.View`
     background-color: ${({ theme }) => theme.colors.surface};
-    padding-horizontal: 30;
-    padding-top: 30;
+    padding-horizontal: 30px;
+    padding-top: 30px;
   `,
 );
 
@@ -40,26 +42,32 @@ const InspectionsScreen: React.FC<{}> = () => {
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
   const userData = LoginStore.useState((s) => s.userData);
-  const [{ parent, children: childrenStructures }, isLoading, isComplete] = dbHooks.structures.useInspection(
+  const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
+    initialized: s.initialized,
+    isMongoComplete: selectMongoComplete(s),
+  }));
+  const shouldQueryInspections = initialized && isMongoComplete;
+  const [{ parent, children: childrenStructures }, isLoadingInspections] = dbHooks.structures.useInspection(
     parentId,
     userData,
+    shouldQueryInspections,
   );
-  const [isReady, onReady] = useResult<undefined>();
+  const [isReady, onReady] = useResult();
   const navigation = useNavigation();
 
   if (!userData) {
-    return <Container />;
+    return <LoadingOverlay />;
   }
 
   if (error) {
     return <ErrorScreen userData={userData} />;
   }
 
-  if (isLoading) {
+  if (!initialized || (isLoadingInspections && shouldQueryInspections && progress === 100)) {
     return <LoadingOverlay />;
   }
 
-  if (progress !== 100 || !isComplete) {
+  if (progress !== 100) {
     return <DownloadingScreen progress={progress} />;
   }
 

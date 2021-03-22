@@ -45,10 +45,10 @@ export function createStructureMock() {
       });
     },
 
-    search(input: string) {
+    search(input: string, limit = 20) {
       const r = createSearchRegex(input);
       return new Promise<Structure[]>((resolve) => {
-        resolve(data.filter((s) => r.test(s.display_name)));
+        resolve(data.filter((s) => r.test(s.display_name)).slice(0, limit));
       });
     },
 
@@ -103,7 +103,7 @@ export function createAssignmentMock() {
       });
     },
 
-    getAssignments(id: number) {
+    getAssignments(id: number | null) {
       return new Promise<Assignment[]>((resolve) => {
         resolve(filter((s) => s.structure_id === id, data));
       });
@@ -161,8 +161,11 @@ export function createStructureDb() {
       });
     },
 
-    search(input: string) {
-      return db.find({ display_name: createSearchRegex(input) }).exec() as Promise<Structure[]>;
+    search(input: string, limit = 20) {
+      return db
+        .find({ display_name: createSearchRegex(input) })
+        .limit(limit)
+        .exec() as Promise<Structure[]>;
     },
 
     get(id: number | null) {
@@ -238,7 +241,7 @@ export function createAssignmentDb() {
       return db.findOne({ id }).exec() as Promise<Assignment | undefined>;
     },
 
-    getAssignments(id: number) {
+    getAssignments(id: number | null) {
       return db.find({ structure_id: id }).sort({ display_name: 1 }).exec() as Promise<Assignment[]>;
     },
 
