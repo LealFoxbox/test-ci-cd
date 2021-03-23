@@ -15,7 +15,6 @@ import { UploadStoreState } from 'src/pullstate/uploadStore/initialState';
 import usePrevious from 'src/utils/usePrevious';
 
 import { presignPhotos, submitInspection, uploadPhotos } from '../api/uploads';
-
 import {
   cleanUploadErrorsAction,
   finishPhotoUploadAction,
@@ -24,7 +23,7 @@ import {
   setFormSubmittedAction,
   setUploadingErrorAction,
   setUploadingFieldAction,
-} from './actions';
+} from '../../pullstate/uploaderActions';
 
 const FLAGS = {
   loggedIn: false,

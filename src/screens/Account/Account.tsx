@@ -1,19 +1,16 @@
 import React from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Button, Dialog, Divider, Paragraph, Portal, ProgressBar, useTheme } from 'react-native-paper';
-import { format } from 'date-fns';
+import { Button, Dialog, Divider, Paragraph, Portal, useTheme } from 'react-native-paper';
 
 import config from 'src/config';
 import { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
-import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
-import { DownloadStore } from 'src/pullstate/downloadStore';
-import { INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { clearInspectionsDataAction, logoutAction } from 'src/pullstate/actions';
+import { logoutAction } from 'src/pullstate/actions';
+
+import DownloadRow from './DownloadRow';
 
 const Container = styled.View`
   flex: 1;
@@ -37,12 +34,9 @@ const metadata = `
 
 const AccountScreen: React.FC = () => {
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
-  const lastUpdated = PersistentUserStore.useState((s) => s.lastUpdated);
-  const progress = DownloadStore.useState((s) => s.progress);
 
   const [visible, setVisible] = React.useState(false);
   const theme = useTheme();
-  const navigation = useNavigation();
   const connected = useNetworkStatus();
 
   const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
@@ -54,15 +48,6 @@ const AccountScreen: React.FC = () => {
 
   const handleLogout = () => {
     void logoutAction();
-  };
-
-  const handleRedownload = async () => {
-    await clearInspectionsDataAction();
-
-    navigation.reset({
-      index: 0,
-      routes: [{ name: INSPECTIONS_HOME, params: { parentId: null } }],
-    });
   };
 
   return (
@@ -78,30 +63,7 @@ const AccountScreen: React.FC = () => {
             onPress={showDialog}
           />
           <Divider />
-          {progress === 100 && lastUpdated && (
-            <Row
-              accessibilityLabel="download"
-              label="Download New Data"
-              value={`Last updated ${format(lastUpdated, 'MM/dd/yyyy hh:mma')}`}
-              icon="cloud-download"
-              onPress={handleRedownload}
-              disabled={!connected}
-            />
-          )}
-          {(progress !== 100 || !lastUpdated) && (
-            <Row
-              accessibilityLabel="downloading"
-              label="Downloading Data..."
-              value={
-                <ProgressBar
-                  progress={progress / 100}
-                  color={theme.colors.primary}
-                  style={{ maxWidth: 250, marginVertical: 5 }}
-                />
-              }
-              icon="cloud-download"
-            />
-          )}
+          <DownloadRow userData={userData} disabled={!connected} />
           <Divider />
           <Row
             accessibilityLabel="support"

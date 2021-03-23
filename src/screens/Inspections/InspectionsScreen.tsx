@@ -1,28 +1,40 @@
 import React from 'react';
-import { Divider, Title, useTheme } from 'react-native-paper';
+import { Divider, Title } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { FlatList, View } from 'react-native';
+import { FlatList } from 'react-native';
 
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
-import { INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
+import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
-import { styled } from 'src/paperTheme';
+import { styled, withTheme } from 'src/paperTheme';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { selectMongoComplete } from 'src/pullstate/selectors';
 
 import DownloadingScreen from './DownloadingScreen';
 import ErrorScreen from './ErrorScreen';
 import BlankScreen from './BlankScreen';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  justify-content: center;
-`;
+const Container = withTheme(
+  styled.View`
+    flex: 1;
+    background-color: ${({ theme }) => theme.colors.background};
+    justify-content: center;
+  `,
+);
+
+const TitleContainer = withTheme(
+  styled.View`
+    background-color: ${({ theme }) => theme.colors.surface};
+    padding-horizontal: 30px;
+    padding-top: 30px;
+  `,
+);
 
 const InspectionsScreen: React.FC<{}> = () => {
   const {
@@ -30,32 +42,37 @@ const InspectionsScreen: React.FC<{}> = () => {
   } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
   const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
   const userData = LoginStore.useState((s) => s.userData);
-  const [{ parent, children: childrenStructures }, isLoading, isComplete] = dbHooks.structures.useInspection(
+  const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
+    initialized: s.initialized,
+    isMongoComplete: selectMongoComplete(s),
+  }));
+  const shouldQueryInspections = initialized && isMongoComplete;
+  const [{ parent, children: childrenStructures }, isLoadingInspections] = dbHooks.structures.useInspection(
     parentId,
     userData,
+    shouldQueryInspections,
   );
-  const [isReady, onReady] = useResult<undefined>();
-  const theme = useTheme();
+  const [isReady, onReady] = useResult();
   const navigation = useNavigation();
 
   if (!userData) {
-    return <Container theme={theme} />;
-  }
-
-  if (error) {
-    return <ErrorScreen />;
-  }
-
-  if (isLoading) {
     return <LoadingOverlay />;
   }
 
-  if (progress !== 100 || !isComplete) {
+  if (error) {
+    return <ErrorScreen userData={userData} />;
+  }
+
+  if (!initialized || (isLoadingInspections && shouldQueryInspections && progress === 100)) {
+    return <LoadingOverlay />;
+  }
+
+  if (progress !== 100) {
     return <DownloadingScreen progress={progress} />;
   }
 
   return (
-    <Container theme={theme}>
+    <Container>
       {childrenStructures.length === 0 ? (
         <BlankScreen />
       ) : (
@@ -69,9 +86,9 @@ const InspectionsScreen: React.FC<{}> = () => {
             ListHeaderComponent={
               <>
                 {!!parentId && !!parent && (
-                  <View style={{ backgroundColor: theme.colors.surface, paddingHorizontal: 30, paddingTop: 30 }}>
+                  <TitleContainer>
                     {!!parent?.location_path && <Title style={{ fontWeight: 'bold' }}>{parent.location_path}</Title>}
-                  </View>
+                  </TitleContainer>
                 )}
 
                 <Notes value={parent?.notes} onReady={onReady} style={{ padding: 30 }} />
@@ -83,9 +100,13 @@ const InspectionsScreen: React.FC<{}> = () => {
                 onPress={() => {
                   if (item.active_children_count > 0) {
                     navigation.navigate({
-                      name: INSPECTIONS_HOME,
+                      name: INSPECTIONS_CHILDREN,
                       key: `${parentId || 'base'}`,
-                      params: { parentId: item.id, title: item.display_name, showLocationPath: false },
+                      params: {
+                        parentId: item.id,
+                        title: item.display_name,
+                        showLocationPath: false,
+                      },
                     });
                   } else {
                     navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });

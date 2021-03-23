@@ -58,7 +58,7 @@ const LoginScreen: React.FC<{}> = () => {
     onSuccess: async (userData) => {
       if (userData.status === 200 && userData.data.user) {
         setAuthError('');
-        await loginAction(userData.data.user);
+        await loginAction({ user: userData.data.user, outdatedUserData: false });
       } else {
         setAuthError(authenticateError);
       }

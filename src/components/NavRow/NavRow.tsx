@@ -13,27 +13,29 @@ const Container = styled.TouchableOpacity`
 `;
 
 interface RowProps {
-  label: string;
+  label: React.ReactNode;
+  content?: React.ReactNode;
   accessibilityLabel?: string;
   icon?: string;
   onPress: () => void;
 }
 
-const NavRow: React.FC<RowProps> = ({ accessibilityLabel, label, icon, onPress }) => {
+const NavRow: React.FC<RowProps> = ({ accessibilityLabel, label, content, icon, onPress }) => {
   const theme = useTheme();
 
   return (
     <Container
       onPress={onPress}
       accessibilityRole="button"
-      {...getAccessibilityAndAutomationProps(accessibilityLabel || label)}
+      {...getAccessibilityAndAutomationProps(accessibilityLabel || (typeof label === 'string' ? label : 'row'))}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingRight: 15, paddingLeft: 5 }}>
         {icon && (
           <MaterialCommunityIcons name={icon} size={24} color={theme.colors.primary} style={{ marginLeft: 15 }} />
         )}
         <Card.Content style={{ flex: 1 }}>
-          <Text>{label}</Text>
+          {typeof label === 'string' ? <Text>{label}</Text> : label}
+          {content || null}
         </Card.Content>
         <MaterialIcons name="chevron-right" size={24} color={theme.colors.placeholder} />
       </View>

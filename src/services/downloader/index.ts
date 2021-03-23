@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { useEffect } from 'react';
-import { isEmpty } from 'lodash/fp';
+import { fromPairs } from 'lodash/fp';
 
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -8,32 +8,36 @@ import { LoginStore } from 'src/pullstate/loginStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
 import timeoutPromise from 'src/utils/timeoutPromise';
 import { useTrigger } from 'src/utils/useTrigger';
-import { hasConnection, useNetworkStatus } from 'src/utils/useNetworkStatus';
-import { getUnixSeconds, isSecondsExpired } from 'src/utils/expiration';
-import { Form, SelectRating } from 'src/types';
+import { hasConnection } from 'src/utils/useNetworkStatus';
+import { getUnixSeconds } from 'src/utils/expiration';
+import { Rating, SelectRating } from 'src/types';
 
 import { fetchForm } from '../api/forms';
 import { fetchRatingChoices, fetchRatings } from '../api/ratings';
-import { assignmentsDb } from '../mongodb';
 import { useIsMongoLoaded } from '../mongoHooks';
 
 import { downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
 import { getNextDbDownload, getTotalPages, refreshDb } from './dbUtils';
-import { deleteAllJSONFiles, deleteInvalidFiles } from './fileUtils';
+import { deleteAllJSONFiles, deleteExpiredFiles, deleteInvalidFiles } from './fileUtils';
 import {
+  RatingChoicesDownload,
   cleanExpiredIncompleteRatings,
   getNextRatingChoicesDownload,
   isSelectRating,
   selectIsRatingsBaseDownloaded,
-  selectIsRatingsComplete,
+  selectRatingsComplete,
 } from './ratingsUtils';
 import { PERCENTAGES } from './percentages';
+import { getNextFormDownload } from './formUtils';
 
 const FLAGS = {
   loggedIn: false,
+  errors: 0,
 };
 
-function setProgress(progress: number) {
+function advanceProgress(progress: number) {
+  FLAGS.errors = 0;
+
   DownloadStore.update((s) => {
     if (s.progress !== progress) {
       s.progress = progress;
@@ -47,15 +51,20 @@ function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices
   });
 }
 
-async function getMissingForms(forms: Record<string, Form>) {
-  const distinctIds = await assignmentsDb.getDistinctFormIds();
-  const hadMissingIds = distinctIds.some((id) => !forms[id]);
+async function handleError(section: string) {
+  FLAGS.errors += 1;
 
-  if (hadMissingIds) {
-    return distinctIds.filter((id) => !forms[id] || isSecondsExpired(forms[id].lastDownloaded));
+  if (FLAGS.errors > 3) {
+    // we probably don't have any internet, let's check that
+    const isConnected = await hasConnection();
+
+    if (isConnected) {
+      DownloadStore.update((s) => {
+        s.error = `Failed to download ${section} data`;
+        console.log(`handleError: ${s.error}`);
+      });
+    }
   }
-
-  return [];
 }
 
 export async function dbDownload({
@@ -70,7 +79,7 @@ export async function dbDownload({
   console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
   setDownloading('db');
   await waitForExistingDownloads();
-  // TODO: if a page was outdated, wouldn't that mean we'd need to redownload EVERYTHING?
+  await deleteExpiredFiles();
   await deleteInvalidFiles();
 
   const totalPages = {
@@ -82,7 +91,7 @@ export async function dbDownload({
   let erroredOut = false;
 
   while (nextDownload && FLAGS.loggedIn && !erroredOut) {
-    setProgress(nextDownload.progress);
+    advanceProgress(nextDownload.progress);
 
     const { type } = nextDownload;
 
@@ -104,232 +113,171 @@ export async function dbDownload({
   }
 
   if (!erroredOut) {
-    setProgress(PERCENTAGES.dbLoad[0]);
+    advanceProgress(PERCENTAGES.dbLoad[0]);
 
     FLAGS.loggedIn && (await refreshDb(isStaging));
 
-    setProgress((PERCENTAGES.dbLoad[0] + PERCENTAGES.dbLoad[1]) * 0.5);
+    advanceProgress((PERCENTAGES.dbLoad[0] + PERCENTAGES.dbLoad[1]) * 0.5);
 
     await deleteAllJSONFiles();
 
-    setProgress(PERCENTAGES.dbLoad[1]);
-
-    setDownloading(null);
+    advanceProgress(PERCENTAGES.dbLoad[1]);
   } else {
-    console.warn('DB DOWNLOAD ERRORED OUT');
-    DownloadStore.update((s) => {
-      s.error = `Failed to download Inspections data`;
-      s.downloading = null;
-    });
-  }
-}
-
-async function formsDownload(formIds: number[], token: string, subdomain: string) {
-  console.log('DOWNLOADING FORMS');
-  setDownloading('forms');
-
-  const [start, end] = PERCENTAGES.forms;
-  let errorsCount = 0;
-  let isConnected = true;
-
-  let i = 0;
-  while (i < formIds.length && FLAGS.loggedIn && errorsCount < 3 && isConnected) {
-    const formId = formIds[i];
-    try {
-      console.log('fetchForms: form ', i + 1, ' out of ', formIds.length);
-
-      const { data } = await fetchForm({ companyId: subdomain, token, formId });
-      errorsCount = 0;
-      PersistentUserStore.update((s) => {
-        s.forms[data.inspection_form.id] = {
-          ...data.inspection_form,
-          lastDownloaded: getUnixSeconds(),
-        };
-        s.lastUpdated = Date.now();
-      });
-      setProgress(start + ((end - start) * i) / formIds.length);
-
-      i += 1;
-    } catch (e) {
-      errorsCount += 1;
-      // we probably don't have any internet, let's check that
-      isConnected = await hasConnection();
-    }
-
-    await timeoutPromise(200);
-  }
-
-  if (isConnected) {
-    if (errorsCount >= 3) {
-      DownloadStore.update((s) => {
-        s.error = `Failed to download form data`;
-      });
-    } else {
-      setProgress(end);
-    }
+    await handleError('db');
   }
 
   setDownloading(null);
 }
 
-async function enhancedTryCatch(cb: () => Promise<void>) {
-  let errorsCount = 0;
-  let success = false;
-  let isConnected = true;
+async function formsDownload(
+  { progress, formId }: { progress: number; formId: number },
+  token: string,
+  subdomain: string,
+) {
+  setDownloading('forms');
 
-  while (!success && errorsCount < 3 && isConnected && FLAGS.loggedIn) {
-    try {
-      await cb();
-      success = true;
-    } catch (e) {
-      errorsCount += 1;
-      // we probably don't have any internet, let's check that
-      isConnected = await hasConnection();
-    }
+  try {
+    console.log(`formsDownload: Downloading form ${formId}`);
+    const { data } = await fetchForm({ companyId: subdomain, token, formId });
+
+    PersistentUserStore.update((s) => {
+      s.forms[data.inspection_form.id] = {
+        ...data.inspection_form,
+        lastDownloaded: getUnixSeconds(),
+      };
+      s.lastUpdated = Date.now();
+    });
+
+    advanceProgress(progress);
+  } catch (e) {
+    await handleError('form');
   }
 
-  if (!success && isConnected) {
-    return true;
-  }
+  await timeoutPromise(200);
 
-  return false;
+  setDownloading(null);
 }
 
 async function ratingsDownload(token: string, subdomain: string) {
   setDownloading('ratings');
   console.log('DOWNLOADING RATINGS');
 
-  const [start, end] = PERCENTAGES.ratings;
+  const [, end] = PERCENTAGES.ratings;
 
-  setProgress(start);
-  const erroredOut = await enhancedTryCatch(async () => {
+  try {
     const { data } = await fetchRatings({ companyId: subdomain, token });
 
     PersistentUserStore.update((s) => {
-      for (const key of Object.keys(s.ratings)) {
-        delete s.ratings[key];
-      }
-
-      for (const r of data.ratings) {
+      const ratingKeyValueList: [number, Rating][] = data.ratings.map((r) => {
         if (!isSelectRating(r)) {
-          s.ratings[r.id] = r;
-        } else {
-          (s.ratings[r.id] as any) = {
+          return [r.id, r];
+        }
+
+        return [
+          r.id,
+          {
             ...r,
             page: null,
             totalPages: null,
             lastDownloaded: [],
-          };
-        }
-      }
+          },
+        ];
+      });
+
       const now = Date.now();
-      s.ratingsDownloaded = now;
-      s.lastUpdated = now;
+
+      return {
+        ...s,
+        ratings: fromPairs(ratingKeyValueList),
+        ratingsDownloaded: now,
+        lastUpdated: now,
+      };
     });
 
-    setProgress(end);
-  });
-
-  if (erroredOut) {
-    DownloadStore.update((s) => {
-      s.error = `Failed to download ratings data`;
-    });
+    advanceProgress(end);
+  } catch (e) {
+    await handleError('rating');
   }
+
+  await timeoutPromise(200);
 
   setDownloading(null);
 }
 
-async function ratingChoicesDownload(token: string, subdomain: string) {
+async function ratingChoicesDownload(nextDownload: RatingChoicesDownload, token: string, subdomain: string) {
   setDownloading('ratingChoices');
-  console.log('DOWNLOADING RATING CHOICES');
 
-  cleanExpiredIncompleteRatings();
+  console.log(
+    'ratingChoicesDownload: ratingsChoice #',
+    nextDownload.ratingId,
+    ' -> ',
+    nextDownload.page,
+    ' out of ',
+    nextDownload.totalPages,
+  );
 
-  const [, end] = PERCENTAGES.ratingChoices;
+  try {
+    const { data } = await fetchRatingChoices({
+      companyId: subdomain,
+      token,
+      ratingId: nextDownload.ratingId,
+      page: nextDownload.page,
+    });
 
-  let nextDownload = getNextRatingChoicesDownload();
-  let erroredOut = false;
-
-  while (nextDownload && !erroredOut) {
-    erroredOut = await enhancedTryCatch(async () => {
+    PersistentUserStore.update((s) => {
       if (nextDownload) {
-        console.log(
-          'ratingChoicesDownload: ratingsChoice #',
-          nextDownload.ratingId,
-          ' -> ',
-          nextDownload.page,
-          ' out of ',
-          nextDownload.totalPages,
-        );
+        const id = nextDownload.ratingId;
+        const rating = s.ratings[id] as SelectRating | undefined;
 
-        const { data } = await fetchRatingChoices({
-          companyId: subdomain,
-          token,
-          ratingId: nextDownload.ratingId,
-          page: nextDownload.page,
-        });
+        if (!rating) {
+          throw new Error(`ratingChoicesDownload error: rating id ${id} doesn't exist in ratings`);
+        }
 
-        PersistentUserStore.update((s) => {
-          if (nextDownload) {
-            const id = nextDownload.ratingId;
-            const rating = s.ratings[id] as SelectRating | undefined;
-
-            if (!rating) {
-              throw new Error(`ratingChoicesDownload error: rating id ${id} doesn't exist in ratings`);
-            }
-
-            return {
-              ...s,
-              ratings: {
-                ...s.ratings,
-                [id]: {
-                  ...rating,
-                  range_choices: (rating.range_choices || []).concat(data.list_choices),
-                  lastDownloaded: (rating.lastDownloaded || []).concat(Date.now()),
-                  page: data.meta.current_page,
-                  totalPages: data.meta.total_pages,
-                },
-              },
-              lastUpdated: Date.now(),
-            };
-          }
-        });
-
-        setProgress(nextDownload.progress);
-
-        nextDownload = getNextRatingChoicesDownload();
+        return {
+          ...s,
+          ratings: {
+            ...s.ratings,
+            [id]: {
+              ...rating,
+              range_choices: (rating.range_choices || []).concat(data.list_choices),
+              lastDownloaded: (rating.lastDownloaded || []).concat(Date.now()),
+              page: data.meta.current_page,
+              totalPages: data.meta.total_pages,
+            },
+          },
+          lastUpdated: Date.now(),
+        };
       }
+
+      return s;
     });
 
-    await timeoutPromise(200);
+    advanceProgress(nextDownload.progress);
+  } catch (e) {
+    await handleError('ratingChoices');
   }
 
-  if (erroredOut) {
-    DownloadStore.update((s) => {
-      s.error = `Failed to download rating choices data`;
-    });
-  } else {
-    setProgress(end);
-  }
+  await timeoutPromise(200);
 
   setDownloading(null);
 }
 
 export function useDownloader(): ReturnType<typeof useTrigger> {
   const [shouldTrigger, setShouldTrigger, resetTrigger] = useTrigger();
-  const { token, inspectionsEnabled, subdomain, isStaging } = LoginStore.useState((s) => ({
+  const { token, inspectionsEnabled, subdomain, isStaging, outdatedUserData } = LoginStore.useState((s) => ({
     token: s.userData?.single_access_token,
     inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
     subdomain: s.userData?.account.subdomain,
     isStaging: s.isStaging,
+    outdatedUserData: s.outdatedUserData,
   }));
   const { forms, ratings, isRatingsBaseDownloaded, isRatingsComplete, isMongoComplete } = PersistentUserStore.useState(
     (s) => ({
       forms: s.forms,
       ratings: s.ratings,
       isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
-      isRatingsComplete: selectIsRatingsComplete(s),
       isMongoComplete: selectMongoComplete(s),
+      isRatingsComplete: selectRatingsComplete(s),
     }),
   );
   const { downloading, downloadError } = DownloadStore.useState((s) => ({
@@ -337,19 +285,24 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
     downloadError: s.error,
   }));
   const isMongoLoaded = useIsMongoLoaded();
-  const connected = useNetworkStatus();
 
   useEffect(() => {
     (async () => {
       if (!token) {
         if (FLAGS.loggedIn) {
           FLAGS.loggedIn = false;
+          FLAGS.errors = 0;
           resetTrigger();
         }
-      } else if (isMongoLoaded && shouldTrigger && subdomain) {
+      } else if (isMongoLoaded && shouldTrigger && subdomain && !outdatedUserData) {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
+            // FIRST TIME WE ARE TRYING TO DOWNLOAD DB
+            FLAGS.errors = 0;
+
+            // TODO: db refactor, use getNextDbDownload outside dbDownload instead
+
             void dbDownload({ token, subdomain, isStaging });
           } else {
             DownloadStore.update((s) => {
@@ -357,40 +310,50 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
                 s.progress = PERCENTAGES.forms[0];
               }
             });
-            const formIds = await getMissingForms(forms);
-            if (formIds.length > 0) {
-              void formsDownload(formIds, token, subdomain);
-            } else {
-              if (!isEmpty(forms)) {
+
+            const nextForm = await getNextFormDownload(forms);
+
+            if (nextForm) {
+              void formsDownload(nextForm, token, subdomain);
+            } else if (!isRatingsComplete) {
+              const wasCleaned = await cleanExpiredIncompleteRatings();
+              // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
+              if (!wasCleaned) {
                 if (!isRatingsBaseDownloaded) {
                   void ratingsDownload(token, subdomain);
-                } else if (!isRatingsComplete) {
-                  void ratingChoicesDownload(token, subdomain);
                 } else {
-                  setProgress(100);
+                  const nextRatingChoicesDownload = getNextRatingChoicesDownload(ratings);
+
+                  if (nextRatingChoicesDownload) {
+                    void ratingChoicesDownload(nextRatingChoicesDownload, token, subdomain);
+                  } else {
+                    advanceProgress(100);
+                  }
                 }
               }
+            } else {
+              advanceProgress(100);
             }
           }
         }
       }
     })();
   }, [
-    isMongoLoaded,
-    shouldTrigger,
-    token,
-    subdomain,
-    forms,
-    ratings,
-    isMongoComplete,
-    downloading,
-    inspectionsEnabled,
     downloadError,
-    connected,
-    isRatingsComplete,
+    downloading,
+    forms,
+    inspectionsEnabled,
+    isMongoComplete,
+    isMongoLoaded,
     isRatingsBaseDownloaded,
+    isRatingsComplete,
     isStaging,
+    outdatedUserData,
+    ratings,
     resetTrigger,
+    shouldTrigger,
+    subdomain,
+    token,
   ]);
 
   return [shouldTrigger, setShouldTrigger, resetTrigger];

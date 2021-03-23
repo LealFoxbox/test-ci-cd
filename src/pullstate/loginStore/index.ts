@@ -4,7 +4,7 @@ import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
 
 import { initStoreStorage } from '../storeStorage';
-import { loginAction, logoutAction } from '../actions';
+import { clearInspectionsDataAction, loginAction, logoutAction } from '../actions';
 
 import { LoginState, initialState } from './initialState';
 
@@ -26,18 +26,22 @@ void restoreStoredData().then(async (state: LoginState) => {
       }),
     );
 
-    if (error || !response) {
+    if (!error && response?.data) {
+      void loginAction({ user: response.data.user, outdatedUserData: false });
+    } else {
       console.warn('fetchtUser error ', error);
+
       if (error?.response?.status === 401) {
         void logoutAction();
       } else {
-        void loginAction(state.userData);
-      }
-    } else {
-      if (response.data) {
-        void loginAction(response.data.user);
-      } else {
-        void loginAction(state.userData);
+        await loginAction({ user: state.userData });
+        if (state.outdatedUserData) {
+          await clearInspectionsDataAction({
+            invalidateUserData: true,
+            companyId,
+            token,
+          });
+        }
       }
     }
   }

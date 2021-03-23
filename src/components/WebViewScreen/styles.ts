@@ -10,12 +10,14 @@ export const MessageContainer = styled.View`
   justify-content: center;
 `;
 
-export const DisabledOverlay = withTheme(styled.View`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  background-color: ${(p) => p.theme.colors.backdrop};
-  opacity: 0.45;
-`);
+export const DisabledOverlay = withTheme(
+  styled.View`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: ${(p) => p.theme.colors.backdrop};
+    opacity: 0.45;
+  `,
+);

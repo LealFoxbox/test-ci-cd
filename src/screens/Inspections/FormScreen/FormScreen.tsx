@@ -23,7 +23,7 @@ import {
   updateDraftCoords,
   updateDraftFieldsAction,
   updateDraftFormAction,
-} from 'src/pullstate/actions';
+} from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import { createRenderCard } from '../FormCards/createRenderCard';

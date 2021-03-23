@@ -1,13 +1,24 @@
 /* eslint-disable no-console */
 import Datastore from 'react-native-local-mongodb';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { filter, find, uniqBy } from 'lodash/fp';
+import { escapeRegExp, filter, find, uniqBy, words } from 'lodash/fp';
 
 import config, { getMockFlags } from 'src/config';
 import { Assignment, Structure } from 'src/types';
 
 type StructuresDb = ReturnType<typeof createStructureDb>;
 type AssignmentDb = ReturnType<typeof createAssignmentDb>;
+
+export function createSearchRegex(s: string) {
+  // TODO: use this regex instead
+  // https://regexr.com/335fm
+  return new RegExp(
+    words(escapeRegExp(s))
+      .map((w) => `(?=.*${w})`)
+      .join(''),
+    'i',
+  );
+}
 
 export function createStructureMock() {
   let data: Structure[] = [];
@@ -31,6 +42,21 @@ export function createStructureMock() {
     get(id: number) {
       return new Promise<Structure | undefined>((resolve) => {
         resolve(find({ id }, data));
+      });
+    },
+
+    search(input: string, field = 'display_name', limit = 20) {
+      const r = createSearchRegex(input);
+      return new Promise<Structure[]>((resolve) => {
+        // TODO: fix this mysterious type error
+        // @ts-ignore
+        resolve(data.filter((s) => r.test(s[field])).slice(0, limit));
+      });
+    },
+
+    getAll() {
+      return new Promise<Structure[]>((resolve) => {
+        resolve(data);
       });
     },
 
@@ -73,7 +99,13 @@ export function createAssignmentMock() {
       });
     },
 
-    getAssignments(id: number) {
+    getAll() {
+      return new Promise<Assignment[]>((resolve) => {
+        resolve(data);
+      });
+    },
+
+    getAssignments(id: number | null) {
       return new Promise<Assignment[]>((resolve) => {
         resolve(filter((s) => s.structure_id === id, data));
       });
@@ -131,8 +163,19 @@ export function createStructureDb() {
       });
     },
 
+    search(input: string, field = 'display_name', limit = 20) {
+      return db
+        .find({ [field]: createSearchRegex(input) })
+        .limit(limit)
+        .exec() as Promise<Structure[]>;
+    },
+
     get(id: number | null) {
       return db.findOne({ id }).exec() as Promise<Structure | undefined>;
+    },
+
+    getAll() {
+      return db.find({}).exec() as Promise<Structure[]>;
     },
 
     getMultiple(ids: number[]) {
@@ -192,11 +235,15 @@ export function createAssignmentDb() {
       });
     },
 
+    getAll() {
+      return db.find({}).exec() as Promise<Assignment[]>;
+    },
+
     get(id: number) {
       return db.findOne({ id }).exec() as Promise<Assignment | undefined>;
     },
 
-    getAssignments(id: number) {
+    getAssignments(id: number | null) {
       return db.find({ structure_id: id }).sort({ display_name: 1 }).exec() as Promise<Assignment[]>;
     },
 

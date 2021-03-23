@@ -1,13 +1,13 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Divider, Title, useTheme } from 'react-native-paper';
+import { Divider, Text, Title, useTheme } from 'react-native-paper';
 
 import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
-import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/actions';
+import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/formActions';
 import * as dbHooks from 'src/services/mongoHooks';
 import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
 import { useResult } from 'src/utils/useResult';
@@ -46,7 +46,7 @@ const FormListScreen: React.FC<{}> = () => {
         justifyContent: 'center',
       }}
     >
-      {assignments.length === 0 || !structure ? (
+      {assignments?.length === 0 || !structure ? (
         <BlankScreen />
       ) : (
         <>
@@ -74,7 +74,8 @@ const FormListScreen: React.FC<{}> = () => {
               const row = (
                 <NavRow
                   label={label}
-                  icon={hasDraft ? 'file-document' : 'file-document-outline'}
+                  icon="file-document-outline"
+                  content={hasDraft ? <Text style={{ color: theme.colors.deficient }}>Draft</Text> : null}
                   onPress={() => {
                     if (!drafts[item.id]) {
                       const coords = { latitude: null, longitude: null };

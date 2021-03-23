@@ -15,11 +15,11 @@ import TicketsNavigator from './TicketsNavigator';
 import AccountNavigator from './AccountNavigator';
 import {
   ACCOUNT_NAVIGATOR,
+  BOTTOM_TAB_NAVIGATOR,
   INSPECTIONS_NAVIGATOR,
   RATING_CHOICES_MODAL,
   SCHEDULE_NAVIGATOR,
   SIGNATURE_MODAL,
-  TAB_STACK_NAVIGATOR,
   TICKETS_NAVIGATOR,
   UPLOADS_NAVIGATOR,
 } from './screenNames';
@@ -34,7 +34,7 @@ export type MainTabsNavigatorParamList = {
 };
 
 export type MainNavigatorParamList = {
-  [TAB_STACK_NAVIGATOR]: undefined;
+  [BOTTOM_TAB_NAVIGATOR]: undefined;
   [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number };
   [RATING_CHOICES_MODAL]: { title: string; assignmentId: number; ratingId: number; formFieldId: number };
 };
@@ -42,7 +42,7 @@ export type MainNavigatorParamList = {
 const TabStack = createMaterialBottomTabNavigator<MainTabsNavigatorParamList>();
 const MainStack = createStackNavigator<MainNavigatorParamList>();
 
-const TabStackNavigator: React.FC = () => {
+const BottomTabNavigator: React.FC = () => {
   const { colors } = useTheme();
   const userData = LoginStore.useState((s) => s.userData);
 
@@ -116,7 +116,7 @@ const TabStackNavigator: React.FC = () => {
 
 const MainStackNavigator: React.FC = () => (
   <MainStack.Navigator mode="modal" screenOptions={{ header: Header }}>
-    <MainStack.Screen name={TAB_STACK_NAVIGATOR} component={TabStackNavigator} options={{ headerShown: false }} />
+    <MainStack.Screen name={BOTTOM_TAB_NAVIGATOR} component={BottomTabNavigator} options={{ headerShown: false }} />
     <MainStack.Screen name={SIGNATURE_MODAL} component={SignatureScreen} initialParams={{ title: 'Signature' }} />
     <MainStack.Screen name={RATING_CHOICES_MODAL} component={RatingChoicesScreen} />
   </MainStack.Navigator>

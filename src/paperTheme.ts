@@ -6,6 +6,7 @@ const customColors = {
   deficient: '#FF3333',
   gps: '#007AFE',
   success: '#34C759',
+  secondaryText: '#888',
 };
 
 type CustomColors = typeof customColors;
@@ -23,6 +24,27 @@ const paperTheme = {
     onBackground: '#000000',
     onSurface: '#FF9400',
     notification: '#FF9400',
+
+    ...customColors,
+  },
+};
+
+export const transparentTheme = {
+  ...DefaultTheme,
+  colors: {
+    primary: '#FF9400',
+    accent: '#F2680E',
+    background: 'transparent',
+    surface: 'transparent',
+    error: '#FF2D55',
+    text: '#FFFFFF',
+    onBackground: '#000000',
+    onSurface: '#FF9400',
+    notification: '#FF9400',
+
+    disabled: '#FFFFFFAA',
+    placeholder: '#FFFFFFAA',
+    backdrop: 'transparent',
 
     ...customColors,
   },

@@ -35,9 +35,7 @@ export function getOurFiles(allFiles: ReadDirItem[]) {
   return sortBy(
     'name',
     allFiles.filter(
-      (f) =>
-        f.name.endsWith('.json') &&
-        (f.name.startsWith('structures') || f.name.startsWith('assignments') || f.name.startsWith('ratings')),
+      (f) => f.name.endsWith('.json') && (f.name.startsWith('structures') || f.name.startsWith('assignments')),
     ),
   );
 }
@@ -61,13 +59,19 @@ export async function deleteAllJSONFiles() {
   return Promise.all(ourFiles.map(deleteFile));
 }
 
-export function getFileTimestamp(fileName: string) {
+function getFileTimestamp(fileName: string) {
   const timestamp = last(fileName.split(' '));
   if (!timestamp) {
     return null;
   }
 
   return parseInt(timestamp.replace(/[^0-9]/g, ''), 10);
+}
+
+function isFileExpired(file: ReadDirItem) {
+  const lastDownloaded = getFileTimestamp(file.name);
+
+  return isSecondsExpired(lastDownloaded);
 }
 
 export function getFilePage(fileName: string) {
@@ -96,9 +100,7 @@ export function findNextPage(allFiles: ReadDirItem[], type: DownloadType) {
 }
 
 async function isFileValid(file: ReadDirItem) {
-  const lastDownloaded = getFileTimestamp(file.name);
-
-  if (isSecondsExpired(lastDownloaded)) {
+  if (isFileExpired(file)) {
     return false;
   }
 
@@ -122,34 +124,46 @@ async function isFileValid(file: ReadDirItem) {
   }
 }
 
-export async function deleteInvalidFiles() {
+export async function deleteExpiredFiles() {
   const allFiles = await RNFS.readDir(dir);
   const ourFiles = getOurFiles(allFiles);
 
-  let i = 0;
-  while (i < ourFiles.length) {
-    const file = ourFiles[i];
+  if (ourFiles.some(isFileExpired)) {
+    for (const file of ourFiles) {
+      await deleteFile(file);
+    }
+    return true;
+  }
 
+  return false;
+}
+
+export async function deleteInvalidFiles() {
+  const allFiles = await RNFS.readDir(dir);
+  const ourFiles = getOurFiles(allFiles);
+  let foundIt = false;
+
+  for (const file of ourFiles) {
     const isValid = await isFileValid(file);
     if (!isValid) {
       await deleteFile(file);
+      foundIt = true;
     }
-
-    i += 1;
   }
+
+  return foundIt;
 }
 
 export async function findValidFile<T>(type: DownloadType) {
   const allFiles = await RNFS.readDir(dir);
 
-  const fileList = getOurTypeFiles(allFiles, type).map((f) => f.path);
+  const filePaths = getOurTypeFiles(allFiles, type).map((f) => f.path);
 
-  let i = 0;
-  while (i < fileList.length) {
+  for (const path of filePaths) {
     try {
-      return JSON.parse(await RNFS.readFile(fileList[i])) as T;
+      return JSON.parse(await RNFS.readFile(path)) as T;
     } catch (e) {
-      i += 1;
+      console.log('whoopsie, found an invalid file');
     }
   }
 

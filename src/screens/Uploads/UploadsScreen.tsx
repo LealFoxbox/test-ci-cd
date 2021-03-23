@@ -14,7 +14,7 @@ import config, { getMockFlags } from 'src/config';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
 import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
-import { cleanUploadErrorsAction } from 'src/services/uploader/actions';
+import { cleanUploadErrorsAction } from 'src/pullstate/uploaderActions';
 
 import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
