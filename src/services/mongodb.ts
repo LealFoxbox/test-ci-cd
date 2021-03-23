@@ -45,10 +45,12 @@ export function createStructureMock() {
       });
     },
 
-    search(input: string, limit = 20) {
+    search(input: string, field = 'display_name', limit = 20) {
       const r = createSearchRegex(input);
       return new Promise<Structure[]>((resolve) => {
-        resolve(data.filter((s) => r.test(s.display_name)).slice(0, limit));
+        // TODO: fix this mysterious type error
+        // @ts-ignore
+        resolve(data.filter((s) => r.test(s[field])).slice(0, limit));
       });
     },
 
@@ -161,9 +163,9 @@ export function createStructureDb() {
       });
     },
 
-    search(input: string, limit = 20) {
+    search(input: string, field = 'display_name', limit = 20) {
       return db
-        .find({ display_name: createSearchRegex(input) })
+        .find({ [field]: createSearchRegex(input) })
         .limit(limit)
         .exec() as Promise<Structure[]>;
     },

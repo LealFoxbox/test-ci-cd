@@ -38,7 +38,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
     const t = setTimeout(() => {
       if (hasWords(searchInput)) {
         SearchStore.update((s) => ({ ...s, isLoading: true }));
-        void structuresDb.search(searchInput).then(makeChangeResultsHandler(searchInput));
+        void structuresDb.search(searchInput, 'location_path', 20).then(makeChangeResultsHandler(searchInput));
       }
     }, 300);
 
