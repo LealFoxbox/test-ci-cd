@@ -4,8 +4,10 @@ import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
-import { directories } from 'react-native-background-downloader';
 import RNFS from 'react-native-fs';
+import RNFetchBlob from 'rn-fetch-blob';
+
+const dir = RNFetchBlob.fs.dirs.DownloadDir;
 
 type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
 
@@ -19,7 +21,7 @@ export interface MoreButtonProps {
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
-  const destPath = `${directories.documents}/${fileName}`;
+  const destPath = `${dir}/${fileName}`;
   await RNFS.copyFile(uri, destPath);
   const statResult = await RNFS.stat(destPath);
   return statResult.path;

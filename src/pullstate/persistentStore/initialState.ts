@@ -5,14 +5,14 @@ export type PersistentState = {
   forms: Record<string, Form>; // the key is formId
   ratings: Record<string, Rating>; // the key is ratingId
   ratingsDownloaded: null | number;
-  structuresDbMeta: null | {
-    currentPage: number;
-    totalPages: number;
-  };
-  assignmentsDbMeta: null | {
-    currentPage: number;
-    totalPages: number;
-  };
+  structuresFilesLoaded: number;
+  structuresFilePaths: Record<string, string>; // key: file name, value: complete file path
+  structuresTotalPages: number;
+
+  assignmentsFilesLoaded: number;
+  assignmentsFilePaths: Record<string, string>; // key: file name, value: complete file path
+  assignmentsTotalPages: number;
+
   lastUpdated: null | number;
 
   drafts: Record<string, DraftForm>; // the key is assignmentId
@@ -25,10 +25,16 @@ export const initialState: PersistentState = {
   forms: {},
   ratings: {},
   ratingsDownloaded: null,
-  structuresDbMeta: null,
-  assignmentsDbMeta: null,
-  lastUpdated: null,
 
+  structuresFilesLoaded: 0,
+  structuresFilePaths: {},
+  structuresTotalPages: 0,
+
+  assignmentsFilesLoaded: 0,
+  assignmentsFilePaths: {},
+  assignmentsTotalPages: 0,
+
+  lastUpdated: null,
   drafts: {},
   pendingUploads: [],
   uploads: [],

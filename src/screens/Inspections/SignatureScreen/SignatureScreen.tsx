@@ -3,8 +3,8 @@ import { Dimensions, ScaledSize } from 'react-native';
 import { Button } from 'react-native-paper';
 import SignatureCapture from 'react-native-signature-capture';
 import RNFS from 'react-native-fs';
-import { directories } from 'react-native-background-downloader';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import RNFetchBlob from 'rn-fetch-blob';
 
 import { styled } from 'src/paperTheme';
 import { INSPECTIONS_FORM, SIGNATURE_MODAL } from 'src/navigation/screenNames';
@@ -21,6 +21,8 @@ const ButtonsContainer = styled.View`
   align-items: center;
   margin: 20px;
 `;
+
+const dir = RNFetchBlob.fs.dirs.DownloadDir;
 
 const SignatureScreen: React.FC = () => {
   const signatureRef = useRef<SignatureCapture>(null);
@@ -53,7 +55,7 @@ const SignatureScreen: React.FC = () => {
         onSaveEvent={({ encoded }) => {
           const fileName = `signature - ${Date.now()}.png`;
 
-          const path = `${directories.documents}/${fileName}`;
+          const path = `${dir}/${fileName}`;
           RNFS.writeFile(path, encoded, 'base64')
             .then(() => {
               navigation.navigate(INSPECTIONS_FORM, { newPhoto: { path, fileName, formFieldId } });

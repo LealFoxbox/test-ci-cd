@@ -23,8 +23,6 @@ const config = {
   PLATFORM: 'android',
   MOCKS: {
     DB: true,
-    DATA_STRUCTURES: false,
-    DATA_ASSIGNMENTS: false,
     DATA_FORMS: false,
     DOWNLOAD_STRUCTURES: false,
     DOWNLOAD_ASSIGNMENTS: false,

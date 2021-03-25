@@ -1,24 +1,19 @@
 /* eslint-disable no-console */
 
 import RNFS from 'react-native-fs';
-import { directories } from 'react-native-background-downloader';
 
-import { getMockFlags } from 'src/config';
-import { updateAssignmentsMeta, updateStructuresMeta } from 'src/pullstate/actions';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
-import { FetchAssignmentsResponse, mockAssignmentsPage } from '../api/assignments';
-import { FetchStructuresResponse, mockStructuresPage } from '../api/structures';
+import { FetchAssignmentsResponse } from '../api/assignments';
+import { FetchStructuresResponse } from '../api/structures';
 import { assignmentsDb, structuresDb } from '../mongodb';
 
-import { MetaFile, findNextPage, findValidFile, getOurTypeFiles } from './fileUtils';
+import { MetaFile, findNextPage, findValidFile } from './fileUtils';
 import { DownloadType } from './backDownloads';
 import { PERCENTAGES } from './percentages';
 
-const dir = directories.documents;
-
-export async function refreshDb(isStaging: boolean) {
-  const allFiles = await RNFS.readDir(dir);
-  const structuresPathList = getOurTypeFiles(allFiles, 'structures').map((f) => f.path);
+export async function refreshDb(structuresFiles: Record<string, string>, assignmentsFiles: Record<string, string>) {
+  const structuresPathList = Object.values(structuresFiles);
 
   await structuresDb.clean();
 
@@ -28,29 +23,18 @@ export async function refreshDb(isStaging: boolean) {
       console.log('READING ', structuresPathList[i]);
       const downloadedContent = JSON.parse(await RNFS.readFile(structuresPathList[i])) as FetchStructuresResponse;
       await structuresDb.insertPage(downloadedContent.structures);
-      updateStructuresMeta(i + 1, structuresPathList.length);
+
+      PersistentUserStore.update((s) => ({
+        ...s,
+        structuresFilesLoaded: i + 1,
+      }));
     } catch (e) {
       console.warn('refreshDb structures error: ', e);
     }
     i += 1;
   }
 
-  if (getMockFlags(isStaging).DATA_STRUCTURES) {
-    updateStructuresMeta(15.777, structuresPathList.length);
-    i = 0;
-    while (i < 20) {
-      try {
-        console.log('MOCKING STRUCTURES ', i);
-        await structuresDb.insertPage(mockStructuresPage());
-      } catch (e) {
-        console.warn('refreshDb structures error while mocking: ', e);
-      }
-      i += 1;
-    }
-    updateStructuresMeta(structuresPathList.length, structuresPathList.length);
-  }
-
-  const assignmentsPathList = getOurTypeFiles(allFiles, 'assignments').map((f) => f.path);
+  const assignmentsPathList = Object.values(assignmentsFiles);
 
   await assignmentsDb.clean();
 
@@ -60,36 +44,24 @@ export async function refreshDb(isStaging: boolean) {
       console.log('READING ', assignmentsPathList[i]);
       const downloadedContent = JSON.parse(await RNFS.readFile(assignmentsPathList[i])) as FetchAssignmentsResponse;
       await assignmentsDb.insertPage(downloadedContent.inspection_form_assignments);
-      updateAssignmentsMeta(i + 1, assignmentsPathList.length);
+      PersistentUserStore.update((s) => ({
+        ...s,
+        assignmentsFilesLoaded: i + 1,
+      }));
     } catch (e) {
       console.warn('refreshDb assignments error: ', e);
     }
     i += 1;
   }
-
-  if (getMockFlags(isStaging).DATA_ASSIGNMENTS) {
-    updateAssignmentsMeta(15.777, assignmentsPathList.length);
-    i = 0;
-    while (i < 20) {
-      try {
-        console.log('MOCKING ASSIGNMENTS', i);
-        await assignmentsDb.insertPage(mockAssignmentsPage());
-      } catch (e) {
-        console.warn('refreshDb assignments error while mocking: ', e);
-      }
-      i += 1;
-    }
-    updateAssignmentsMeta(assignmentsPathList.length, assignmentsPathList.length);
-  }
 }
 
 export interface DbTotalPages {
-  structures: number | null;
-  assignments: number | null;
+  structuresTotalPages: number;
+  assignmentsTotalPages: number;
 }
 
-export async function getTotalPages(type: DownloadType) {
-  const validFile = await findValidFile<MetaFile>(type);
+export async function findTotalPages(files: Record<string, string>) {
+  const validFile = await findValidFile<MetaFile>(files);
 
   if (validFile) {
     return validFile.meta.total_pages;
@@ -98,35 +70,38 @@ export async function getTotalPages(type: DownloadType) {
   return null;
 }
 
-export async function getNextDbDownload(totalPages: DbTotalPages) {
-  const allFiles = await RNFS.readDir(dir);
-  const nextStructuresPage = findNextPage(allFiles, 'structures');
+export function getNextDbDownload(
+  structuresFiles: Record<string, string>,
+  assignmentsFiles: Record<string, string>,
+  { structuresTotalPages, assignmentsTotalPages }: DbTotalPages,
+) {
+  const nextStructuresPage = findNextPage(structuresFiles);
 
-  if (!totalPages.structures || nextStructuresPage <= totalPages.structures) {
-    console.log('getNextDbDownload: structures ', nextStructuresPage, ' out of ', totalPages.structures);
+  if (!structuresTotalPages || nextStructuresPage <= structuresTotalPages) {
+    console.log('getNextDbDownload: structures ', nextStructuresPage, ' out of ', structuresTotalPages);
     const [start, end] = PERCENTAGES.structures;
 
     return {
       type: 'structures' as DownloadType,
       page: nextStructuresPage,
-      progress: !totalPages.structures
+      progress: !structuresTotalPages
         ? start + nextStructuresPage * 2
-        : start + ((end - start) * nextStructuresPage) / totalPages.structures,
+        : start + ((end - start) * nextStructuresPage) / structuresTotalPages,
     };
   }
 
-  const nextAssignmentsPage = findNextPage(allFiles, 'assignments');
+  const nextAssignmentsPage = findNextPage(assignmentsFiles);
 
-  if (!totalPages.assignments || nextAssignmentsPage <= totalPages.assignments) {
-    console.log('getNextDbDownload: assignments ', nextAssignmentsPage, ' out of ', totalPages.assignments);
+  if (!assignmentsTotalPages || nextAssignmentsPage <= assignmentsTotalPages) {
+    console.log('getNextDbDownload: assignments ', nextAssignmentsPage, ' out of ', assignmentsTotalPages);
     const [start, end] = PERCENTAGES.assignments;
 
     return {
       type: 'assignments' as DownloadType,
       page: nextAssignmentsPage,
-      progress: !totalPages.assignments
+      progress: !assignmentsTotalPages
         ? start + nextAssignmentsPage * 2
-        : start + ((end - start) * nextAssignmentsPage) / totalPages.assignments,
+        : start + ((end - start) * nextAssignmentsPage) / assignmentsTotalPages,
     };
   }
 

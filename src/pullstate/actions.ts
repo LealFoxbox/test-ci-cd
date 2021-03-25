@@ -1,10 +1,11 @@
-import { omit, pick } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
 import { User } from 'src/types';
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
+import { DownloadType } from 'src/services/downloader/backDownloads';
 
 import { LoginStore } from './loginStore';
 import { initialState as loginInitialState } from './loginStore/initialState';
@@ -64,22 +65,68 @@ export const toggleStagingAction = () => {
   });
 };
 
-export const updateStructuresMeta = (currentPage: number, totalPages: number) => {
-  PersistentUserStore.update((s) => {
-    return {
-      ...s,
-      structuresDbMeta: { currentPage, totalPages },
-    };
-  });
+export const updateTotalPages = ({
+  structuresTotalPages,
+  assignmentsTotalPages,
+}: {
+  structuresTotalPages: number;
+  assignmentsTotalPages: number;
+}) => {
+  PersistentUserStore.update((s) => ({
+    ...s,
+    structuresTotalPages,
+    assignmentsTotalPages,
+  }));
 };
 
-export const updateAssignmentsMeta = (currentPage: number, totalPages: number) => {
-  PersistentUserStore.update((s) => {
-    return {
+export const clearFilePaths = (fileNames: string[]) => {
+  PersistentUserStore.update((s) => ({
+    ...s,
+    structuresFilePaths: omit(fileNames, s.structuresFilePaths),
+    assignmentsFilePaths: omit(fileNames, s.assignmentsFilePaths),
+  }));
+};
+
+export const addFilesPaths = ({ type, filePaths }: { type: DownloadType; filePaths: Record<string, string> }) => {
+  if (type === 'structures') {
+    PersistentUserStore.update((s) => ({
       ...s,
-      assignmentsDbMeta: { currentPage, totalPages },
-    };
-  });
+      structuresFilePaths: { ...s.structuresFilePaths, ...filePaths },
+    }));
+  } else {
+    PersistentUserStore.update((s) => ({
+      ...s,
+      assignmentsFilePaths: { ...s.assignmentsFilePaths, ...filePaths },
+    }));
+  }
+};
+
+export const clearFilesPaths = (type: DownloadType, fileNames: string[]) => {
+  if (type === 'structures') {
+    PersistentUserStore.update((s) => ({
+      ...s,
+      structuresFilePaths: omit(fileNames, s.structuresFilePaths),
+    }));
+  } else {
+    PersistentUserStore.update((s) => ({
+      ...s,
+      assignmentsFilePaths: omit(fileNames, s.assignmentsFilePaths),
+    }));
+  }
+};
+
+export const clearAllFilesPaths = (type: DownloadType) => {
+  if (type === 'structures') {
+    PersistentUserStore.update((s) => ({
+      ...s,
+      structuresFilePaths: {},
+    }));
+  } else {
+    PersistentUserStore.update((s) => ({
+      ...s,
+      assignmentsFilePaths: {},
+    }));
+  }
 };
 
 export async function clearInspectionsDataAction({
@@ -100,15 +147,10 @@ export async function clearInspectionsDataAction({
 
   DownloadStore.update(() => downloadInitialState);
 
-  PersistentUserStore.update((s) => {
-    return {
-      ...s,
-      ...pick(
-        ['forms', 'ratings', 'ratingsDownloaded', 'assignmentsDbMeta', 'structuresDbMeta', 'lastUpdated'],
-        persistentInitialState,
-      ),
-    };
-  });
+  PersistentUserStore.update((s) => ({
+    ...s,
+    ...omit(['initialized', 'drafts', 'pendingUploads', 'uploads'], persistentInitialState),
+  }));
 
   if (invalidateUserData) {
     // refetch user
