@@ -12,6 +12,7 @@ import { MetaFile, findNextPage, findValidFile } from './fileUtils';
 import { DownloadType } from './backDownloads';
 import { PERCENTAGES } from './percentages';
 
+// TODO: refactor this function so it can resume if it was cancelled by closing the app
 export async function refreshDb(structuresFiles: Record<string, string>, assignmentsFiles: Record<string, string>) {
   const structuresPathList = Object.values(structuresFiles);
 

@@ -1,18 +1,25 @@
 import { Store } from 'pullstate';
+import { fromPairs } from 'lodash/fp';
 
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
 
-import { initStoreStorage } from '../storeStorage';
+import { OldState, initStoreStorage } from '../storeStorage';
 import { clearInspectionsDataAction, loginAction, logoutAction } from '../actions';
 
 import { LoginState, initialState } from './initialState';
 
 export const LoginStore = new Store(initialState);
 
+const reconcileState = (iState: LoginState, oldState: OldState) => {
+  // So far, we don't really need to migrate a lot of info between versions
+  // but just in case we are carefully restoring just what we know is correct in the current state
+  return fromPairs(Object.entries(iState).map(([key, value]) => [key, oldState[key] || value])) as LoginState;
+};
+
 const { restoreStoredData, subscribe } = initStoreStorage({ storeName: 'loginStore', store: LoginStore, initialState });
 
-void restoreStoredData().then(async (state: LoginState) => {
+void restoreStoredData(reconcileState).then(async (state: LoginState) => {
   if (!state.userData) {
     void logoutAction();
   } else {
