@@ -21,11 +21,11 @@ const reconcileState = (iState: PersistentState, oldState: OldState): Persistent
     return {
       ...reconciled,
 
-      structuresFilesLoaded: originalTypedState.structuresDbMeta?.currentPage || 0,
-      structuresTotalPages: originalTypedState.structuresDbMeta?.totalPages || 0,
+      structuresFilesLoaded: originalTypedState.structuresDbMeta?.currentPage || iState.structuresFilesLoaded,
+      structuresTotalPages: originalTypedState.structuresDbMeta?.totalPages || iState.structuresTotalPages,
 
-      assignmentsFilesLoaded: originalTypedState.assignmentsDbMeta?.currentPage || 0,
-      assignmentsTotalPages: originalTypedState.assignmentsDbMeta?.totalPages || 0,
+      assignmentsFilesLoaded: originalTypedState.assignmentsDbMeta?.currentPage || iState.assignmentsFilesLoaded,
+      assignmentsTotalPages: originalTypedState.assignmentsDbMeta?.totalPages || iState.assignmentsTotalPages,
     };
   }
 

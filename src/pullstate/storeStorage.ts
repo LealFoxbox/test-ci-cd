@@ -29,6 +29,8 @@ export function initStoreStorage<S = { lastTimeThisStateChangedTypes?: string }>
 
       store.update(() => reconciledState);
 
+      await storage.setItem(storeName, JSON.stringify(reconciledState));
+
       return reconciledState;
     },
     subscribe: () => {
