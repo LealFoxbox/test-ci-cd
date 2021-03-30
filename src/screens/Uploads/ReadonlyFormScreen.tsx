@@ -12,6 +12,7 @@ import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { RATING_CHOICES_MODAL, SIGNATURE_MODAL, UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
+import { RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/MainStackNavigator';
 import { UploadsNavigatorParamList } from 'src/navigation/UploadsNavigator';
 import { DraftForm } from 'src/types';
 import { useResult } from 'src/utils/useResult';
@@ -108,7 +109,8 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
   }
 
   const goToSignature = (formFieldId: number) => {
-    navigation.navigate(SIGNATURE_MODAL, { assignmentId: draft.assignmentId, formFieldId });
+    const p: SignatureModalParams = { assignmentId: draft.assignmentId, formFieldId, title: 'Signature' };
+    navigation.navigate(SIGNATURE_MODAL, p);
   };
 
   const goToRatingChoices = ({
@@ -120,7 +122,8 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
     ratingId: number;
     formFieldId: number;
   }) => {
-    navigation.navigate(RATING_CHOICES_MODAL, { assignmentId: draft.assignmentId, ratingId, formFieldId, title });
+    const p: RatingChoicesModalParams = { assignmentId: draft.assignmentId, ratingId, formFieldId, title };
+    navigation.navigate(RATING_CHOICES_MODAL, p);
   };
 
   const hasCoordinates = draft.latitude !== null && draft.longitude !== null;

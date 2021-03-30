@@ -108,7 +108,7 @@ export const submitInspection = (params: SubmitInspectionParams) => {
     data: {
       user_credentials: params.token,
       submission_token: draft.guid,
-      // inspection_event_id: null, // TODO: this id will be coming in from schedule tab
+      inspection_event_id: draft.eventId !== undefined ? parseInt(draft.eventId, 10) : undefined,
       inspection: {
         name: draft.name,
         structure_id: draft.structureId,

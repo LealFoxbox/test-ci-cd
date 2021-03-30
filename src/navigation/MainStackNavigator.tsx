@@ -1,8 +1,9 @@
 import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
-import { createStackNavigator } from '@react-navigation/stack';
 
 import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
@@ -38,6 +39,11 @@ export type MainNavigatorParamList = {
   [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number };
   [RATING_CHOICES_MODAL]: { title: string; assignmentId: number; ratingId: number; formFieldId: number };
 };
+
+export type SignatureModalRoute = RouteProp<MainNavigatorParamList, typeof SIGNATURE_MODAL>;
+export type SignatureModalParams = SignatureModalRoute['params'];
+export type RatingChoicesModalRoute = RouteProp<MainNavigatorParamList, typeof RATING_CHOICES_MODAL>;
+export type RatingChoicesModalParams = RatingChoicesModalRoute['params'];
 
 const TabStack = createMaterialBottomTabNavigator<MainTabsNavigatorParamList>();
 const MainStack = createStackNavigator<MainNavigatorParamList>();
@@ -117,7 +123,7 @@ const BottomTabNavigator: React.FC = () => {
 const MainStackNavigator: React.FC = () => (
   <MainStack.Navigator mode="modal" screenOptions={{ header: Header }}>
     <MainStack.Screen name={BOTTOM_TAB_NAVIGATOR} component={BottomTabNavigator} options={{ headerShown: false }} />
-    <MainStack.Screen name={SIGNATURE_MODAL} component={SignatureScreen} initialParams={{ title: 'Signature' }} />
+    <MainStack.Screen name={SIGNATURE_MODAL} component={SignatureScreen} />
     <MainStack.Screen name={RATING_CHOICES_MODAL} component={RatingChoicesScreen} />
   </MainStack.Navigator>
 );

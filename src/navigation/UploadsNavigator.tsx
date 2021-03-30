@@ -1,5 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 
 import Header from 'src/components/Header';
 import UploadsScreen from 'src/screens/Uploads';
@@ -16,6 +17,9 @@ export type UploadsNavigatorParamList = {
     guid: string;
   };
 };
+
+export type UploadsReadonlyFormRoute = RouteProp<UploadsNavigatorParamList, typeof UPLOADS_READONLY_FORM>;
+export type UploadsReadonlyFormParams = UploadsReadonlyFormRoute['params'];
 
 const Stack = createStackNavigator<UploadsNavigatorParamList>();
 

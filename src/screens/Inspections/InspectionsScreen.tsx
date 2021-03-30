@@ -1,6 +1,6 @@
 import React from 'react';
 import { Divider, Title } from 'react-native-paper';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList } from 'react-native';
 
 import LoadingOverlay from 'src/components/LoadingOverlay';
@@ -8,8 +8,12 @@ import NavRow from 'src/components/NavRow';
 import Notes from 'src/components/Notes';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { DownloadStore } from 'src/pullstate/downloadStore';
-import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST, INSPECTIONS_HOME } from 'src/navigation/screenNames';
-import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
+import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
+import {
+  InspectionChildrenParams,
+  InspectionFormListParams,
+  InspectionHomeRoute,
+} from 'src/navigation/InspectionsNavigator';
 import * as dbHooks from 'src/services/mongoHooks';
 import { useResult } from 'src/utils/useResult';
 import { styled, withTheme } from 'src/paperTheme';
@@ -39,7 +43,7 @@ const TitleContainer = withTheme(
 const InspectionsScreen: React.FC<{}> = () => {
   const {
     params: { parentId, showLocationPath },
-  } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>>();
+  } = useRoute<InspectionHomeRoute>();
   const { progress, error } = DownloadStore.useState((s) => ({ progress: s.progress, error: s.error }));
   const userData = LoginStore.useState((s) => s.userData);
   const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
@@ -99,17 +103,26 @@ const InspectionsScreen: React.FC<{}> = () => {
                 label={showLocationPath ? item.location_path || item.display_name : item.display_name}
                 onPress={() => {
                   if (item.active_children_count > 0) {
+                    const p: InspectionChildrenParams = {
+                      parentId: item.id,
+                      title: item.display_name,
+                      showLocationPath: false,
+                      hasSearch: false,
+                    };
+
                     navigation.navigate({
                       name: INSPECTIONS_CHILDREN,
                       key: `${parentId || 'base'}`,
-                      params: {
-                        parentId: item.id,
-                        title: item.display_name,
-                        showLocationPath: false,
-                      },
+                      params: p,
                     });
                   } else {
-                    navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: item.id, title: item.display_name });
+                    const p: InspectionFormListParams = {
+                      parentId: item.id,
+                      title: item.display_name,
+                      hasSearch: false,
+                    };
+
+                    navigation.navigate(INSPECTIONS_FORM_LIST, p);
                   }
                 }}
               />

@@ -10,6 +10,7 @@ import { INSPECTIONS_CHILDREN, INSPECTIONS_FORM_LIST } from 'src/navigation/scre
 import { styled, withTheme } from 'src/paperTheme';
 import { Structure } from 'src/types';
 import LoadingOverlay from 'src/components/LoadingOverlay';
+import { InspectionChildrenParams, InspectionFormListParams } from 'src/navigation/InspectionsNavigator';
 
 const Container = withTheme(
   styled.View`
@@ -81,17 +82,26 @@ const Row: React.FC<RowProps> = React.memo((props) => {
       label={<Text>{label}</Text>}
       onPress={() => {
         if (props.active_children_count > 0) {
+          const p: InspectionChildrenParams = {
+            parentId: props.id,
+            title: props.display_name,
+            showLocationPath: false,
+            hasSearch: false,
+          };
+
           navigation.navigate({
             name: INSPECTIONS_CHILDREN,
             key: 'search',
-            params: {
-              parentId: props.id,
-              title: props.display_name,
-              showLocationPath: false,
-            },
+            params: p,
           });
         } else {
-          navigation.navigate(INSPECTIONS_FORM_LIST, { parentId: props.id, title: props.display_name });
+          const p: InspectionFormListParams = {
+            parentId: props.id,
+            title: props.display_name,
+            hasSearch: false,
+          };
+
+          navigation.navigate(INSPECTIONS_FORM_LIST, p);
         }
       }}
     />

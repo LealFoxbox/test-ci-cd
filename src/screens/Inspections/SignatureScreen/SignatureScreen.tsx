@@ -9,6 +9,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { styled } from 'src/paperTheme';
 import { INSPECTIONS_FORM, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
+import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
 
 const Container = styled.View`
   flex: 1;
@@ -58,7 +59,10 @@ const SignatureScreen: React.FC = () => {
           const path = `${dir}/${fileName}`;
           RNFS.writeFile(path, encoded, 'base64')
             .then(() => {
-              navigation.navigate(INSPECTIONS_FORM, { newPhoto: { path, fileName, formFieldId } });
+              // since this is navigating back we don't need to fill in every param for InspectionFormParams
+              const newPhoto: InspectionFormParams['newPhoto'] = { path, fileName, formFieldId };
+
+              navigation.navigate(INSPECTIONS_FORM, { newPhoto });
             })
             .catch((err) => {
               console.warn('Signature Screen RNFS writefile error: ', err);

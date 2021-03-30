@@ -16,11 +16,34 @@ import { Container, DisabledOverlay, MessageContainer } from './styles';
 
 const setRenderEmpty = () => null;
 
-const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
+function useCombinedRefs<T>(...refs: React.MutableRefObject<T | null>[]): React.MutableRefObject<T | null> {
+  const targetRef = React.useRef<T>(null);
+
+  React.useEffect(() => {
+    refs.forEach((ref) => {
+      if (!ref) return;
+
+      if (typeof ref === 'function') {
+        // @ts-ignore
+        ref(targetRef.current);
+      } else {
+        ref.current = targetRef.current;
+      }
+    });
+  }, [refs]);
+
+  return targetRef;
+}
+
+const WebViewScreen = React.forwardRef<WebView, WebViewProps>(({ style, ...props }, ref) => {
   const [headerRight, setHeaderRight] = useState<() => React.ReactNode>(setRenderEmpty);
 
   const [showError, setShowError] = useState(false);
-  const webRef = useRef<WebView>(null);
+  const innerRef = useRef<WebView>(null);
+  const webRef = useCombinedRefs<WebView>(
+    ref as React.MutableRefObject<WebView | null>,
+    innerRef as React.MutableRefObject<WebView | null>,
+  );
   const connected = useNetworkStatus();
   const prevConnected = usePrevious(connected);
   const theme = useTheme();
@@ -50,6 +73,7 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
       return () => {
         BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 
@@ -82,10 +106,11 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
             originWhitelist={['*']}
             startInLoadingState
             geolocationEnabled
-            onNavigationStateChange={({ url }: WebViewNavigation) => {
-              if (url.endsWith('.com/login')) {
+            onNavigationStateChange={(params: WebViewNavigation) => {
+              if (params.url.endsWith('.com/login')) {
                 void logoutAction();
               }
+              props.onNavigationStateChange && props.onNavigationStateChange(params);
             }}
             onError={() => {
               setShowError(true);
@@ -108,6 +133,6 @@ const WebViewScreen: React.FC<WebViewProps> = ({ style, ...props }) => {
       </Container>
     </Container>
   );
-};
+});
 
 export default WebViewScreen;

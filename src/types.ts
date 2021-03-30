@@ -230,6 +230,7 @@ export interface DraftForm {
   assignmentId: number;
   formId: number;
   structureId: number;
+  eventId: undefined | string;
   started_at: number | null;
   ended_at: number | null;
   guid: string; // random unique token created in the frontend. It's basically `${Date.now()}${uniqueId('')}`

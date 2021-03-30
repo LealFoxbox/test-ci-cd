@@ -27,12 +27,22 @@ interface FormCreationParams {
   form: Form;
   isStaging: boolean;
   assignmentId: number;
+  eventId?: string;
+  structureId: number;
   ratings: Record<string, Rating>;
   structure: Structure;
   coords: { latitude: number | null; longitude: number | null };
 }
 
-function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }: FormCreationParams) {
+function createEmptyDraftForm({
+  form,
+  assignmentId,
+  eventId,
+  structureId,
+  structure,
+  coords,
+  ratings,
+}: FormCreationParams) {
   const fields = form.inspection_form_items.map((field) => {
     const rating = ratings[field.rating_id] as Rating | undefined;
 
@@ -97,7 +107,8 @@ function createEmptyDraftForm({ form, assignmentId, structure, coords, ratings }
     name: form.name,
     assignmentId: assignmentId,
     formId: form.id,
-    structureId: structure.id,
+    structureId,
+    eventId,
     started_at: null,
     ended_at: null,
     lastModified: null,

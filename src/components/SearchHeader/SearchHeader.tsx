@@ -8,6 +8,7 @@ import { SearchStore } from 'src/pullstate/searchStore';
 import { INSPECTIONS_SEARCH_RESULTS } from 'src/navigation/screenNames';
 import { structuresDb } from 'src/services/mongodb';
 import { Structure } from 'src/types';
+import { InspectionSearchResultsParams } from 'src/navigation/InspectionsNavigator';
 
 interface SearchHeaderProps extends StackHeaderProps {
   onClose?: () => void;
@@ -29,7 +30,8 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
     SearchStore.update((s) => ({ ...s, isLoading: false, showResults: true, results: r, lastSearch: input }));
 
     if (isInspection && hasWords(searchInput)) {
-      navigation.navigate(INSPECTIONS_SEARCH_RESULTS);
+      const p: InspectionSearchResultsParams = {};
+      navigation.navigate(INSPECTIONS_SEARCH_RESULTS, p);
       onClose && onClose();
     }
   };
