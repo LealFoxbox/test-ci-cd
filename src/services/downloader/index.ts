@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { useEffect } from 'react';
-import { fromPairs } from 'lodash/fp';
+import { fromPairs, isEmpty } from 'lodash/fp';
 
 import { DownloadStore } from 'src/pullstate/downloadStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -11,14 +11,15 @@ import { useTrigger } from 'src/utils/useTrigger';
 import { hasConnection } from 'src/utils/useNetworkStatus';
 import { getUnixSeconds } from 'src/utils/expiration';
 import { Rating, SelectRating } from 'src/types';
+import { addFilesPaths, clearAllFilesPaths, clearFilePaths, updateTotalPages } from 'src/pullstate/actions';
 
 import { fetchForm } from '../api/forms';
 import { fetchRatingChoices, fetchRatings } from '../api/ratings';
 import { useIsMongoLoaded } from '../mongoHooks';
 
-import { downloadByTypeAsPromise, waitForExistingDownloads } from './backDownloads';
-import { getNextDbDownload, getTotalPages, refreshDb } from './dbUtils';
-import { deleteAllJSONFiles, deleteExpiredFiles, deleteInvalidFiles } from './fileUtils';
+import { downloadFile } from './backDownloads';
+import { findTotalPages, getNextDbDownload, refreshDb } from './dbUtils';
+import { areFilesExpired, deleteAllJSONFiles, deleteInvalidFiles } from './fileUtils';
 import {
   RatingChoicesDownload,
   cleanExpiredIncompleteRatings,
@@ -45,10 +46,11 @@ function advanceProgress(progress: number) {
   });
 }
 
-function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices' | null) {
-  DownloadStore.update((s) => {
-    s.downloading = downloading;
-  });
+function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices' | 'fileDelete' | null) {
+  DownloadStore.update((s) => ({
+    ...s,
+    downloading,
+  }));
 }
 
 async function handleError(section: string) {
@@ -67,64 +69,122 @@ async function handleError(section: string) {
   }
 }
 
-export async function dbDownload({
-  token,
-  subdomain,
-  isStaging,
+async function checkTotalPages({
+  structuresTotalPages,
+  assignmentsTotalPages,
+  structuresFiles,
+  assignmentsFiles,
 }: {
-  token: string;
-  subdomain: string;
-  isStaging: boolean;
+  structuresTotalPages: number;
+  assignmentsTotalPages: number;
+  structuresFiles: Record<string, string>;
+  assignmentsFiles: Record<string, string>;
 }) {
-  console.log('DOWNLOADING STRUCTURES AND ASSIGNMENTS');
-  setDownloading('db');
-  await waitForExistingDownloads();
-  await deleteExpiredFiles();
-  await deleteInvalidFiles();
+  const isStructuresUpdateable = !structuresTotalPages && !isEmpty(structuresFiles);
+  const isAssignmentsUpdateable = !assignmentsTotalPages && !isEmpty(assignmentsFiles);
 
   const totalPages = {
-    structures: await getTotalPages('structures'),
-    assignments: await getTotalPages('assignments'),
+    structuresTotalPages: !isStructuresUpdateable ? structuresTotalPages : (await findTotalPages(structuresFiles)) || 0,
+    assignmentsTotalPages: !isAssignmentsUpdateable
+      ? assignmentsTotalPages
+      : (await findTotalPages(assignmentsFiles)) || 0,
   };
 
-  let nextDownload = await getNextDbDownload(totalPages);
-  let erroredOut = false;
+  if (isStructuresUpdateable || isAssignmentsUpdateable) {
+    updateTotalPages(totalPages);
+  }
 
-  while (nextDownload && FLAGS.loggedIn && !erroredOut) {
-    advanceProgress(nextDownload.progress);
+  return totalPages;
+}
 
-    const { type } = nextDownload;
+export async function fileDownload({
+  structuresFiles,
+  assignmentsFiles,
+  token,
+  subdomain,
+  structuresTotalPages,
+  assignmentsTotalPages,
+}: {
+  structuresFiles: Record<string, string>;
+  assignmentsFiles: Record<string, string>;
+  token: string;
+  subdomain: string;
+  structuresTotalPages: number;
+  assignmentsTotalPages: number;
+}) {
+  setDownloading('db');
+
+  if (areFilesExpired(structuresFiles) || areFilesExpired(assignmentsFiles)) {
+    // Some file has expired, lets delete everything and setDownloading(null)
+    await deleteAllJSONFiles();
+    clearAllFilesPaths('structures');
+    clearAllFilesPaths('assignments');
+    FLAGS.errors = 0;
+
+    setDownloading(null);
+    return;
+  }
+
+  const totalPages = await checkTotalPages({
+    structuresTotalPages,
+    assignmentsTotalPages,
+    structuresFiles,
+    assignmentsFiles,
+  });
+
+  const nextDownload = getNextDbDownload(structuresFiles, assignmentsFiles, totalPages);
+
+  if (nextDownload) {
+    // There is at least one file to download, lets download it and setDownloading(null)
+    const { type, page } = nextDownload;
 
     try {
-      await downloadByTypeAsPromise({ token, subdomain, page: nextDownload.page, type });
+      const path = await downloadFile({ token, subdomain, page, type });
+      addFilesPaths({ type, filePaths: path });
+
+      advanceProgress(nextDownload.progress);
+
       await timeoutPromise(200);
-
-      if (!totalPages[type]) {
-        totalPages[type] = await getTotalPages(type);
-      }
     } catch (e) {
-      console.warn(nextDownload.type, ' error on page ', nextDownload.page, ' with: ', e);
-      erroredOut = true;
+      await handleError('db');
     }
 
-    if (!erroredOut) {
-      nextDownload = await getNextDbDownload(totalPages);
-    }
+    setDownloading(null);
+    return;
   }
 
-  if (!erroredOut) {
-    advanceProgress(PERCENTAGES.dbLoad[0]);
-
-    FLAGS.loggedIn && (await refreshDb(isStaging));
-
-    advanceProgress((PERCENTAGES.dbLoad[0] + PERCENTAGES.dbLoad[1]) * 0.5);
-
-    await deleteAllJSONFiles();
-
-    advanceProgress(PERCENTAGES.dbLoad[1]);
-  } else {
-    await handleError('db');
+  const invalidStructures = await deleteInvalidFiles(structuresFiles);
+  const invalidAssignments = await deleteInvalidFiles(assignmentsFiles);
+  if (invalidStructures.length > 0 || invalidAssignments.length > 0) {
+    // There was at least one unreadable file, lets delete it and setDownloading(null)
+    clearFilePaths([invalidStructures, invalidAssignments].flat());
+    setDownloading(null);
+    return;
   }
+
+  // We have all of the files and they're readabale! lets load the db
+  advanceProgress(PERCENTAGES.dbLoad[0]);
+
+  FLAGS.loggedIn && (await refreshDb(structuresFiles, assignmentsFiles));
+
+  advanceProgress(PERCENTAGES.dbLoad[1]);
+
+  setDownloading(null);
+}
+
+async function fileDelete() {
+  setDownloading('fileDelete');
+
+  advanceProgress(PERCENTAGES.fileDelete[0]);
+
+  await deleteAllJSONFiles();
+  PersistentUserStore.update((s) => ({
+    ...s,
+    structuresFilePaths: {},
+    assignmentsFilePaths: {},
+  }));
+
+  advanceProgress(PERCENTAGES.fileDelete[1]);
 
   setDownloading(null);
 }
@@ -264,28 +324,40 @@ async function ratingChoicesDownload(nextDownload: RatingChoicesDownload, token:
 
 export function useDownloader(): ReturnType<typeof useTrigger> {
   const [shouldTrigger, setShouldTrigger, resetTrigger] = useTrigger();
-  const { token, inspectionsEnabled, subdomain, isStaging, outdatedUserData } = LoginStore.useState((s) => ({
+  const { token, inspectionsEnabled, subdomain, outdatedUserData } = LoginStore.useState((s) => ({
     token: s.userData?.single_access_token,
     inspectionsEnabled: s.userData?.features.inspection_feature.enabled,
     subdomain: s.userData?.account.subdomain,
-    isStaging: s.isStaging,
     outdatedUserData: s.outdatedUserData,
   }));
-  const { forms, ratings, isRatingsBaseDownloaded, isRatingsComplete, isMongoComplete } = PersistentUserStore.useState(
-    (s) => ({
-      forms: s.forms,
-      ratings: s.ratings,
-      isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
-      isMongoComplete: selectMongoComplete(s),
-      isRatingsComplete: selectRatingsComplete(s),
-    }),
-  );
+  const {
+    forms,
+    ratings,
+    isRatingsBaseDownloaded,
+    isRatingsComplete,
+    isMongoComplete,
+    structuresFiles,
+    assignmentsFiles,
+    structuresTotalPages,
+    assignmentsTotalPages,
+  } = PersistentUserStore.useState((s) => ({
+    forms: s.forms,
+    ratings: s.ratings,
+    isRatingsBaseDownloaded: selectIsRatingsBaseDownloaded(s),
+    isMongoComplete: selectMongoComplete(s),
+    isRatingsComplete: selectRatingsComplete(s),
+    structuresFiles: s.structuresFilePaths,
+    assignmentsFiles: s.assignmentsFilePaths,
+    structuresTotalPages: s.structuresTotalPages,
+    assignmentsTotalPages: s.assignmentsTotalPages,
+  }));
   const { downloading, downloadError } = DownloadStore.useState((s) => ({
     downloading: s.downloading,
     downloadError: s.error,
   }));
   const isMongoLoaded = useIsMongoLoaded();
 
+  // TODO: refactor this useEffect into a "return early" organization so that it's more readable
   useEffect(() => {
     (async () => {
       if (!token) {
@@ -298,47 +370,49 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
-            // FIRST TIME WE ARE TRYING TO DOWNLOAD DB
-            FLAGS.errors = 0;
-
-            // TODO: db refactor, use getNextDbDownload outside dbDownload instead
-
-            void dbDownload({ token, subdomain, isStaging });
-          } else {
-            DownloadStore.update((s) => {
-              if (s.progress < PERCENTAGES.forms[0]) {
-                s.progress = PERCENTAGES.forms[0];
-              }
+            void fileDownload({
+              structuresFiles,
+              assignmentsFiles,
+              token,
+              subdomain,
+              structuresTotalPages,
+              assignmentsTotalPages,
             });
+          } else {
+            if (!isEmpty(structuresFiles) || !isEmpty(assignmentsFiles)) {
+              void fileDelete();
+            } else {
+              const nextForm = await getNextFormDownload(forms);
 
-            const nextForm = await getNextFormDownload(forms);
-
-            if (nextForm) {
-              void formsDownload(nextForm, token, subdomain);
-            } else if (!isRatingsComplete) {
-              const wasCleaned = await cleanExpiredIncompleteRatings();
-              // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
-              if (!wasCleaned) {
-                if (!isRatingsBaseDownloaded) {
-                  void ratingsDownload(token, subdomain);
-                } else {
-                  const nextRatingChoicesDownload = getNextRatingChoicesDownload(ratings);
-
-                  if (nextRatingChoicesDownload) {
-                    void ratingChoicesDownload(nextRatingChoicesDownload, token, subdomain);
+              if (nextForm) {
+                void formsDownload(nextForm, token, subdomain);
+              } else if (!isRatingsComplete) {
+                const wasCleaned = await cleanExpiredIncompleteRatings();
+                // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
+                if (!wasCleaned) {
+                  if (!isRatingsBaseDownloaded) {
+                    void ratingsDownload(token, subdomain);
                   } else {
-                    advanceProgress(100);
+                    const nextRatingChoicesDownload = getNextRatingChoicesDownload(ratings);
+
+                    if (nextRatingChoicesDownload) {
+                      void ratingChoicesDownload(nextRatingChoicesDownload, token, subdomain);
+                    } else {
+                      advanceProgress(100);
+                    }
                   }
                 }
+              } else {
+                advanceProgress(100);
               }
-            } else {
-              advanceProgress(100);
             }
           }
         }
       }
     })();
   }, [
+    assignmentsFiles,
+    assignmentsTotalPages,
     downloadError,
     downloading,
     forms,
@@ -347,11 +421,12 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
     isMongoLoaded,
     isRatingsBaseDownloaded,
     isRatingsComplete,
-    isStaging,
     outdatedUserData,
     ratings,
     resetTrigger,
     shouldTrigger,
+    structuresFiles,
+    structuresTotalPages,
     subdomain,
     token,
   ]);

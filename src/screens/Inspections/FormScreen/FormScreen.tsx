@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { ActivityIndicator, Button, Card, Chip, Divider, useTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -13,8 +13,9 @@ import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
-import { INSPECTIONS_FORM, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
-import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
+import { RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
+import { InspectionFormParams, InspectionFormRoute } from 'src/navigation/InspectionsNavigator';
+import { RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/MainStackNavigator';
 import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
@@ -32,7 +33,7 @@ import OptionRow from './OptionRow';
 
 async function updateSignature(
   assignmentId: number,
-  newPhoto: RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>['params']['newPhoto'],
+  newPhoto: InspectionFormParams['newPhoto'],
   formValues: Record<string, DraftField>,
 ) {
   if (!newPhoto) {
@@ -87,7 +88,7 @@ function parseFieldsWithCategories(draft: DraftForm) {
 const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newPhoto, rangeChoicesSelection },
-  } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>>();
+  } = useRoute<InspectionFormRoute>();
   const userData = LoginStore.useState((s) => s.userData);
   const { draft, ratings } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,
@@ -175,7 +176,8 @@ const EditFormScreen: React.FC<{}> = () => {
   };
 
   const goToSignature = (formFieldId: number) => {
-    navigation.navigate(SIGNATURE_MODAL, { assignmentId, formFieldId });
+    const p: SignatureModalParams = { assignmentId, formFieldId, title: 'Signature' };
+    navigation.navigate(SIGNATURE_MODAL, p);
   };
 
   const goToRatingChoices = ({
@@ -187,7 +189,8 @@ const EditFormScreen: React.FC<{}> = () => {
     ratingId: number;
     formFieldId: number;
   }) => {
-    navigation.navigate(RATING_CHOICES_MODAL, { assignmentId, ratingId, formFieldId, title });
+    const p: RatingChoicesModalParams = { assignmentId, ratingId, formFieldId, title };
+    navigation.navigate(RATING_CHOICES_MODAL, p);
   };
 
   const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);

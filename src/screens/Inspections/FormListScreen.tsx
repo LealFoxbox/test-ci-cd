@@ -1,15 +1,15 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Divider, Text, Title, useTheme } from 'react-native-paper';
 
-import { INSPECTIONS_FORM, INSPECTIONS_FORM_LIST } from 'src/navigation/screenNames';
+import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { selectMongoComplete } from 'src/pullstate/selectors';
 import { deleteDraftAction, initFormDraftAction } from 'src/pullstate/formActions';
 import * as dbHooks from 'src/services/mongoHooks';
-import { InspectionsNavigatorParamList } from 'src/navigation/InspectionsNavigator';
+import { InspectionFormListRoute, InspectionFormParams } from 'src/navigation/InspectionsNavigator';
 import { useResult } from 'src/utils/useResult';
 import NavRow from 'src/components/NavRow';
 import SwipableRow from 'src/components/SwipableRow/SwipableRow';
@@ -21,7 +21,7 @@ import BlankScreen from './BlankScreen';
 const FormListScreen: React.FC<{}> = () => {
   const {
     params: { parentId },
-  } = useRoute<RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>>();
+  } = useRoute<InspectionFormListRoute>();
   const { forms, drafts, ratings, isMongoComplete } = PersistentUserStore.useState((s) => ({
     forms: s.forms,
     ratings: s.ratings,
@@ -80,15 +80,23 @@ const FormListScreen: React.FC<{}> = () => {
                     if (!drafts[item.id]) {
                       const coords = { latitude: null, longitude: null };
 
-                      initFormDraftAction({ form, isStaging, assignmentId: item.id, ratings, coords, structure });
+                      initFormDraftAction({
+                        form,
+                        isStaging,
+                        assignmentId: item.id,
+                        ratings,
+                        coords,
+                        structureId: structure.id,
+                        structure,
+                      });
                     }
 
-                    navigation.navigate(INSPECTIONS_FORM, {
-                      formId: item.inspection_form_id,
-                      structureId: item.structure_id,
+                    const p: InspectionFormParams = {
                       assignmentId: item.id,
                       title: label,
-                    });
+                    };
+
+                    navigation.navigate(INSPECTIONS_FORM, p);
                   }}
                 />
               );

@@ -12,6 +12,7 @@ import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import Row from 'src/components/Row';
 import { SelectField, SelectRating, SelectRatingChoice } from 'src/types';
+import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
 
 const Container = styled.View`
   flex: 1;
@@ -113,11 +114,14 @@ const RatingChoicesScreen: React.FC = () => {
         <IconButton
           icon="check"
           onPress={() => {
+            // since this is navigating back we don't need to fill in every param for InspectionFormParams
+            const rangeChoicesSelection: InspectionFormParams['rangeChoicesSelection'] = {
+              listChoiceIds: selection,
+              formFieldId,
+            };
+
             navigation.navigate(INSPECTIONS_FORM, {
-              rangeChoicesSelection: {
-                listChoiceIds: selection,
-                formFieldId,
-              },
+              rangeChoicesSelection,
             });
           }}
           color={theme.colors.surface}

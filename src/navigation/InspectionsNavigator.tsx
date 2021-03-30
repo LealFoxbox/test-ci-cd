@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
+import { RouteProp } from '@react-navigation/native';
 
 import InspectionsScreen from 'src/screens/Inspections';
 import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
@@ -10,7 +11,6 @@ import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import DraftsScreen from 'src/screens/Inspections/DraftsScreen';
 import SearchHeader from 'src/components/SearchHeader';
 import Header from 'src/components/Header';
-import { RangeChoice } from 'src/types';
 
 import {
   INSPECTIONS_CHILDREN,
@@ -28,10 +28,7 @@ export type InspectionsNavigatorParamList = {
     hasSearch: boolean;
     showLocationPath: boolean;
   };
-  [INSPECTIONS_SEARCH_RESULTS]: {
-    hasSearch: true;
-    searchInput: string;
-  };
+  [INSPECTIONS_SEARCH_RESULTS]: {};
   [INSPECTIONS_CHILDREN]: {
     parentId: number;
     title: string;
@@ -45,16 +42,25 @@ export type InspectionsNavigatorParamList = {
   };
   [INSPECTIONS_FORM]: {
     title: string;
-    formId: number;
-    structureId: number;
     assignmentId: number;
     newPhoto?: { path: string; fileName: string; formFieldId: number };
     rangeChoicesSelection?: {
-      listChoiceIds: RangeChoice[];
+      listChoiceIds: number[];
       formFieldId: number;
     };
   };
 };
+
+export type InspectionHomeRoute = RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_HOME>;
+export type InspectionHomeParams = InspectionHomeRoute['params'];
+export type InspectionSearchResultsRoute = RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_SEARCH_RESULTS>;
+export type InspectionSearchResultsParams = InspectionSearchResultsRoute['params'];
+export type InspectionChildrenRoute = RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_CHILDREN>;
+export type InspectionChildrenParams = InspectionChildrenRoute['params'];
+export type InspectionFormListRoute = RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM_LIST>;
+export type InspectionFormListParams = InspectionFormListRoute['params'];
+export type InspectionFormRoute = RouteProp<InspectionsNavigatorParamList, typeof INSPECTIONS_FORM>;
+export type InspectionFormParams = InspectionFormRoute['params'];
 
 const TabNav = createMaterialTopTabNavigator();
 
@@ -99,37 +105,14 @@ const InspectionsNavigator: React.FC = () => {
           showLocationPath: true,
         }}
       />
-      <Stack.Screen
-        name={INSPECTIONS_CHILDREN}
-        component={InspectionsScreen}
-        initialParams={{
-          title: 'Inspections',
-          showLocationPath: false,
-        }}
-      />
+      <Stack.Screen name={INSPECTIONS_CHILDREN} component={InspectionsScreen} />
       <Stack.Screen
         name={INSPECTIONS_SEARCH_RESULTS}
         component={InspectionSearchScreen}
-        initialParams={{
-          hasSearch: true,
-          searchInput: '',
-        }}
         options={{ header: SearchHeader }}
       />
-      <Stack.Screen
-        name={INSPECTIONS_FORM_LIST}
-        component={InspectionsFormListScreen}
-        initialParams={{
-          title: 'Inspections',
-        }}
-      />
-      <Stack.Screen
-        name={INSPECTIONS_FORM}
-        component={InspectionFormScreen}
-        initialParams={{
-          title: 'Inspections',
-        }}
-      />
+      <Stack.Screen name={INSPECTIONS_FORM_LIST} component={InspectionsFormListScreen} />
+      <Stack.Screen name={INSPECTIONS_FORM} component={InspectionFormScreen} />
     </Stack.Navigator>
   );
 };

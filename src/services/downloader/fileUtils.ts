@@ -1,15 +1,12 @@
 /* eslint-disable no-console */
-/* eslint-disable import/no-named-as-default-member */
-
-import RNFS, { ReadDirItem } from 'react-native-fs';
-import RNBackgroundDownloader from 'react-native-background-downloader';
-import { last, sortBy } from 'lodash/fp';
+import RNFS from 'react-native-fs';
+import { last, uniq } from 'lodash/fp';
+import RNFetchBlob from 'rn-fetch-blob';
 
 import { isSecondsExpired } from 'src/utils/expiration';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
-import { DownloadType } from './backDownloads';
-
-const dir = RNBackgroundDownloader.directories.documents;
+const dir = RNFetchBlob.fs.dirs.DownloadDir;
 
 export interface MetaFile {
   meta: {
@@ -18,45 +15,39 @@ export interface MetaFile {
   };
 }
 
-async function deleteFile(file: ReadDirItem) {
+export async function deleteFile(filePath: string) {
   try {
-    await RNFS.unlink(file.path);
+    await RNFS.unlink(filePath);
   } catch (e) {
-    console.warn('deleteFile function: error ', e, ' for file ', file.path);
+    console.warn('deleteFile function: error ', e, ' for file ', filePath);
   }
+}
+
+export function deleteFiles(filePaths: string[]) {
+  return Promise.all(filePaths.map(deleteFile));
 }
 
 // NOTE:
 // file name structure: {type}{page number} - {date in yy_mm_dd} {timestamp of download in unix seconds}.json
 // file name example: 'structures1 - 21_01_05 1609860756.json'
-// the date itself is not used but it's there for human readability
-
-export function getOurFiles(allFiles: ReadDirItem[]) {
-  return sortBy(
-    'name',
-    allFiles.filter(
-      (f) => f.name.endsWith('.json') && (f.name.startsWith('structures') || f.name.startsWith('assignments')),
-    ),
-  );
-}
-
-export function getOurTypeFiles(allFiles: ReadDirItem[], type: DownloadType) {
-  return sortBy(
-    'name',
-    allFiles.filter((f) => f.name.endsWith('.json') && f.name.startsWith(type)),
-  );
-}
+// the yy_mm_dd section is only there for human readability
 
 export async function deleteAllJSONFiles() {
-  const allFiles = await RNFS.readDir(dir);
-  const ourFiles = getOurFiles(allFiles);
+  const rawState = PersistentUserStore.getRawState();
 
-  console.log(
-    'DELETE FILES:',
-    ourFiles.map((f) => f.path),
+  const dirFiles = await RNFS.readDir(dir);
+
+  const filePaths = uniq(
+    dirFiles
+      .filter((f) => f.name.endsWith('.json') && (f.name.startsWith('structures') || f.name.startsWith('assignments')))
+      .map((f) => f.path)
+      .concat(Object.values(rawState.structuresFilePaths))
+      .concat(Object.values(rawState.assignmentsFilePaths)),
   );
 
-  return Promise.all(ourFiles.map(deleteFile));
+  console.log('DELETE FILES:', filePaths);
+
+  return deleteFiles(filePaths);
 }
 
 function getFileTimestamp(fileName: string) {
@@ -68,13 +59,13 @@ function getFileTimestamp(fileName: string) {
   return parseInt(timestamp.replace(/[^0-9]/g, ''), 10);
 }
 
-function isFileExpired(file: ReadDirItem) {
-  const lastDownloaded = getFileTimestamp(file.name);
+function isFileExpired(fileName: string) {
+  const lastDownloaded = getFileTimestamp(fileName);
 
   return isSecondsExpired(lastDownloaded);
 }
 
-export function getFilePage(fileName: string) {
+function getFilePage(fileName: string) {
   const typeAndPage = fileName.split(' ')[0];
   const page = parseInt(typeAndPage.replace(/[^0-9]/g, ''), 10);
 
@@ -85,33 +76,29 @@ export function getFilePage(fileName: string) {
   return page;
 }
 
-export function findNextPage(allFiles: ReadDirItem[], type: DownloadType) {
-  const sortedFiles = getOurTypeFiles(allFiles, type);
+export function findNextPage(files: Record<string, string>) {
+  const sortedFileNames = Object.keys(files).sort();
 
-  const foundIndex = sortedFiles.findIndex((f: ReadDirItem, i: number) => {
-    return getFilePage(f.name) !== i + 1;
+  const foundIndex = sortedFileNames.findIndex((f: string, i: number) => {
+    return getFilePage(f) !== i + 1;
   });
 
   if (foundIndex !== -1) {
     return foundIndex + 1;
   }
 
-  return sortedFiles.length + 1;
+  return sortedFileNames.length + 1;
 }
 
-async function isFileValid(file: ReadDirItem) {
-  if (isFileExpired(file)) {
-    return false;
-  }
-
-  const page = getFilePage(file.name);
+async function isFileValid(fileName: string, filaPath: string) {
+  const page = getFilePage(fileName);
 
   if (page === null) {
     return false;
   }
 
   try {
-    const fileString = await RNFS.readFile(file.path);
+    const fileString = await RNFS.readFile(filaPath);
     const content = JSON.parse(fileString) as MetaFile;
 
     if (content.meta && content.meta.current_page && content.meta.total_pages) {
@@ -124,40 +111,26 @@ async function isFileValid(file: ReadDirItem) {
   }
 }
 
-export async function deleteExpiredFiles() {
-  const allFiles = await RNFS.readDir(dir);
-  const ourFiles = getOurFiles(allFiles);
-
-  if (ourFiles.some(isFileExpired)) {
-    for (const file of ourFiles) {
-      await deleteFile(file);
-    }
-    return true;
-  }
-
-  return false;
+export function areFilesExpired(files: Record<string, string>) {
+  return Object.keys(files).some(isFileExpired);
 }
 
-export async function deleteInvalidFiles() {
-  const allFiles = await RNFS.readDir(dir);
-  const ourFiles = getOurFiles(allFiles);
-  let foundIt = false;
+export async function deleteInvalidFiles(files: Record<string, string>) {
+  const deletedFiles = [];
 
-  for (const file of ourFiles) {
-    const isValid = await isFileValid(file);
+  for (const [fileName, filePath] of Object.entries(files)) {
+    const isValid = await isFileValid(fileName, filePath);
     if (!isValid) {
-      await deleteFile(file);
-      foundIt = true;
+      await deleteFile(filePath);
+      deletedFiles.push(fileName);
     }
   }
 
-  return foundIt;
+  return deletedFiles;
 }
 
-export async function findValidFile<T>(type: DownloadType) {
-  const allFiles = await RNFS.readDir(dir);
-
-  const filePaths = getOurTypeFiles(allFiles, type).map((f) => f.path);
+export async function findValidFile<T>(files: Record<string, string>) {
+  const filePaths = Object.values(files);
 
   for (const path of filePaths) {
     try {

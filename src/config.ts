@@ -24,8 +24,6 @@ interface Config {
   PARSED_LOCALES: string;
   MOCKS: {
     DB: boolean;
-    DATA_STRUCTURES: boolean; // reproduces a huge data load on the app
-    DATA_ASSIGNMENTS: boolean; // reproduces a huge data load on the app
     DATA_FORMS: boolean; // reproduces a huge data load on the app
     DOWNLOAD_STRUCTURES: boolean; // reproduces a huge data download time
     DOWNLOAD_ASSIGNMENTS: boolean; // reproduces a huge data download time
@@ -56,8 +54,6 @@ const config: Config = {
   PLATFORM: Platform.OS,
   MOCKS: {
     DB: false,
-    DATA_STRUCTURES: false,
-    DATA_ASSIGNMENTS: false,
     DATA_FORMS: false,
     DOWNLOAD_STRUCTURES: false,
     DOWNLOAD_ASSIGNMENTS: false,

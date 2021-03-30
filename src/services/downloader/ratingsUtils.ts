@@ -1,4 +1,4 @@
-import { defer, isEmpty, sortBy } from 'lodash/fp';
+import { isEmpty, sortBy } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { PersistentState } from 'src/pullstate/persistentStore/initialState';
@@ -36,19 +36,22 @@ export const selectRatingsComplete = (s: PersistentState) => {
 };
 
 export function cleanExpiredIncompleteRatings() {
+  // we wrap this in a promise because we cant guarantee that update() is/will always be synchronous
+  // and we need to know if we'll clean the ratings or not
+  // TODO: find a less hacky way of doing this
   return new Promise<boolean>((resolve) => {
     PersistentUserStore.update((s) => {
       const ratingBaseExpired = isMilisecondsExpired(s.ratingsDownloaded);
 
       if (ratingBaseExpired || getSelectRatings(s.ratings).some(isRatingExpired)) {
-        defer(() => resolve(true));
+        resolve(true);
         return {
           ...s,
           ratings: {},
           ratingsDownloaded: null,
         };
       }
-      defer(() => resolve(false));
+      resolve(false);
       return s;
     });
   });

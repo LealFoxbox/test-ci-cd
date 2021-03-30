@@ -8,13 +8,14 @@ import { format } from 'date-fns';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
+import { UploadStore } from 'src/pullstate/uploadStore';
+import { getUploadState } from 'src/pullstate/uploadStore/selectors';
+import { cleanUploadErrorsAction } from 'src/pullstate/uploaderActions';
+import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
+import { UploadsReadonlyFormParams } from 'src/navigation/UploadsNavigator';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import config, { getMockFlags } from 'src/config';
-import { UploadStore } from 'src/pullstate/uploadStore';
-import { getUploadState } from 'src/pullstate/uploadStore/selectors';
-import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
-import { cleanUploadErrorsAction } from 'src/pullstate/uploaderActions';
 
 import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
@@ -82,11 +83,13 @@ const UploadsScreen: React.FC<{}> = () => {
           renderItem={({ item }) => {
             const { guid } = item.draft;
 
-            const gotoForm = () =>
-              navigation.navigate(UPLOADS_READONLY_FORM, {
+            const gotoForm = () => {
+              const p: UploadsReadonlyFormParams = {
                 guid: item.draft.guid,
                 title: item.draft.name,
-              });
+              };
+              navigation.navigate(UPLOADS_READONLY_FORM, p);
+            };
 
             if (!item.submittedAt) {
               const { state, progress, error } = getUploadState(uploadStates, guid);

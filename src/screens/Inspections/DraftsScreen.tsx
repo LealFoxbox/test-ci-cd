@@ -9,6 +9,7 @@ import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { styled, withTheme } from 'src/paperTheme';
 import SwipableRow from 'src/components/SwipableRow';
 import { deleteDraftAction } from 'src/pullstate/formActions';
+import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
 
 import DraftRow from './DraftRow';
 
@@ -38,12 +39,11 @@ const DraftsScreen: React.FC<{}> = () => {
               label={item.name}
               content={item.locationPath}
               onPress={() => {
-                navigation.navigate(INSPECTIONS_FORM, {
-                  formId: item.formId,
-                  structureId: item.structureId,
+                const p: InspectionFormParams = {
                   assignmentId: item.assignmentId,
                   title: item.name,
-                });
+                };
+                navigation.navigate(INSPECTIONS_FORM, p);
               }}
               hasPhotos={Object.values(item.fields).some((f) => f.photos.length > 0)}
               lastModified={item.lastModified || item.started_at || Date.now()}
