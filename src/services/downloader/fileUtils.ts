@@ -52,7 +52,7 @@ export async function deleteAllJSONFiles() {
 
     return deleteFiles(filePaths);
   } catch (error) {
-    console.warn('error', error.message);
+    console.log('error', error.message);
     return [];
   }
 }
