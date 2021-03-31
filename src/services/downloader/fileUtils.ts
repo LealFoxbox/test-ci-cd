@@ -33,21 +33,28 @@ export function deleteFiles(filePaths: string[]) {
 // the yy_mm_dd section is only there for human readability
 
 export async function deleteAllJSONFiles() {
-  const rawState = PersistentUserStore.getRawState();
+  try {
+    const rawState = PersistentUserStore.getRawState();
 
-  const dirFiles = await RNFS.readDir(dir);
+    const dirFiles = await RNFS.readDir(dir);
 
-  const filePaths = uniq(
-    dirFiles
-      .filter((f) => f.name.endsWith('.json') && (f.name.startsWith('structures') || f.name.startsWith('assignments')))
-      .map((f) => f.path)
-      .concat(Object.values(rawState.structuresFilePaths))
-      .concat(Object.values(rawState.assignmentsFilePaths)),
-  );
+    const filePaths = uniq(
+      dirFiles
+        .filter(
+          (f) => f.name.endsWith('.json') && (f.name.startsWith('structures') || f.name.startsWith('assignments')),
+        )
+        .map((f) => f.path)
+        .concat(Object.values(rawState.structuresFilePaths))
+        .concat(Object.values(rawState.assignmentsFilePaths)),
+    );
 
-  console.log('DELETE FILES:', filePaths);
+    console.log('DELETE FILES:', filePaths);
 
-  return deleteFiles(filePaths);
+    return deleteFiles(filePaths);
+  } catch (error) {
+    console.log('error', error.message);
+    return [];
+  }
 }
 
 function getFileTimestamp(fileName: string) {
