@@ -76,10 +76,14 @@ function parseFieldsWithCategories(draft: DraftForm) {
 
   const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
 
+  if (!draft.categories) {
+    console.warn('[APP] FormScreen - DRAFT CATEGORIES => UNDEFINED');
+  }
+
   return toPairs(groupBy('category_id', filteredFields))
     .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
     .flatMap(([catId, values]) => [
-      catId === 'undefined' || catId === 'null' ? '' : draft.categories[catId] || 'Category',
+      catId === 'undefined' || catId === 'null' ? '' : draft.categories?.[catId] || 'Category',
       sortBy('position', values),
     ])
     .flat();

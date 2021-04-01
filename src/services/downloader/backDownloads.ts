@@ -1,9 +1,10 @@
 import { format } from 'date-fns';
-import RNFetchBlob from 'rn-fetch-blob';
+
+import Storage from 'src/services/storage';
+import config from 'src/config';
+import * as Downloader from 'src/services/downloader';
 
 import { getApiUrl } from '../api/utils';
-
-const dir = RNFetchBlob.fs.dirs.DownloadDir;
 
 // note: timestamp t is unix time but in full seconds
 function getNow() {
@@ -27,15 +28,28 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
   const fileName = `${params.type}${params.page} - ${getNow()}.json`;
 
   const options = {
-    path: `${dir}/${fileName}`,
+    path: `${Storage.downloadDir}/${fileName}`,
   };
+  let storagePermission = true;
 
-  const res = await RNFetchBlob.config(options).fetch('GET', url, {
-    'Cache-Control': 'no-store',
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  });
+  if (parseInt(config.SYSTEM_VERSION) < 10) {
+    storagePermission = await Storage.requestPermission();
+  }
 
-  // this structure is useful because it matches the pullstate of structuresFilePaths and assignmentsFilePaths
-  return { [fileName]: res.path() };
+  if (storagePermission) {
+    const res = await Storage.download({
+      options,
+      url,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    // this structure is useful because it matches the pullstate of structuresFilePaths and assignmentsFilePaths
+    return { [fileName]: res.path() };
+  } else {
+    await Downloader.handleError('', true);
+  }
+  return {};
 }

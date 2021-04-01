@@ -53,9 +53,15 @@ function setDownloading(downloading: 'forms' | 'db' | 'ratings' | 'ratingChoices
   }));
 }
 
-async function handleError(section: string) {
+export async function handleError(section: string, noPermission = false) {
   FLAGS.errors += 1;
 
+  if (noPermission) {
+    DownloadStore.update((s) => {
+      s.error = `Failed to download. Permission denied.`;
+      console.log(`handleError: ${s.error}`);
+    });
+  }
   if (FLAGS.errors > 3) {
     // we probably don't have any internet, let's check that
     const isConnected = await hasConnection();
