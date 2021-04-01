@@ -6,3 +6,4 @@ export const getDeviceId = jest.fn(() => 'goldfish');
 export const isEmulator = jest.fn(() => Promise.resolve(false));
 export const getModel = jest.fn(() => 'getModel');
 export const getVersion = jest.fn(() => '1.0');
+export const getSystemVersion = jest.fn(() => '10.0.0');
