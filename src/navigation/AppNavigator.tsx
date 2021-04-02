@@ -30,15 +30,17 @@ function AppNavigator() {
 
   useEffect(() => {
     if (userData && status !== 'starting' && persistentStoreIsInitialized) {
-      const inspectionFeature = userData.features.inspection_feature.enabled;
+      (async () => {
+        const inspectionFeature = userData.features.inspection_feature.enabled;
 
-      if (inspectionFeature) {
-        void requestLocationPermission();
-        triggerDownload();
-        triggerUpload();
-      } else if (inspectionFeature === false) {
-        void clearInspectionsDataAction({});
-      }
+        if (inspectionFeature) {
+          await requestLocationPermission();
+          triggerDownload();
+          triggerUpload();
+        } else if (inspectionFeature === false) {
+          void clearInspectionsDataAction({});
+        }
+      })();
     }
   }, [userData, triggerDownload, triggerUpload, status, persistentStoreIsInitialized]);
 
