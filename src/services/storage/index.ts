@@ -7,6 +7,11 @@ interface FetchDownload {
   headers: { [key: string]: string };
 }
 
+interface FetchUpload {
+  url: string;
+  data: { name: string; data: string; filename?: string }[];
+}
+
 class Storage {
   static downloadDir = RNFetchBlob.fs.dirs.DownloadDir;
 
@@ -23,6 +28,17 @@ class Storage {
 
   static download = async ({ options, url, headers }: FetchDownload): Promise<FetchBlobResponse> => {
     return RNFetchBlob.config(options).fetch('GET', url, headers);
+  };
+
+  static upload = async ({ url, data }: FetchUpload) => {
+    return RNFetchBlob.fetch(
+      'POST',
+      url,
+      {
+        'Content-Type': 'multipart/form-data',
+      },
+      data,
+    );
   };
 }
 

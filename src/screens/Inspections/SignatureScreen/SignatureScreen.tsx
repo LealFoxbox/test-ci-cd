@@ -4,12 +4,12 @@ import { Button } from 'react-native-paper';
 import SignatureCapture from 'react-native-signature-capture';
 import RNFS from 'react-native-fs';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import RNFetchBlob from 'rn-fetch-blob';
 
 import { styled } from 'src/paperTheme';
 import { INSPECTIONS_FORM, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
 import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
+import Storage from 'src/services/storage';
 
 const Container = styled.View`
   flex: 1;
@@ -23,7 +23,7 @@ const ButtonsContainer = styled.View`
   margin: 20px;
 `;
 
-const dir = RNFetchBlob.fs.dirs.DownloadDir;
+const dir = Storage.downloadDir;
 
 const SignatureScreen: React.FC = () => {
   const signatureRef = useRef<SignatureCapture>(null);

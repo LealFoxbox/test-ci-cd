@@ -5,9 +5,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
-import RNFetchBlob from 'rn-fetch-blob';
 
-const dir = RNFetchBlob.fs.dirs.DownloadDir;
+import Storage from 'src/services/storage';
+
+const dir = Storage.downloadDir;
 
 type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
 
