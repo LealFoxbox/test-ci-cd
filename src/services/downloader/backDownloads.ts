@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 
 import Storage from 'src/services/storage';
 import config from 'src/config';
-import * as Downloader from 'src/services/downloader';
+import { DownloadStore } from 'src/pullstate/downloadStore';
 
 import { getApiUrl } from '../api/utils';
 
@@ -49,7 +49,10 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
     // this structure is useful because it matches the pullstate of structuresFilePaths and assignmentsFilePaths
     return { [fileName]: res.path() };
   } else {
-    await Downloader.handleError('', true);
+    DownloadStore.update((s) => {
+      s.error = `Failed to download. Permission denied.`;
+      console.log(`handleError: ${s.error}`);
+    });
   }
   return {};
 }
