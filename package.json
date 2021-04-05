@@ -54,7 +54,6 @@
     "react-native-local-mongodb": "^2.2.9",
     "react-native-localize": "^1.4.3",
     "react-native-paper": "^4.2.0",
-    "react-native-reanimated": "^1.13.0",
     "react-native-safe-area-context": "^3.1.7",
     "react-native-screens": "^2.16.1",
     "react-native-sensitive-info": "^5.5.8",
