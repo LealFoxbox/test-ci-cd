@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-import Storage from 'src/services/storage';
+import { downloadDir, downloaderStorage, requestStoragePermission } from 'src/services/storage';
 import config from 'src/config';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 
@@ -28,16 +28,16 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
   const fileName = `${params.type}${params.page} - ${getNow()}.json`;
 
   const options = {
-    path: `${Storage.downloadDir}/${fileName}`,
+    path: `${downloadDir}/${fileName}`,
   };
   let storagePermission = true;
 
   if (parseInt(config.SYSTEM_VERSION) < 10) {
-    storagePermission = await Storage.requestPermission();
+    storagePermission = await requestStoragePermission();
   }
 
   if (storagePermission) {
-    const res = await Storage.download({
+    const res = await downloaderStorage({
       options,
       url,
       headers: {

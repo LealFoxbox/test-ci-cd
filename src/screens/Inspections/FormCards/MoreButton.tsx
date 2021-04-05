@@ -6,9 +6,7 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 
-import Storage from 'src/services/storage';
-
-const dir = Storage.downloadDir;
+import { downloadDir } from 'src/services/storage';
 
 type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
 
@@ -22,7 +20,7 @@ export interface MoreButtonProps {
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
-  const destPath = `${dir}/${fileName}`;
+  const destPath = `${downloadDir}/${fileName}`;
   await RNFS.copyFile(uri, destPath);
   const statResult = await RNFS.stat(destPath);
   return statResult.path;

@@ -2,11 +2,11 @@
 import RNFS from 'react-native-fs';
 import { last, uniq } from 'lodash/fp';
 
-import Storage from 'src/services/storage';
+import { downloadDir } from 'src/services/storage';
 import { isSecondsExpired } from 'src/utils/expiration';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
-const dir = Storage.downloadDir;
+const dir = downloadDir;
 
 export interface MetaFile {
   meta: {

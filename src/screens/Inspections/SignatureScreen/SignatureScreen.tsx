@@ -9,7 +9,7 @@ import { styled } from 'src/paperTheme';
 import { INSPECTIONS_FORM, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
 import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
-import Storage from 'src/services/storage';
+import { downloadDir } from 'src/services/storage';
 
 const Container = styled.View`
   flex: 1;
@@ -23,7 +23,7 @@ const ButtonsContainer = styled.View`
   margin: 20px;
 `;
 
-const dir = Storage.downloadDir;
+const dir = downloadDir;
 
 const SignatureScreen: React.FC = () => {
   const signatureRef = useRef<SignatureCapture>(null);

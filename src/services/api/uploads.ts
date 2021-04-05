@@ -2,7 +2,7 @@ import axios, { AxiosPromise } from 'axios';
 import { formatISO } from 'date-fns';
 
 import { PendingUpload, PresignedPhoto } from 'src/types';
-import Storage from 'src/services/storage';
+import { uploaderStorage } from 'src/services/storage';
 
 import { bigDownloadRaxConfig, getApiUrl } from './utils';
 
@@ -60,7 +60,7 @@ export const uploadPhotos = (params: UploadPhotoParams) => {
 
   data.push({ name: 'file', filename: params.fileName, data: params.file });
 
-  return Storage.upload({
+  return uploaderStorage({
     url: params.url,
     data,
   });

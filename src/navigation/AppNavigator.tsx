@@ -8,7 +8,7 @@ import { useUploader } from 'src/services/uploader';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { requestLocationPermission } from 'src/utils/getCurrentPosition';
-import Storage from 'src/services/storage';
+import { requestStoragePermission } from 'src/services/storage';
 
 import AuthNavigator from './AuthNavigator';
 import MainStackNavigator from './MainStackNavigator';
@@ -35,7 +35,7 @@ function AppNavigator() {
         const inspectionFeature = userData.features.inspection_feature.enabled;
 
         if (inspectionFeature) {
-          await Storage.requestPermission();
+          await requestStoragePermission();
           void requestLocationPermission();
           triggerDownload();
           triggerUpload();
