@@ -99,7 +99,6 @@ export async function removeUploadingPhotoAction(upload: PendingUpload, photo: D
 
     if (index === -1) {
       console.warn('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
-      // s.pendingUploads = s.pendingUploads.filter((item) => item.draft.guid !== undefined);
       throw new Error('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
     }
 
