@@ -30,12 +30,17 @@ export async function downloaderStorage({ options, url, headers }: FetchDownload
 }
 
 export async function uploaderStorage({ url, data }: FetchUpload) {
-  return RNFetchBlob.fetch(
-    'POST',
-    url,
-    {
-      'Content-Type': 'multipart/form-data',
-    },
-    data,
-  );
+  try {
+    return await RNFetchBlob.fetch(
+      'POST',
+      url,
+      {
+        'Content-Type': 'multipart/form-data',
+      },
+      data,
+    );
+  } catch (error) {
+    console.warn('[APP][DOWNLOADER] ERROR => UPLOADER_STORAGE');
+    throw new Error('[APP] [ERROR] uploader storage');
+  }
 }

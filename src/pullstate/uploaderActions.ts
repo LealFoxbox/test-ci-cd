@@ -86,9 +86,9 @@ export function setFormSubmittedAction(upload: PendingUpload) {
   });
 }
 
-export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPhoto) {
+export async function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPhoto) {
   try {
-    void RNFS.unlink(photo.uri);
+    await RNFS.unlink(photo.uri);
   } catch (e) {
     console.warn('removeUploadingPhotoAction RNFS.unlink error: ', e);
   }

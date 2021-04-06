@@ -61,15 +61,17 @@ async function photoUploader(
 ) {
   setUploadingFieldAction(upload, 'state', 'photos');
 
-  console.log('photoUploader init of file ', photo.fileName);
-
   let file: string | undefined;
 
   try {
     file = await RNFS.readFile(photo.uri, 'base64');
   } catch (e) {
     console.warn('photoUploader: file read error for photoupload: ', e);
-    removeUploadingPhotoAction(upload, photo);
+    try {
+      await removeUploadingPhotoAction(upload, photo);
+    } catch (error) {
+      console.warn('[APP] [photoUploader]: remove Uploading', error);
+    }
   }
 
   if (file) {
