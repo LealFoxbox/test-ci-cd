@@ -86,11 +86,15 @@ export const createRenderCard = (
       setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
-    const handleDeletePhoto = (photo: DraftPhoto) => {
+    const handleDeletePhoto = async (photo: DraftPhoto) => {
       const newPhotos = differenceBy({ uri: photo.uri }, fieldValue.photos, [photo]);
       const newValues = set(`${draftField.formFieldId}.photos`, newPhotos, values);
 
-      void RNFS.unlink(photo.uri);
+      try {
+        await RNFS.unlink(photo.uri);
+      } catch (error) {
+        console.warn('[APP] UNLINK');
+      }
 
       setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
       updateDraftFieldsAction(assignmentId, newValues);

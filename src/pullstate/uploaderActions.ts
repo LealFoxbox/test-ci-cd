@@ -86,9 +86,9 @@ export function setFormSubmittedAction(upload: PendingUpload) {
   });
 }
 
-export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPhoto) {
+export async function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPhoto) {
   try {
-    void RNFS.unlink(photo.uri);
+    await RNFS.unlink(photo.uri);
   } catch (e) {
     console.warn('removeUploadingPhotoAction RNFS.unlink error: ', e);
   }
@@ -99,6 +99,7 @@ export function removeUploadingPhotoAction(upload: PendingUpload, photo: DraftPh
 
     if (index === -1) {
       console.warn('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
+      // s.pendingUploads = s.pendingUploads.filter((item) => item.draft.guid !== undefined);
       throw new Error('removeUploadingPhotoAction error: upload argument doesnt exist in pendingUploads');
     }
 
