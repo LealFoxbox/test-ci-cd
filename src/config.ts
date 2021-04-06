@@ -1,5 +1,12 @@
 import { Platform } from 'react-native';
-import { getBuildNumber, getBundleId, getModel, getUniqueId, getVersion } from 'react-native-device-info';
+import {
+  getBuildNumber,
+  getBundleId,
+  getModel,
+  getSystemVersion,
+  getUniqueId,
+  getVersion,
+} from 'react-native-device-info';
 import { Locale, getLocales } from 'react-native-localize';
 import { map, mapValues } from 'lodash/fp';
 
@@ -21,6 +28,7 @@ interface Config {
   BUNDLE_ID: string;
   PLATFORM: typeof Platform.OS;
   LOCALES: Locale[];
+  SYSTEM_VERSION: string;
   PARSED_LOCALES: string;
   MOCKS: {
     DB: boolean;
@@ -50,6 +58,7 @@ const config: Config = {
   PLATFORM_VERSION: Platform.Version,
   BUNDLE_ID: getBundleId(),
   LOCALES: getLocales(),
+  SYSTEM_VERSION: getSystemVersion(),
   PARSED_LOCALES: map('languageTag', getLocales()).join(', '),
   PLATFORM: Platform.OS,
   MOCKS: {

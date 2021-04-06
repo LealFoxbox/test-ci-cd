@@ -1,9 +1,10 @@
 import { format } from 'date-fns';
-import RNFetchBlob from 'rn-fetch-blob';
+
+import { downloadDir, downloaderStorage, requestStoragePermission } from 'src/services/storage';
+import config from 'src/config';
+import { DownloadStore } from 'src/pullstate/downloadStore';
 
 import { getApiUrl } from '../api/utils';
-
-const dir = RNFetchBlob.fs.dirs.DownloadDir;
 
 // note: timestamp t is unix time but in full seconds
 function getNow() {
@@ -27,15 +28,31 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
   const fileName = `${params.type}${params.page} - ${getNow()}.json`;
 
   const options = {
-    path: `${dir}/${fileName}`,
+    path: `${downloadDir}/${fileName}`,
   };
+  let storagePermission = true;
 
-  const res = await RNFetchBlob.config(options).fetch('GET', url, {
-    'Cache-Control': 'no-store',
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  });
+  if (parseInt(config.SYSTEM_VERSION) < 10) {
+    storagePermission = await requestStoragePermission();
+  }
 
-  // this structure is useful because it matches the pullstate of structuresFilePaths and assignmentsFilePaths
-  return { [fileName]: res.path() };
+  if (storagePermission) {
+    const res = await downloaderStorage({
+      options,
+      url,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    // this structure is useful because it matches the pullstate of structuresFilePaths and assignmentsFilePaths
+    return { [fileName]: res.path() };
+  } else {
+    DownloadStore.update((s) => {
+      s.error = `Failed to download. Permission denied.`;
+      console.log(`handleError: ${s.error}`);
+    });
+  }
+  return {};
 }

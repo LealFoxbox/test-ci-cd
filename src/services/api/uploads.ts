@@ -1,8 +1,8 @@
 import axios, { AxiosPromise } from 'axios';
-import RNFetchBlob from 'rn-fetch-blob';
 import { formatISO } from 'date-fns';
 
 import { PendingUpload, PresignedPhoto } from 'src/types';
+import { uploaderStorage } from 'src/services/storage';
 
 import { bigDownloadRaxConfig, getApiUrl } from './utils';
 
@@ -60,14 +60,10 @@ export const uploadPhotos = (params: UploadPhotoParams) => {
 
   data.push({ name: 'file', filename: params.fileName, data: params.file });
 
-  return RNFetchBlob.fetch(
-    'POST',
-    params.url,
-    {
-      'Content-Type': 'multipart/form-data',
-    },
+  return uploaderStorage({
+    url: params.url,
     data,
-  );
+  });
 };
 
 export interface SubmitInspectionParams {

@@ -8,6 +8,7 @@ import { useUploader } from 'src/services/uploader';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { requestLocationPermission } from 'src/utils/getCurrentPosition';
+import { requestStoragePermission } from 'src/services/storage';
 
 import AuthNavigator from './AuthNavigator';
 import MainStackNavigator from './MainStackNavigator';
@@ -30,15 +31,18 @@ function AppNavigator() {
 
   useEffect(() => {
     if (userData && status !== 'starting' && persistentStoreIsInitialized) {
-      const inspectionFeature = userData.features.inspection_feature.enabled;
+      (async () => {
+        const inspectionFeature = userData.features.inspection_feature.enabled;
 
-      if (inspectionFeature) {
-        void requestLocationPermission();
-        triggerDownload();
-        triggerUpload();
-      } else if (inspectionFeature === false) {
-        void clearInspectionsDataAction({});
-      }
+        if (inspectionFeature) {
+          await requestStoragePermission();
+          void requestLocationPermission();
+          triggerDownload();
+          triggerUpload();
+        } else if (inspectionFeature === false) {
+          void clearInspectionsDataAction({});
+        }
+      })();
     }
   }, [userData, triggerDownload, triggerUpload, status, persistentStoreIsInitialized]);
 

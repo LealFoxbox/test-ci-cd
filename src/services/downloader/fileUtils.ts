@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import RNFS from 'react-native-fs';
 import { last, uniq } from 'lodash/fp';
-import RNFetchBlob from 'rn-fetch-blob';
 
+import { downloadDir } from 'src/services/storage';
 import { isSecondsExpired } from 'src/utils/expiration';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 
-const dir = RNFetchBlob.fs.dirs.DownloadDir;
+const dir = downloadDir;
 
 export interface MetaFile {
   meta: {
