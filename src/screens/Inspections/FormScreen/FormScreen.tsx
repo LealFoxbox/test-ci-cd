@@ -13,7 +13,12 @@ import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
-import { RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
+import {
+  INSPECTIONS_FORM,
+  RATING_CHOICES_MODAL,
+  SCHEDULE_INSPECTIONS_FORM,
+  SIGNATURE_MODAL,
+} from 'src/navigation/screenNames';
 import { InspectionFormParams, InspectionFormRoute } from 'src/navigation/InspectionsNavigator';
 import { RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/MainStackNavigator';
 import { DraftField, DraftForm, DraftPhoto } from 'src/types';
@@ -30,6 +35,11 @@ import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { createRenderCard } from '../FormCards/createRenderCard';
 
 import OptionRow from './OptionRow';
+
+const INSPECTIONS_SCREEN = {
+  [INSPECTIONS_FORM]: INSPECTIONS_FORM,
+  [SCHEDULE_INSPECTIONS_FORM]: SCHEDULE_INSPECTIONS_FORM,
+};
 
 async function updateSignature(
   assignmentId: number,
@@ -92,7 +102,11 @@ function parseFieldsWithCategories(draft: DraftForm) {
 const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newPhoto, rangeChoicesSelection },
+    name: nameScreen,
+    ...more
   } = useRoute<InspectionFormRoute>();
+
+  console.log('[APP] EDIT FORM SCREEN', more);
   const userData = LoginStore.useState((s) => s.userData);
   const { draft, ratings } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,
@@ -180,7 +194,12 @@ const EditFormScreen: React.FC<{}> = () => {
   };
 
   const goToSignature = (formFieldId: number) => {
-    const p: SignatureModalParams = { assignmentId, formFieldId, title: 'Signature' };
+    const p: SignatureModalParams = {
+      assignmentId,
+      formFieldId,
+      title: 'Signature',
+      screenName: INSPECTIONS_SCREEN[nameScreen],
+    };
     navigation.navigate(SIGNATURE_MODAL, p);
   };
 
@@ -193,7 +212,13 @@ const EditFormScreen: React.FC<{}> = () => {
     ratingId: number;
     formFieldId: number;
   }) => {
-    const p: RatingChoicesModalParams = { assignmentId, ratingId, formFieldId, title };
+    const p: RatingChoicesModalParams = {
+      assignmentId,
+      ratingId,
+      formFieldId,
+      title,
+      screenName: INSPECTIONS_SCREEN[nameScreen],
+    };
     navigation.navigate(RATING_CHOICES_MODAL, p);
   };
 

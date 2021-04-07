@@ -38,7 +38,7 @@ const emptyChoices: SelectRatingChoice[] = [];
 
 const RatingChoicesScreen: React.FC = () => {
   const {
-    params: { assignmentId, ratingId, formFieldId },
+    params: { assignmentId, ratingId, formFieldId, screenName },
   } = useRoute<RouteProp<MainNavigatorParamList, typeof RATING_CHOICES_MODAL>>();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -120,7 +120,7 @@ const RatingChoicesScreen: React.FC = () => {
               formFieldId,
             };
 
-            navigation.navigate(INSPECTIONS_FORM, {
+            navigation.navigate(screenName || INSPECTIONS_FORM, {
               rangeChoicesSelection,
             });
           }}
@@ -129,6 +129,7 @@ const RatingChoicesScreen: React.FC = () => {
         />
       ),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formFieldId, navigation, selection, theme]);
 
   // TODO: improve perf of Row rendering

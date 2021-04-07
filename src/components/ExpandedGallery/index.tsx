@@ -89,7 +89,11 @@ function ExpandedGallery({
   }, [currentImageIndex, onImageIndexChange]);
 
   useEffect(() => {
-    imageListRef.current?.scrollToIndex({ index: currentImageIndex, animated: false });
+    if (images?.length <= currentImageIndex) {
+      imageListRef.current?.scrollToIndex({ index: currentImageIndex, animated: false });
+    } else {
+      console.warn('[APP][ERROR] => EXPANDED GALLERY');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 

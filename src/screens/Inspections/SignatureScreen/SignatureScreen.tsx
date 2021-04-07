@@ -32,7 +32,7 @@ const SignatureScreen: React.FC = () => {
 
   const [isPortrait, setIsPortrait] = useState(dim.height > dim.width);
   const {
-    params: { formFieldId },
+    params: { formFieldId, screenName },
   } = useRoute<RouteProp<MainNavigatorParamList, typeof SIGNATURE_MODAL>>();
   const navigation = useNavigation();
 
@@ -62,7 +62,7 @@ const SignatureScreen: React.FC = () => {
               // since this is navigating back we don't need to fill in every param for InspectionFormParams
               const newPhoto: InspectionFormParams['newPhoto'] = { path, fileName, formFieldId };
 
-              navigation.navigate(INSPECTIONS_FORM, { newPhoto });
+              navigation.navigate(screenName || INSPECTIONS_FORM, { newPhoto });
             })
             .catch((err) => {
               console.warn('Signature Screen RNFS writefile error: ', err);
