@@ -103,10 +103,9 @@ const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newPhoto, rangeChoicesSelection },
     name: nameScreen,
-    ...more
   } = useRoute<InspectionFormRoute>();
 
-  console.log('[APP] EDIT FORM SCREEN', more);
+  console.log('[APP] EDIT FORM SCREEN', nameScreen);
   const userData = LoginStore.useState((s) => s.userData);
   const { draft, ratings } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,

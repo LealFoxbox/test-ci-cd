@@ -76,10 +76,11 @@ function ExpandedGallery({
   HeaderComponent,
   FooterComponent,
 }: Props) {
+  const imageIndexGallery = imageIndex >= images?.length ? images.length - 1 : imageIndex;
   const imageListRef = React.createRef<VirtualizedList<ImageSource>>();
   const [opacity, onRequestCloseEnhanced] = useRequestClose(onRequestClose);
   const [layout, setLayout] = React.useState<Dimensions>({ width: 0, height: 0 });
-  const [currentImageIndex, onScroll] = useImageIndexChange(imageIndex, layout);
+  const [currentImageIndex, onScroll] = useImageIndexChange(imageIndexGallery, layout);
   const [headerTransform, footerTransform, toggleBarsVisible] = useAnimatedComponents();
 
   useEffect(() => {
@@ -89,10 +90,8 @@ function ExpandedGallery({
   }, [currentImageIndex, onImageIndexChange]);
 
   useEffect(() => {
-    if (images?.length <= currentImageIndex) {
+    if (images?.length > currentImageIndex) {
       imageListRef.current?.scrollToIndex({ index: currentImageIndex, animated: false });
-    } else {
-      console.warn('[APP][ERROR] => EXPANDED GALLERY');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
@@ -147,7 +146,7 @@ function ExpandedGallery({
           maxToRenderPerBatch={1}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
-          initialScrollIndex={imageIndex}
+          initialScrollIndex={imageIndexGallery}
           getItem={(_, index) => images[index]}
           getItemCount={() => images.length}
           getItemLayout={(_, index) => ({
