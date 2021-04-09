@@ -18,7 +18,6 @@ import {
   INSPECTIONS_FORM_LIST,
   INSPECTIONS_HOME,
   INSPECTIONS_SEARCH_RESULTS,
-  SCHEDULE_INSPECTIONS_FORM,
 } from './screenNames';
 
 export type InspectionsNavigatorParamList = {
@@ -42,15 +41,6 @@ export type InspectionsNavigatorParamList = {
     hasSearch: boolean;
   };
   [INSPECTIONS_FORM]: {
-    title: string;
-    assignmentId: number;
-    newPhoto?: { path: string; fileName: string; formFieldId: number };
-    rangeChoicesSelection?: {
-      listChoiceIds: number[];
-      formFieldId: number;
-    };
-  };
-  [SCHEDULE_INSPECTIONS_FORM]: {
     title: string;
     assignmentId: number;
     newPhoto?: { path: string; fileName: string; formFieldId: number };
