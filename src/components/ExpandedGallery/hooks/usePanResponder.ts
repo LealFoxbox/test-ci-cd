@@ -6,7 +6,7 @@
  *
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Animated,
   GestureResponderEvent,
@@ -54,8 +54,7 @@ const usePanResponder = ({
   let tmpTranslate: Position | null = null;
   let isDoubleTapPerformed = false;
   let lastTapTS: number | null = null;
-  // TODO: use useRef
-  let longPressHandlerRef: number | null = null;
+  const longPressHandlerRef = useRef<null | ReturnType<typeof setTimeout>>(null);
 
   const MIN_DIMENSION = Math.min(layout.width, layout.height);
 
@@ -113,7 +112,7 @@ const usePanResponder = ({
   });
 
   const cancelLongPressHandle = () => {
-    longPressHandlerRef && clearTimeout(longPressHandlerRef);
+    longPressHandlerRef.current && clearTimeout(longPressHandlerRef.current);
   };
 
   const handlers = {
@@ -122,7 +121,7 @@ const usePanResponder = ({
 
       if (gestureState.numberActiveTouches > 1) return;
 
-      longPressHandlerRef = setTimeout(onLongPress, delayLongPress);
+      longPressHandlerRef.current = setTimeout(onLongPress, delayLongPress);
     },
     onStart: (event: GestureResponderEvent, gestureState: PanResponderGestureState) => {
       initialTouches = event.nativeEvent.touches;

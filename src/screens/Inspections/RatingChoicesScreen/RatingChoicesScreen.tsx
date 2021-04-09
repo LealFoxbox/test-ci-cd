@@ -131,7 +131,22 @@ const RatingChoicesScreen: React.FC = () => {
     });
   }, [formFieldId, navigation, selection, theme]);
 
-  // TODO: improve perf of Row rendering
+  const renderItem = useCallback(
+    ({ item }: { item: SelectRatingChoice }) => (
+      <Row
+        icon={selection.includes(item.id) ? 'check' : undefined}
+        label={item.name}
+        onPress={() => {
+          if (!isMultiSelect) {
+            setSelection([item.id]);
+          } else {
+            setSelection(xor(selection, [item.id]));
+          }
+        }}
+      />
+    ),
+    [isMultiSelect, selection],
+  );
 
   return (
     <Container>
@@ -150,19 +165,7 @@ const RatingChoicesScreen: React.FC = () => {
         }}
         data={ratingChoices}
         keyExtractor={(item) => `${item.id}`}
-        renderItem={({ item }) => (
-          <Row
-            icon={selection.includes(item.id) ? 'check' : undefined}
-            label={item.name}
-            onPress={() => {
-              if (!isMultiSelect) {
-                setSelection([item.id]);
-              } else {
-                setSelection(xor(selection, [item.id]));
-              }
-            }}
-          />
-        )}
+        renderItem={renderItem}
       />
     </Container>
   );
