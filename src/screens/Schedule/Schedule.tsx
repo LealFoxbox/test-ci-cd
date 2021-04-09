@@ -4,7 +4,7 @@ import WebView from 'react-native-webview';
 import { useNavigation } from '@react-navigation/core';
 import { find } from 'lodash/fp';
 
-import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
+import { SCHEDULE_INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
 import { initFormDraftAction } from 'src/pullstate/formActions';
 import { LoginStore } from 'src/pullstate/loginStore';
@@ -87,7 +87,7 @@ const ScheduleScreen: React.FC<{}> = () => {
             };
 
             webRef.current?.goBack();
-            navigation.navigate(INSPECTIONS_FORM, p);
+            navigation.navigate(SCHEDULE_INSPECTIONS_FORM, p);
           })();
         }
       }}

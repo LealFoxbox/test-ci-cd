@@ -36,8 +36,14 @@ export type MainTabsNavigatorParamList = {
 
 export type MainNavigatorParamList = {
   [BOTTOM_TAB_NAVIGATOR]: undefined;
-  [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number };
-  [RATING_CHOICES_MODAL]: { title: string; assignmentId: number; ratingId: number; formFieldId: number };
+  [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number; screenName?: string };
+  [RATING_CHOICES_MODAL]: {
+    title: string;
+    assignmentId: number;
+    ratingId: number;
+    formFieldId: number;
+    screenName?: string;
+  };
 };
 
 export type SignatureModalRoute = RouteProp<MainNavigatorParamList, typeof SIGNATURE_MODAL>;
