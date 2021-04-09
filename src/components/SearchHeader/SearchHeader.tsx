@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Appbar, TextInput } from 'react-native-paper';
+import { StatusBar } from 'react-native';
 import { StackHeaderProps } from '@react-navigation/stack';
 import { words } from 'lodash/fp';
 
@@ -82,6 +83,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onClose, scene, navigation,
         style={{ flex: 1, marginRight: 20, fontSize: 20 }}
         autoFocus
       />
+      <StatusBar animated backgroundColor="#CC7700" barStyle={'default'} showHideTransition={'fade'} />
     </Appbar.Header>
   );
 };
