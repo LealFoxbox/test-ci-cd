@@ -357,16 +357,15 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
   }));
   const isMongoLoaded = useIsMongoLoaded();
 
-  // TODO: refactor this useEffect into a "return early" organization so that it's more readable
   useEffect(() => {
     (async () => {
-      if (!token) {
-        if (FLAGS.loggedIn) {
-          FLAGS.loggedIn = false;
-          FLAGS.errors = 0;
-          resetTrigger();
-        }
-      } else if (isMongoLoaded && shouldTrigger && subdomain && !outdatedUserData) {
+      if (!token && FLAGS.loggedIn) {
+        FLAGS.loggedIn = false;
+        FLAGS.errors = 0;
+        return resetTrigger();
+      }
+
+      if (isMongoLoaded && shouldTrigger && subdomain && !outdatedUserData && token) {
         FLAGS.loggedIn = true;
         if (inspectionsEnabled && !downloadError && downloading === null) {
           if (!isMongoComplete) {
