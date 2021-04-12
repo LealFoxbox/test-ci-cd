@@ -359,54 +359,60 @@ export function useDownloader(): ReturnType<typeof useTrigger> {
 
   useEffect(() => {
     (async () => {
-      if (!token && FLAGS.loggedIn) {
-        FLAGS.loggedIn = false;
-        FLAGS.errors = 0;
-        return resetTrigger();
+      if (!token) {
+        if (FLAGS.loggedIn) {
+          FLAGS.loggedIn = false;
+          FLAGS.errors = 0;
+          resetTrigger();
+        }
+        return;
       }
 
-      if (isMongoLoaded && shouldTrigger && subdomain && !outdatedUserData && token) {
-        FLAGS.loggedIn = true;
-        if (inspectionsEnabled && !downloadError && downloading === null) {
-          if (!isMongoComplete) {
-            void fileDownload({
-              structuresFiles,
-              assignmentsFiles,
-              token,
-              subdomain,
-              structuresTotalPages,
-              assignmentsTotalPages,
-            });
-          } else {
-            if (!isEmpty(structuresFiles) || !isEmpty(assignmentsFiles)) {
-              void fileDelete();
-            } else {
-              const nextForm = await getNextFormDownload(forms);
-
-              if (nextForm) {
-                void formsDownload(nextForm, token, subdomain);
-              } else if (!isRatingsComplete) {
-                const wasCleaned = await cleanExpiredIncompleteRatings();
-                // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
-                if (!wasCleaned) {
-                  if (!isRatingsBaseDownloaded) {
-                    void ratingsDownload(token, subdomain);
-                  } else {
-                    const nextRatingChoicesDownload = getNextRatingChoicesDownload(ratings);
-
-                    if (nextRatingChoicesDownload) {
-                      void ratingChoicesDownload(nextRatingChoicesDownload, token, subdomain);
-                    } else {
-                      advanceProgress(100);
-                    }
-                  }
-                }
-              } else {
-                advanceProgress(100);
-              }
-            }
-          }
-        }
+      if (!isMongoLoaded || !shouldTrigger || !subdomain || outdatedUserData) {
+        return;
+      }
+      FLAGS.loggedIn = true;
+      if (!inspectionsEnabled || downloadError || downloading !== null) {
+        return;
+      }
+      if (!isMongoComplete) {
+        void fileDownload({
+          structuresFiles,
+          assignmentsFiles,
+          token,
+          subdomain,
+          structuresTotalPages,
+          assignmentsTotalPages,
+        });
+        return;
+      }
+      if (!isEmpty(structuresFiles) || !isEmpty(assignmentsFiles)) {
+        void fileDelete();
+        return;
+      }
+      const nextForm = await getNextFormDownload(forms);
+      if (nextForm) {
+        void formsDownload(nextForm, token, subdomain);
+        return;
+      }
+      if (isRatingsComplete) {
+        advanceProgress(100);
+        return;
+      }
+      const wasCleaned = await cleanExpiredIncompleteRatings();
+      // if it WAS cleaned, this useEffect will trigger again so we don't want to continue
+      if (wasCleaned) {
+        return;
+      }
+      if (!isRatingsBaseDownloaded) {
+        void ratingsDownload(token, subdomain);
+        return;
+      }
+      const nextRatingChoicesDownload = getNextRatingChoicesDownload(ratings);
+      if (nextRatingChoicesDownload) {
+        void ratingChoicesDownload(nextRatingChoicesDownload, token, subdomain);
+      } else {
+        advanceProgress(100);
       }
     })();
   }, [
