@@ -21,9 +21,7 @@ function getScheduleUri(user: User) {
 const ScheduleScreen: React.FC<{}> = () => {
   const webRef = useRef<WebView>(null);
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
-  const uploads = PersistentUserStore.useState((s) =>
-    s.uploads.filter((item) => !!item.submittedAt).map((item) => item?.draft?.guid || ''),
-  );
+  const uploads = PersistentUserStore.useState((s) => s.uploads.filter((item) => !!item.submittedAt));
 
   const navigation = useNavigation();
   useEffect(() => {
