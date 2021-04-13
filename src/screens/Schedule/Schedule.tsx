@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import WebView from 'react-native-webview';
 import { useNavigation } from '@react-navigation/core';
 import { find } from 'lodash/fp';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { InspectionFormParams } from 'src/navigation/InspectionsNavigator';
@@ -21,16 +22,27 @@ function getScheduleUri(user: User) {
 const ScheduleScreen: React.FC<{}> = () => {
   const webRef = useRef<WebView>(null);
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
-  const uploads = PersistentUserStore.useState((s) => s.uploads.filter((item) => !!item.submittedAt));
+  const uploads = PersistentUserStore.useState((s) =>
+    s.uploads.filter((item) => !!item.submittedAt && !!item?.draft?.eventId),
+  );
+  // we use refresh webview as ref to reload the webview schedule when it's in stack navigation
+  const refreshWebview = useRef<boolean>(false);
 
   const navigation = useNavigation();
+
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {});
-    if (webRef.current && uploads.length > 0) {
-      webRef.current.reload();
-    }
-    return unsubscribe;
-  }, [navigation, uploads]);
+    // If the screen is in the stack and uploads have changed, this lets us know that the screen needs to render the next time when it's a focus.
+    refreshWebview.current = true;
+  }, [uploads]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (webRef.current && refreshWebview.current) {
+        webRef.current.reload();
+        refreshWebview.current = false;
+      }
+    }, []),
+  );
 
   if (!userData) {
     return <View />;
