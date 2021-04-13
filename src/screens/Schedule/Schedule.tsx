@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import WebView from 'react-native-webview';
 import { useNavigation } from '@react-navigation/core';
@@ -21,8 +21,18 @@ function getScheduleUri(user: User) {
 const ScheduleScreen: React.FC<{}> = () => {
   const webRef = useRef<WebView>(null);
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
+  const uploads = PersistentUserStore.useState((s) =>
+    s.uploads.filter((item) => !!item.submittedAt).map((item) => item?.draft?.guid || ''),
+  );
 
   const navigation = useNavigation();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {});
+    if (webRef.current && uploads.length > 0) {
+      webRef.current.reload();
+    }
+    return unsubscribe;
+  }, [navigation, uploads]);
 
   if (!userData) {
     return <View />;
