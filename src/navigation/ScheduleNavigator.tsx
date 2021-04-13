@@ -5,12 +5,12 @@ import ScheduleScreen from 'src/screens/Schedule';
 import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import Header from 'src/components/Header';
 
-import { SCHEDULE_HOME, SCHEDULE_INSPECTIONS_FORM } from './screenNames';
+import { INSPECTIONS_FORM, SCHEDULE_HOME, SCHEDULE_INSPECTIONS_FORM } from './screenNames';
 import { InspectionsNavigatorParamList } from './InspectionsNavigator';
 
 export type ScheduleNavigatorParamList = {
   [SCHEDULE_HOME]: { title: string };
-  [SCHEDULE_INSPECTIONS_FORM]: InspectionsNavigatorParamList[typeof SCHEDULE_INSPECTIONS_FORM];
+  [SCHEDULE_INSPECTIONS_FORM]: InspectionsNavigatorParamList[typeof INSPECTIONS_FORM];
 };
 
 const Stack = createStackNavigator<ScheduleNavigatorParamList>();
