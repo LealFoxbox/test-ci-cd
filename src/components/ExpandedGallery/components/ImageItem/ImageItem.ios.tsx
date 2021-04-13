@@ -70,12 +70,12 @@ const ImageItem = ({
   const onScrollEndDrag = useCallback(
     ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
       const velocityY = nativeEvent?.velocity?.y ?? 0;
-      const scaled = nativeEvent?.zoomScale > 1;
+      const zoomScaled = nativeEvent?.zoomScale > 1;
 
-      onZoom(scaled);
-      setScaled(scaled);
+      onZoom(zoomScaled);
+      setScaled(zoomScaled);
 
-      if (!scaled && swipeToCloseEnabled && Math.abs(velocityY) > SWIPE_CLOSE_VELOCITY) {
+      if (!zoomScaled && swipeToCloseEnabled && Math.abs(velocityY) > SWIPE_CLOSE_VELOCITY) {
         onRequestClose();
       }
     },

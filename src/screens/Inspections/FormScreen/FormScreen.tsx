@@ -92,7 +92,9 @@ function parseFieldsWithCategories(draft: DraftForm) {
 const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newPhoto, rangeChoicesSelection },
+    name: screenName,
   } = useRoute<InspectionFormRoute>();
+
   const userData = LoginStore.useState((s) => s.userData);
   const { draft, ratings } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,
@@ -180,7 +182,12 @@ const EditFormScreen: React.FC<{}> = () => {
   };
 
   const goToSignature = (formFieldId: number) => {
-    const p: SignatureModalParams = { assignmentId, formFieldId, title: 'Signature' };
+    const p: SignatureModalParams = {
+      assignmentId,
+      formFieldId,
+      title: 'Signature',
+      screenName,
+    };
     navigation.navigate(SIGNATURE_MODAL, p);
   };
 
@@ -193,7 +200,13 @@ const EditFormScreen: React.FC<{}> = () => {
     ratingId: number;
     formFieldId: number;
   }) => {
-    const p: RatingChoicesModalParams = { assignmentId, ratingId, formFieldId, title };
+    const p: RatingChoicesModalParams = {
+      assignmentId,
+      ratingId,
+      formFieldId,
+      title,
+      screenName,
+    };
     navigation.navigate(RATING_CHOICES_MODAL, p);
   };
 

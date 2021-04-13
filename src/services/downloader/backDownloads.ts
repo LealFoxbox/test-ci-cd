@@ -32,7 +32,7 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
   };
   let storagePermission = true;
 
-  if (parseInt(config.SYSTEM_VERSION) < 10) {
+  if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
     storagePermission = await requestStoragePermission();
   }
 
