@@ -51,11 +51,17 @@ const ScheduleScreen: React.FC<{}> = () => {
   return (
     <WebViewScreen
       ref={webRef}
+      style={{
+        flex: 1,
+        width: '100%',
+      }}
       source={{ uri: getScheduleUri(userData) }}
       onNavigationStateChange={({ url }) => {
         // the url we care about: ["inspect", "areas", "570573", "inspection_forms", "74342"]
 
-        const match = urlMatch(url, ['inspect', 'areas', '*', 'inspection_forms', '*'], { inspection_event_id: '*' });
+        const match = urlMatch(url, ['inspect', 'areas', '*', 'inspection_forms', '*'], {
+          inspection_event_id: '*',
+        });
 
         if (match && typeof match.searchValues.inspection_event_id === 'string') {
           const formId = parseInt(match.pathValues[1], 10);

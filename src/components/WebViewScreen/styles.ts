@@ -1,5 +1,9 @@
 import { styled, withTheme } from 'src/paperTheme';
 
+export const ScrollViewContainer = styled.ScrollView`
+  flex: 1;
+`;
+
 export const Container = styled.View`
   flex: 1;
 `;

@@ -178,6 +178,7 @@ const EditFormScreen: React.FC<{}> = () => {
 
   const submit = () => {
     submitDraftAction(assignmentId);
+    // when a user submitted a schedule inspection form we need to reload the schedule webview
     navigation.goBack();
   };
 
