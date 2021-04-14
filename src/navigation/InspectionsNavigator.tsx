@@ -82,6 +82,7 @@ function InspectionTabsNavigator() {
         component={InspectionsScreen}
         initialParams={{
           parentId: null,
+          showLocationPath: true,
         }}
       />
       <TabNav.Screen name="Drafts" component={DraftsScreen} />
