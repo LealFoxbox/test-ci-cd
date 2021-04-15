@@ -80,7 +80,21 @@ exports[`WebViewScreen should render 1`] = `
                 ]
               }
             >
-              <View
+              <RCTScrollView
+                contentContainerStyle={
+                  Object {
+                    "flexGrow": 1,
+                  }
+                }
+                refreshControl={
+                  <RefreshControlMock
+                    enabled={true}
+                    onRefresh={[Function]}
+                    refreshing={false}
+                    tintColor="white"
+                    title="Loading..."
+                  />
+                }
                 style={
                   Array [
                     Object {
@@ -91,188 +105,180 @@ exports[`WebViewScreen should render 1`] = `
                   ]
                 }
               >
-                <View
-                  style={
-                    Array [
-                      Object {
-                        "flexBasis": 0,
-                        "flexGrow": 1,
-                        "flexShrink": 1,
-                      },
-                    ]
-                  }
-                >
+                <RCTRefreshControl />
+                <View>
                   <View
                     style={
                       Array [
                         Object {
-                          "flex": 1,
-                          "overflow": "hidden",
+                          "flexBasis": 0,
+                          "flexGrow": 1,
+                          "flexShrink": 1,
                         },
-                        undefined,
                       ]
                     }
                   >
-                    <RNCWebView
-                      allowFileAccess={true}
-                      allowUniversalAccessFromFileURLs={true}
-                      cacheEnabled={true}
-                      geolocationEnabled={true}
-                      injectedJavaScriptBeforeContentLoadedForMainFrameOnly={true}
-                      injectedJavaScriptForMainFrameOnly={true}
-                      javaScriptEnabled={true}
-                      messagingEnabled={false}
-                      onContentProcessDidTerminate={[Function]}
-                      onError={[Function]}
-                      onHttpError={[Function]}
-                      onLoadingError={[Function]}
-                      onLoadingFinish={[Function]}
-                      onLoadingProgress={[Function]}
-                      onLoadingStart={[Function]}
-                      onMessage={[Function]}
-                      onNavigationStateChange={[Function]}
-                      onShouldStartLoadWithRequest={[Function]}
-                      source={
-                        Object {
-                          "uri": "https://google.com",
-                        }
-                      }
-                      startInLoadingState={true}
-                      style={
-                        Array [
-                          Object {
-                            "flex": 1,
-                            "overflow": "hidden",
-                          },
-                          Object {
-                            "backgroundColor": "#ffffff",
-                          },
-                          Array [
-                            Object {
-                              "flex": 1,
-                            },
-                            undefined,
-                          ],
-                        ]
-                      }
-                      useSharedProcessPool={true}
-                    />
                     <View
                       style={
                         Array [
                           Object {
-                            "alignItems": "center",
-                            "backgroundColor": "#e9e9e9",
-                            "bottom": 0,
-                            "justifyContent": "center",
-                            "left": 0,
-                            "position": "absolute",
-                            "right": 0,
-                            "top": 0,
-                            "zIndex": 1,
+                            "flexBasis": 0,
+                            "flexGrow": 1,
+                            "flexShrink": 1,
                           },
                         ]
-                      }
-                      theme={
-                        Object {
-                          "animation": Object {
-                            "scale": 1,
-                          },
-                          "colors": Object {
-                            "accent": "#F2680E",
-                            "backdrop": "rgba(0, 0, 0, 0.5)",
-                            "background": "#e9e9e9",
-                            "deficient": "#FF3333",
-                            "disabled": "rgba(0, 0, 0, 0.26)",
-                            "error": "#FF2D55",
-                            "gps": "#007AFE",
-                            "notification": "#FF9400",
-                            "onBackground": "#000000",
-                            "onSurface": "#FF9400",
-                            "placeholder": "rgba(0, 0, 0, 0.54)",
-                            "primary": "#FF9400",
-                            "secondaryText": "#888",
-                            "success": "#34C759",
-                            "surface": "#FFFFFF",
-                            "text": "#000000",
-                          },
-                          "dark": false,
-                          "fonts": Object {
-                            "light": Object {
-                              "fontFamily": "System",
-                              "fontWeight": "300",
-                            },
-                            "medium": Object {
-                              "fontFamily": "System",
-                              "fontWeight": "500",
-                            },
-                            "regular": Object {
-                              "fontFamily": "System",
-                              "fontWeight": "400",
-                            },
-                            "thin": Object {
-                              "fontFamily": "System",
-                              "fontWeight": "100",
-                            },
-                          },
-                          "roundness": 4,
-                        }
                       }
                     >
                       <View
                         style={
                           Array [
                             Object {
-                              "alignItems": "center",
-                              "justifyContent": "center",
+                              "flex": 1,
+                              "overflow": "hidden",
                             },
                             undefined,
                           ]
                         }
                       >
-                        <View
-                          collapsable={false}
-                          style={
+                        <RNCWebView
+                          allowFileAccess={true}
+                          allowUniversalAccessFromFileURLs={true}
+                          cacheEnabled={true}
+                          geolocationEnabled={true}
+                          injectedJavaScriptBeforeContentLoadedForMainFrameOnly={true}
+                          injectedJavaScriptForMainFrameOnly={true}
+                          javaScriptEnabled={true}
+                          messagingEnabled={false}
+                          onContentProcessDidTerminate={[Function]}
+                          onError={[Function]}
+                          onHttpError={[Function]}
+                          onLoadEnd={[Function]}
+                          onLoadingError={[Function]}
+                          onLoadingFinish={[Function]}
+                          onLoadingProgress={[Function]}
+                          onLoadingStart={[Function]}
+                          onMessage={[Function]}
+                          onNavigationStateChange={[Function]}
+                          onScroll={[Function]}
+                          onShouldStartLoadWithRequest={[Function]}
+                          source={
                             Object {
-                              "height": 48,
-                              "opacity": 1,
-                              "width": 48,
+                              "uri": "https://google.com",
+                            }
+                          }
+                          startInLoadingState={true}
+                          style={
+                            Array [
+                              Object {
+                                "flex": 1,
+                                "overflow": "hidden",
+                              },
+                              Object {
+                                "backgroundColor": "#ffffff",
+                              },
+                              Array [
+                                Object {
+                                  "flex": 1,
+                                },
+                                undefined,
+                              ],
+                            ]
+                          }
+                          useSharedProcessPool={true}
+                        />
+                        <View
+                          style={
+                            Array [
+                              Object {
+                                "alignItems": "center",
+                                "backgroundColor": "#e9e9e9",
+                                "bottom": 0,
+                                "justifyContent": "center",
+                                "left": 0,
+                                "position": "absolute",
+                                "right": 0,
+                                "top": 0,
+                                "zIndex": 1,
+                              },
+                            ]
+                          }
+                          theme={
+                            Object {
+                              "animation": Object {
+                                "scale": 1,
+                              },
+                              "colors": Object {
+                                "accent": "#F2680E",
+                                "backdrop": "rgba(0, 0, 0, 0.5)",
+                                "background": "#e9e9e9",
+                                "deficient": "#FF3333",
+                                "disabled": "rgba(0, 0, 0, 0.26)",
+                                "error": "#FF2D55",
+                                "gps": "#007AFE",
+                                "notification": "#FF9400",
+                                "onBackground": "#000000",
+                                "onSurface": "#FF9400",
+                                "placeholder": "rgba(0, 0, 0, 0.54)",
+                                "primary": "#FF9400",
+                                "secondaryText": "#888",
+                                "success": "#34C759",
+                                "surface": "#FFFFFF",
+                                "text": "#000000",
+                              },
+                              "dark": false,
+                              "fonts": Object {
+                                "light": Object {
+                                  "fontFamily": "System",
+                                  "fontWeight": "300",
+                                },
+                                "medium": Object {
+                                  "fontFamily": "System",
+                                  "fontWeight": "500",
+                                },
+                                "regular": Object {
+                                  "fontFamily": "System",
+                                  "fontWeight": "400",
+                                },
+                                "thin": Object {
+                                  "fontFamily": "System",
+                                  "fontWeight": "100",
+                                },
+                              },
+                              "roundness": 4,
                             }
                           }
                         >
                           <View
                             style={
-                              Object {
-                                "alignItems": "center",
-                                "bottom": 0,
-                                "justifyContent": "center",
-                                "left": 0,
-                                "position": "absolute",
-                                "right": 0,
-                                "top": 0,
-                              }
+                              Array [
+                                Object {
+                                  "alignItems": "center",
+                                  "justifyContent": "center",
+                                },
+                                undefined,
+                              ]
                             }
                           >
                             <View
+                              collapsable={false}
                               style={
                                 Object {
                                   "height": 48,
-                                  "transform": Array [
-                                    Object {
-                                      "rotate": "45deg",
-                                    },
-                                  ],
+                                  "opacity": 1,
                                   "width": 48,
                                 }
                               }
                             >
                               <View
-                                collapsable={false}
                                 style={
                                   Object {
-                                    "height": 24,
-                                    "overflow": "hidden",
-                                    "width": 48,
+                                    "alignItems": "center",
+                                    "bottom": 0,
+                                    "justifyContent": "center",
+                                    "left": 0,
+                                    "position": "absolute",
+                                    "right": 0,
+                                    "top": 0,
                                   }
                                 }
                               >
@@ -282,10 +288,7 @@ exports[`WebViewScreen should render 1`] = `
                                       "height": 48,
                                       "transform": Array [
                                         Object {
-                                          "translateY": 0,
-                                        },
-                                        Object {
-                                          "rotate": "-165deg",
+                                          "rotate": "45deg",
                                         },
                                       ],
                                       "width": 48,
@@ -305,53 +308,55 @@ exports[`WebViewScreen should render 1`] = `
                                     <View
                                       style={
                                         Object {
-                                          "borderColor": "#FF9400",
-                                          "borderRadius": 24,
-                                          "borderWidth": 4.8,
                                           "height": 48,
+                                          "transform": Array [
+                                            Object {
+                                              "translateY": 0,
+                                            },
+                                            Object {
+                                              "rotate": "-165deg",
+                                            },
+                                          ],
                                           "width": 48,
                                         }
                                       }
-                                    />
+                                    >
+                                      <View
+                                        collapsable={false}
+                                        style={
+                                          Object {
+                                            "height": 24,
+                                            "overflow": "hidden",
+                                            "width": 48,
+                                          }
+                                        }
+                                      >
+                                        <View
+                                          style={
+                                            Object {
+                                              "borderColor": "#FF9400",
+                                              "borderRadius": 24,
+                                              "borderWidth": 4.8,
+                                              "height": 48,
+                                              "width": 48,
+                                            }
+                                          }
+                                        />
+                                      </View>
+                                    </View>
                                   </View>
                                 </View>
                               </View>
-                            </View>
-                          </View>
-                          <View
-                            style={
-                              Object {
-                                "alignItems": "center",
-                                "bottom": 0,
-                                "justifyContent": "center",
-                                "left": 0,
-                                "position": "absolute",
-                                "right": 0,
-                                "top": 0,
-                              }
-                            }
-                          >
-                            <View
-                              style={
-                                Object {
-                                  "height": 48,
-                                  "transform": Array [
-                                    Object {
-                                      "rotate": "45deg",
-                                    },
-                                  ],
-                                  "width": 48,
-                                }
-                              }
-                            >
                               <View
-                                collapsable={false}
                                 style={
                                   Object {
-                                    "height": 24,
-                                    "overflow": "hidden",
-                                    "top": 24,
-                                    "width": 48,
+                                    "alignItems": "center",
+                                    "bottom": 0,
+                                    "justifyContent": "center",
+                                    "left": 0,
+                                    "position": "absolute",
+                                    "right": 0,
+                                    "top": 0,
                                   }
                                 }
                               >
@@ -361,10 +366,7 @@ exports[`WebViewScreen should render 1`] = `
                                       "height": 48,
                                       "transform": Array [
                                         Object {
-                                          "translateY": -24,
-                                        },
-                                        Object {
-                                          "rotate": "345deg",
+                                          "rotate": "45deg",
                                         },
                                       ],
                                       "width": 48,
@@ -377,6 +379,7 @@ exports[`WebViewScreen should render 1`] = `
                                       Object {
                                         "height": 24,
                                         "overflow": "hidden",
+                                        "top": 24,
                                         "width": 48,
                                       }
                                     }
@@ -384,14 +387,42 @@ exports[`WebViewScreen should render 1`] = `
                                     <View
                                       style={
                                         Object {
-                                          "borderColor": "#FF9400",
-                                          "borderRadius": 24,
-                                          "borderWidth": 4.8,
                                           "height": 48,
+                                          "transform": Array [
+                                            Object {
+                                              "translateY": -24,
+                                            },
+                                            Object {
+                                              "rotate": "345deg",
+                                            },
+                                          ],
                                           "width": 48,
                                         }
                                       }
-                                    />
+                                    >
+                                      <View
+                                        collapsable={false}
+                                        style={
+                                          Object {
+                                            "height": 24,
+                                            "overflow": "hidden",
+                                            "width": 48,
+                                          }
+                                        }
+                                      >
+                                        <View
+                                          style={
+                                            Object {
+                                              "borderColor": "#FF9400",
+                                              "borderRadius": 24,
+                                              "borderWidth": 4.8,
+                                              "height": 48,
+                                              "width": 48,
+                                            }
+                                          }
+                                        />
+                                      </View>
+                                    </View>
                                   </View>
                                 </View>
                               </View>
@@ -402,7 +433,7 @@ exports[`WebViewScreen should render 1`] = `
                     </View>
                   </View>
                 </View>
-              </View>
+              </RCTScrollView>
             </View>
           </View>
         </View>
