@@ -13,32 +13,29 @@ import WebViewScreen from 'src/components/WebViewScreen';
 import { assignmentsDb, structuresDb } from 'src/services/mongodb';
 import { urlMatch } from 'src/utils/urlMatch';
 import { User } from 'src/types';
+import usePrevious from 'src/utils/usePrevious';
+import LoadingOverlay from 'src/components/LoadingOverlay';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 
 function getScheduleUri(user: User) {
   return `${user.features.schedule_feature.url}&user_credentials=${user.single_access_token}`;
 }
 
-const RefreshScheduleSubmitting: React.FC<{
-  webRef: WebView | null;
-}> = ({ webRef }) => {
-  useEffect(() => {
-    return () => {
-      // we use refresh webview as ref to reload the webview schedule when it's in stack navigation
-      if (webRef) {
-        webRef.reload();
-      }
-    };
-  }, [webRef]);
-  return null;
-};
-
 const ScheduleScreen: React.FC<{}> = () => {
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
-  const isSubmittingSchedule = PersistentUserStore.useState((s) => s.isSubmittingSchedule);
+  const pendingUploads = PersistentUserStore.useState(
+    (s) => s.pendingUploads.filter((pending) => !pending.submittedAt && !!pending.draft.eventId).length,
+  );
+  const previousPendingUploads = usePrevious(pendingUploads);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (Number(previousPendingUploads) > 0 && pendingUploads === 0 && connected) {
+      webRef?.current?.reload();
+    }
+  }, [previousPendingUploads, pendingUploads, connected]);
 
   if (!userData) {
     return <View />;
@@ -46,7 +43,6 @@ const ScheduleScreen: React.FC<{}> = () => {
 
   return (
     <>
-      {isSubmittingSchedule && connected && <RefreshScheduleSubmitting webRef={webRef.current} />}
       <WebViewScreen
         ref={webRef}
         source={{ uri: getScheduleUri(userData) }}
@@ -112,6 +108,7 @@ const ScheduleScreen: React.FC<{}> = () => {
           }
         }}
       />
+      {pendingUploads > 0 && connected && <LoadingOverlay />}
     </>
   );
 };

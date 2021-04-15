@@ -122,26 +122,12 @@ async function photoUploader(
   }
 }
 
-function setSubmittingSchedule(pendingUpload: PendingUpload, isSubmitting: boolean) {
-  const { draft } = pendingUpload;
-  if (draft.eventId) {
-    // update to isSubmitting
-    PersistentUserStore.update((s) => {
-      return {
-        ...s,
-        isSubmittingSchedule: isSubmitting,
-      };
-    });
-  }
-}
-
 async function formUploader(token: string, companyId: string, pendingUpload: PendingUpload) {
   setUploadingFieldAction(pendingUpload, 'state', 'form');
 
   console.log('formUploader init: ', pendingUpload.draft.guid);
 
   // Update schedule submitted to reload
-  setSubmittingSchedule(pendingUpload, true);
   const [submitError] = await axiosCatchTo(() => submitInspection({ pendingUpload, token, companyId }));
 
   if (!submitError) {
@@ -153,8 +139,6 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
 
     setUploadingErrorAction(pendingUpload, `Could not submit`);
   }
-
-  setSubmittingSchedule(pendingUpload, false);
 }
 
 export function useUploader(): ReturnType<typeof useTrigger> {

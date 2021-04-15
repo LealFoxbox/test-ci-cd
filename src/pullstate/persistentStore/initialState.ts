@@ -25,7 +25,6 @@ export type PersistentState = {
   drafts: Record<string, DraftForm>; // the key is assignmentId
   pendingUploads: PendingUpload[];
   uploads: PendingUpload[];
-  isSubmittingSchedule: boolean;
 };
 
 export const initialState: PersistentState = {
@@ -48,5 +47,4 @@ export const initialState: PersistentState = {
   drafts: {},
   pendingUploads: [],
   uploads: [],
-  isSubmittingSchedule: false,
 };
