@@ -127,13 +127,11 @@ async function formUploader(token: string, companyId: string, pendingUpload: Pen
 
   console.log('formUploader init: ', pendingUpload.draft.guid);
 
-  // Update schedule submitted to reload
   const [submitError] = await axiosCatchTo(() => submitInspection({ pendingUpload, token, companyId }));
 
   if (!submitError) {
     console.log('formUploader SUCCESS!');
     setFormSubmittedAction(pendingUpload);
-    // Complete schedule submitted
   } else {
     console.warn(`Could not submit draft guid ${pendingUpload.draft.guid} with submitError: `, submitError);
 

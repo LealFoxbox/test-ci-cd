@@ -25,17 +25,17 @@ const ScheduleScreen: React.FC<{}> = () => {
   const webRef = useRef<WebView>(null);
   const connected = useNetworkStatus();
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
-  const pendingUploads = PersistentUserStore.useState(
+  const pendingScheduleUploadsLength = PersistentUserStore.useState(
     (s) => s.pendingUploads.filter((pending) => !!pending.draft.eventId).length,
   );
-  const previousPendingUploads = usePrevious(pendingUploads);
+  const previousPendingScheduledUploadsLength = usePrevious(pendingScheduleUploadsLength);
   const navigation = useNavigation();
 
   useEffect(() => {
-    if (Number(previousPendingUploads) > 0 && pendingUploads === 0 && connected) {
+    if (!!previousPendingScheduledUploadsLength && pendingScheduleUploadsLength === 0 && connected) {
       webRef?.current?.reload();
     }
-  }, [previousPendingUploads, pendingUploads, connected]);
+  }, [previousPendingScheduledUploadsLength, pendingScheduleUploadsLength, connected]);
 
   if (!userData) {
     return <View />;
@@ -108,7 +108,7 @@ const ScheduleScreen: React.FC<{}> = () => {
           }
         }}
       />
-      {pendingUploads > 0 && connected && <LoadingOverlay />}
+      {pendingScheduleUploadsLength > 0 && connected && <LoadingOverlay />}
     </>
   );
 };
