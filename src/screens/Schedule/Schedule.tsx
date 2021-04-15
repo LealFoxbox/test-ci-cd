@@ -26,7 +26,7 @@ const ScheduleScreen: React.FC<{}> = () => {
   const connected = useNetworkStatus();
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
   const pendingUploads = PersistentUserStore.useState(
-    (s) => s.pendingUploads.filter((pending) => !pending.submittedAt && !!pending.draft.eventId).length,
+    (s) => s.pendingUploads.filter((pending) => !!pending.draft.eventId).length,
   );
   const previousPendingUploads = usePrevious(pendingUploads);
   const navigation = useNavigation();
