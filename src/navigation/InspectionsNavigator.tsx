@@ -103,7 +103,6 @@ const InspectionsNavigator: React.FC = () => {
           title: 'Inspections',
           hasSubheader: true,
           hasSearch: true,
-          showLocationPath: true,
         }}
       />
       <Stack.Screen name={INSPECTIONS_CHILDREN} component={InspectionsScreen} />
