@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, Text, TextInput } from 'react-native-paper';
+import { View } from 'react-native';
+import { Card, HelperText, Text, TextInput } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 
 import { styled } from 'src/paperTheme';
@@ -35,6 +36,8 @@ const NumberCard: React.FC<NumberCardProps> = ({
   isReadonly,
   showComment,
   allowDelete,
+  error,
+  errorMessage,
 }) => {
   return (
     <Container>
@@ -52,15 +55,22 @@ const NumberCard: React.FC<NumberCardProps> = ({
         />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
           {!!rating?.prefix && <Text>{rating.prefix}</Text>}
-          <TextInput
-            style={{ marginBottom: 10, flex: 1, marginHorizontal: 5 }}
-            keyboardType="decimal-pad"
-            autoCapitalize="none"
-            placeholder="Enter a number"
-            dense
-            {...numberInputProps}
-            disabled={isReadonly}
-          />
+          <View style={{ marginHorizontal: 5 }}>
+            <TextInput
+              style={{ flex: 1 }}
+              keyboardType="decimal-pad"
+              autoCapitalize="none"
+              placeholder="Enter a number"
+              dense
+              {...numberInputProps}
+              disabled={isReadonly}
+            />
+            {error && (
+              <HelperText type="error" visible padding="none">
+                {errorMessage}
+              </HelperText>
+            )}
+          </View>
           {!!rating?.suffix && <Text>{rating.suffix}</Text>}
         </Card.Content>
         <CardFooter

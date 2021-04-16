@@ -29,6 +29,7 @@ import getCurrentPosition from 'src/utils/getCurrentPosition';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
+import { validateFormScreen } from './validation';
 import OptionRow from './OptionRow';
 
 async function updateSignature(
@@ -325,6 +326,7 @@ const EditFormScreen: React.FC<{}> = () => {
                   dark
                   style={{ marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
                   icon="arrow-up-circle"
+                  disabled={!validateFormScreen(formikProps.values)}
                 >
                   Submit
                 </Button>

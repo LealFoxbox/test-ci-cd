@@ -14,6 +14,8 @@ export interface TextCardProps {
   onDelete: () => void;
   allowDelete: boolean;
   isReadonly: boolean;
+  error?: boolean;
+  errorMessage?: string;
 }
 
 export interface BaseCardProps extends TextCardProps {
