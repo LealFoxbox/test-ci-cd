@@ -9,6 +9,7 @@ import { Title } from 'react-native-paper';
 import { updateDraftFieldsAction } from 'src/pullstate/formActions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
+import { isCorrectNumberCard } from 'src/screens/Inspections/FormScreen/validation';
 
 import TextCard from './TextCard';
 import NumberCard from './NumberCard';
@@ -156,7 +157,15 @@ export const createRenderCard = (
         theme,
       };
 
-      return <NumberCard {...baseCardProps} rating={rating as NumberRating} numberInputProps={numberInputProps} />;
+      return (
+        <NumberCard
+          {...baseCardProps}
+          rating={rating as NumberRating}
+          numberInputProps={numberInputProps}
+          error={!isCorrectNumberCard(numberInputProps.value)}
+          errorMessage={'Incorrect format.'}
+        />
+      );
     }
 
     if (fieldValue.ratingTypeId === 5) {
