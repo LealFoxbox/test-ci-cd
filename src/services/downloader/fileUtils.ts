@@ -84,7 +84,13 @@ function getFilePage(fileName: string) {
 }
 
 export function findNextPage(files: Record<string, string>) {
-  const sortedFileNames = Object.keys(files).sort();
+  const sortedFileNames = Object.keys(files).sort((a, b) => {
+    const aTypeAndPage = a.split(' ')[0];
+    const bTypeAndPage = b.split(' ')[0];
+    const aN = parseInt(aTypeAndPage.replace(/[^0-9]/g, ''), 10);
+    const bN = parseInt(bTypeAndPage.replace(/[^0-9]/g, ''), 10);
+    return aN === bN ? 0 : aN > bN ? 1 : -1;
+  });
 
   const foundIndex = sortedFileNames.findIndex((f: string, i: number) => {
     return getFilePage(f) !== i + 1;
