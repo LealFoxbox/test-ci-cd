@@ -5,6 +5,7 @@ import { last, uniq } from 'lodash/fp';
 import { downloadDir } from 'src/services/storage';
 import { isSecondsExpired } from 'src/utils/expiration';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { getFilePage } from 'src/utils/getFilePage';
 
 const dir = downloadDir;
 
@@ -72,23 +73,10 @@ function isFileExpired(fileName: string) {
   return isSecondsExpired(lastDownloaded);
 }
 
-function getFilePage(fileName: string) {
-  const typeAndPage = fileName.split(' ')[0];
-  const page = parseInt(typeAndPage.replace(/[^0-9]/g, ''), 10);
-
-  if (isNaN(page)) {
-    return null;
-  }
-
-  return page;
-}
-
 export function findNextPage(files: Record<string, string>) {
   const sortedFileNames = Object.keys(files).sort((a, b) => {
-    const aTypeAndPage = a.split(' ')[0];
-    const bTypeAndPage = b.split(' ')[0];
-    const aN = parseInt(aTypeAndPage.replace(/[^0-9]/g, ''), 10);
-    const bN = parseInt(bTypeAndPage.replace(/[^0-9]/g, ''), 10);
+    const aN = getFilePage(a) || 0;
+    const bN = getFilePage(b) || 0;
     return aN === bN ? 0 : aN > bN ? 1 : -1;
   });
 
