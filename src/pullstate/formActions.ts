@@ -121,7 +121,7 @@ function createEmptyDraftForm({
     isDirty: false,
 
     notes: form.notes,
-    categories: fromPairs(form.categories.map((c) => [c.id, c.name])),
+    categories: fromPairs(form.categories?.map((c) => [c.id, c.name])) || [],
     privateInspection: form.private_inspection,
     locationPath: structure.location_path || structure.display_name,
   };
