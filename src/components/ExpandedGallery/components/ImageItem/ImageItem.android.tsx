@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { Animated, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import { Animated, ImageStyle, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 import useImageDimensions from '../../hooks/useImageDimensions';
 import usePanResponder from '../../hooks/usePanResponder';
@@ -15,6 +15,8 @@ import { getImageStyles, getImageTransform } from '../../utils';
 import { Dimensions, ImageSource } from '../../types';
 
 import ImageLoading from './ImageLoading';
+
+import WithAnimatedObject = Animated.WithAnimatedObject;
 
 const SWIPE_CLOSE_OFFSET = 75;
 const SWIPE_CLOSE_VELOCITY = 1.75;
@@ -118,7 +120,12 @@ const ImageItem = ({
         onScrollEndDrag,
       })}
     >
-      <Animated.Image {...panHandlers} source={imageSrc} style={imageStylesWithOpacity} onLoad={onLoaded} />
+      <Animated.Image
+        {...panHandlers}
+        source={imageSrc}
+        style={imageStylesWithOpacity as WithAnimatedObject<ImageStyle>}
+        onLoad={onLoaded}
+      />
       {(!isLoaded || !imageDimensions) && <ImageLoading style={layoutStyle} />}
     </Animated.ScrollView>
   );

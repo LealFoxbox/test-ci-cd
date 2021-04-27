@@ -237,7 +237,7 @@ export interface DraftForm {
   isDirty: boolean;
   lastModified: number | null;
   notes: string | null;
-  categories: Record<string, string>; // key is categoryId, values is the name
+  categories?: Record<string, string>; // key is categoryId, values is the name
   privateInspection: boolean;
   locationPath: string;
 
