@@ -16,8 +16,6 @@ import { Dimensions, ImageSource } from '../../types';
 
 import ImageLoading from './ImageLoading';
 
-import WithAnimatedObject = Animated.WithAnimatedObject;
-
 const SWIPE_CLOSE_OFFSET = 75;
 const SWIPE_CLOSE_VELOCITY = 1.75;
 
@@ -123,7 +121,7 @@ const ImageItem = ({
       <Animated.Image
         {...panHandlers}
         source={imageSrc}
-        style={imageStylesWithOpacity as WithAnimatedObject<ImageStyle>}
+        style={imageStylesWithOpacity as Animated.WithAnimatedObject<ImageStyle>}
         onLoad={onLoaded}
       />
       {(!isLoaded || !imageDimensions) && <ImageLoading style={layoutStyle} />}
