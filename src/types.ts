@@ -25,7 +25,7 @@ export interface FormItem {
 
 export interface Form {
   id: number;
-  categories: Category[];
+  categories?: Category[];
   inspection_form_items: FormItem[];
   name: string;
   notes: string | null;
