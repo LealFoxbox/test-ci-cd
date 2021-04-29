@@ -7,6 +7,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Formik, FormikProps } from 'formik';
 import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
+import * as Sentry from '@sentry/react-native';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
@@ -26,6 +27,7 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
+import { logErrorToSentry } from 'src/utils/logger';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -79,6 +81,10 @@ function parseFieldsWithCategories(draft: DraftForm) {
 
   if (!draft.categories) {
     console.warn('[APP] FormScreen - DRAFT CATEGORIES => UNDEFINED');
+    logErrorToSentry('[APP] FormScreen - DRAFT CATEGORIES', {
+      severity: Sentry.Severity.Warning,
+      draft,
+    });
   }
 
   return toPairs(groupBy('category_id', filteredFields))

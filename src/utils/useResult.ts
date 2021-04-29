@@ -48,6 +48,7 @@ export function useResultAsync<T = unknown>(fn: () => Promise<T>, shouldTrigger:
         mounted = false;
       };
     }
+    return;
   }, [fn, shouldTrigger]);
 
   return [state.result, state.loading, state.error] as const;
