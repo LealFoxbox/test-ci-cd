@@ -82,10 +82,9 @@ function parseFieldsWithCategories(draft: DraftForm) {
   if (!draft.categories) {
     console.warn('[APP] FormScreen - DRAFT CATEGORIES => UNDEFINED');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { fields, ...draftWithoutFields } = draft;
     logErrorToSentry('[APP] FormScreen - DRAFT CATEGORIES', {
       severity: Sentry.Severity.Warning,
-      draftWithoutFields,
+      draft,
     });
   }
 
