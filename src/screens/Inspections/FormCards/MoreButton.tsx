@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,7 +8,7 @@ import RNFS from 'react-native-fs';
 
 import { downloadDir } from 'src/services/storage';
 
-type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
+type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
@@ -54,20 +54,37 @@ async function askStoragePermission() {
   }
 }
 
-function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: () => void, isAttachment: boolean) {
-  return async () => {
-    const callback = async (response: ImagePickerResponse) => {
+async function createAddHandler(
+  onTakePhoto: onTakePhotoType | undefined,
+  closeMenu: () => void,
+  enableButton: boolean,
+  enableButtonHandler: (val: boolean) => void,
+  isAttachment: boolean,
+) {
+  // flag to stop it being called again until the menu is dismissed
+  if (!enableButton) return;
+  enableButtonHandler(false);
+
+  const callback = async (response: ImagePickerResponse) => {
+    try {
       if (!response.didCancel && !response.errorCode) {
         if (response.uri) {
           const fileName = `photo - ${Date.now()}.jpg`;
           const newUri = await fileUrlCopy(response.uri, fileName);
-          onTakePhoto && onTakePhoto({ uri: newUri, fileName }, isAttachment);
+          if (onTakePhoto) {
+            await onTakePhoto({ uri: newUri, fileName }, isAttachment);
+          }
         } else {
           console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
         }
       }
-    };
+    } catch (error) {
+      console.warn('[APP] createAddHandler callback', error.message);
+    }
+    enableButtonHandler(true);
+  };
 
+  try {
     if (isAttachment) {
       const hasPermission = await askStoragePermission();
 
@@ -82,6 +99,8 @@ function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: (
           },
           callback,
         );
+      } else {
+        enableButtonHandler(true);
       }
     } else {
       const hasPermission = await askCameraPermission();
@@ -98,11 +117,15 @@ function createAddHandler(onTakePhoto: onTakePhotoType | undefined, closeMenu: (
           },
           callback,
         );
+      } else {
+        enableButtonHandler(true);
       }
     }
-
-    closeMenu();
-  };
+  } catch (error) {
+    console.warn('[APP] createAddHandler', error.message);
+    enableButtonHandler(true);
+  }
+  closeMenu();
 }
 
 const MoreButton: React.FC<MoreButtonProps> = ({
@@ -115,16 +138,19 @@ const MoreButton: React.FC<MoreButtonProps> = ({
 }) => {
   const [visible, setVisible] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+  const enableButton = useRef<boolean>(true);
 
   const theme = useTheme();
 
-  const openMenu = () => setVisible(true);
+  const enableButtonHandler = (toggleValue: boolean) => (enableButton.current = toggleValue);
 
-  const closeMenu = () => setVisible(false);
+  const openMenu = useCallback(() => setVisible(true), [setVisible]);
 
-  const handlePhoto = createAddHandler(onTakePhoto, closeMenu, false);
+  const closeMenu = useCallback(() => setVisible(false), [setVisible]);
 
-  const handleAttach = createAddHandler(onTakePhoto, closeMenu, true);
+  const handlePhoto = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false);
+
+  const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
 
   const handleDelete = () => {
     closeMenu();
