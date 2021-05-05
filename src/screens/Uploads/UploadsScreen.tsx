@@ -94,27 +94,6 @@ const UploadsScreen: React.FC<{}> = () => {
             if (!item.submittedAt) {
               const { state, progress, error } = getUploadState(uploadStates, guid);
 
-              return (
-                <UploadRow
-                  head="uploading..."
-                  title={item.draft.name}
-                  content={
-                    <>
-                      <Paragraph
-                        style={{
-                          lineHeight: 30,
-                        }}
-                      >
-                        {item.draft.locationPath}
-                      </Paragraph>
-                      <ProgressBar progress={progress / 100} color={theme.colors.primary} />
-                    </>
-                  }
-                  icon="file-document-outline"
-                  IconComponent={MaterialCommunityIcons}
-                  onPress={gotoForm}
-                />
-              );
               if (!error && state !== null) {
                 return (
                   <UploadRow
@@ -124,7 +103,7 @@ const UploadsScreen: React.FC<{}> = () => {
                       <>
                         <Paragraph
                           style={{
-                            marginVertical: 2,
+                            lineHeight: 30,
                           }}
                         >
                           {item.draft.locationPath}
