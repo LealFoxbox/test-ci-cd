@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
-import { Button, Divider, ProgressBar, useTheme } from 'react-native-paper';
+import { Button, Divider, Paragraph, ProgressBar, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { orderBy } from 'lodash/fp';
@@ -94,12 +94,44 @@ const UploadsScreen: React.FC<{}> = () => {
             if (!item.submittedAt) {
               const { state, progress, error } = getUploadState(uploadStates, guid);
 
+              return (
+                <UploadRow
+                  head="uploading..."
+                  title={item.draft.name}
+                  content={
+                    <>
+                      <Paragraph
+                        style={{
+                          lineHeight: 30,
+                        }}
+                      >
+                        {item.draft.locationPath}
+                      </Paragraph>
+                      <ProgressBar progress={progress / 100} color={theme.colors.primary} />
+                    </>
+                  }
+                  icon="file-document-outline"
+                  IconComponent={MaterialCommunityIcons}
+                  onPress={gotoForm}
+                />
+              );
               if (!error && state !== null) {
                 return (
                   <UploadRow
                     head="uploading..."
                     title={item.draft.name}
-                    content={<ProgressBar progress={progress / 100} color={theme.colors.primary} />}
+                    content={
+                      <>
+                        <Paragraph
+                          style={{
+                            marginVertical: 2,
+                          }}
+                        >
+                          {item.draft.locationPath}
+                        </Paragraph>
+                        <ProgressBar progress={progress / 100} color={theme.colors.primary} />
+                      </>
+                    }
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
                     onPress={gotoForm}
