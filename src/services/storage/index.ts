@@ -1,8 +1,8 @@
 import { PermissionsAndroid } from 'react-native';
-import RNFetchBlob, { FetchBlobResponse, RNFetchBlobConfig } from 'rn-fetch-blob';
+import ReactNativeBlobUtil, { FetchBlobResponse, ReactNativeBlobUtilConfig } from 'react-native-blob-util';
 
 interface FetchDownload {
-  options: RNFetchBlobConfig;
+  options: ReactNativeBlobUtilConfig;
   url: string;
   headers: { [key: string]: string };
 }
@@ -12,7 +12,7 @@ interface FetchUpload {
   data: { name: string; data: string; filename?: string }[];
 }
 
-export const downloadDir = RNFetchBlob.fs.dirs.DownloadDir;
+export const downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir;
 
 export async function requestStoragePermission(): Promise<boolean> {
   try {
@@ -26,12 +26,12 @@ export async function requestStoragePermission(): Promise<boolean> {
 }
 
 export async function downloaderStorage({ options, url, headers }: FetchDownload): Promise<FetchBlobResponse> {
-  return RNFetchBlob.config(options).fetch('GET', url, headers);
+  return ReactNativeBlobUtil.config(options).fetch('GET', url, headers);
 }
 
 export async function uploaderStorage({ url, data }: FetchUpload) {
   try {
-    return await RNFetchBlob.fetch(
+    return await ReactNativeBlobUtil.fetch(
       'POST',
       url,
       {
