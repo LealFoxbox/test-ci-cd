@@ -36,7 +36,12 @@ export type MainTabsNavigatorParamList = {
 
 export type MainNavigatorParamList = {
   [BOTTOM_TAB_NAVIGATOR]: undefined;
-  [SIGNATURE_MODAL]: { title: string; assignmentId: number; formFieldId: number; screenName?: string };
+  [SIGNATURE_MODAL]: {
+    title: string;
+    assignmentId: number;
+    formFieldId: number;
+    screenName?: string;
+  };
   [RATING_CHOICES_MODAL]: {
     title: string;
     assignmentId: number;

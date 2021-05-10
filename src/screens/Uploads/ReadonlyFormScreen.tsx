@@ -23,7 +23,7 @@ import OptionRow from '../Inspections/FormScreen/OptionRow';
 function parseFieldsWithCategories(draft: DraftForm) {
   const filteredFields = sortBy(
     'position',
-    Object.values(draft.fields).filter((f) => !f.deleted),
+    Object.values(draft.fields || {}).filter((f) => !f.deleted),
   );
 
   const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');

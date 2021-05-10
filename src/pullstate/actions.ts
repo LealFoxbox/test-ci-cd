@@ -1,4 +1,5 @@
-import { omit } from 'lodash/fp';
+import { fromPairs, omit } from 'lodash/fp';
+import * as Sentry from '@sentry/react-native';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
@@ -6,6 +7,7 @@ import { User } from 'src/types';
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
 import { DownloadType } from 'src/services/downloader/backDownloads';
+import { logErrorToSentry } from 'src/utils/logger';
 
 import { LoginStore } from './loginStore';
 import { initialState as loginInitialState } from './loginStore/initialState';
@@ -127,6 +129,23 @@ export const clearAllFilesPaths = (type: DownloadType) => {
       assignmentsFilePaths: {},
     }));
   }
+};
+
+export const clearDraftsEmpty = () => {
+  PersistentUserStore.update((s) => {
+    const drafts = Object.values(s.drafts || {});
+    const correctDrafts = drafts.filter((draft) => draft.assignmentId);
+    if (correctDrafts.length !== drafts.length) {
+      logErrorToSentry('[APP] ClearDrafts', {
+        severity: Sentry.Severity.Info,
+        draft: drafts.filter((draft) => !draft.assignmentId),
+      });
+    }
+    return {
+      ...s,
+      drafts: fromPairs(correctDrafts.map((draft) => [draft.assignmentId, draft])),
+    };
+  });
 };
 
 export async function clearInspectionsDataAction({

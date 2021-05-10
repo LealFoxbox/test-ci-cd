@@ -222,29 +222,39 @@ export const deleteDraftAction = (assignmentId: number) => {
 
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
   PersistentUserStore.update((persistentState) => {
-    return pipe([
-      // set draft as dirty
-      set(['drafts', assignmentId, 'isDirty'], true),
-      // set started_at if not already set
-      (s: PersistentState) =>
-        s.drafts[assignmentId].started_at ? s : set(['drafts', assignmentId, 'started_at'], Date.now(), s),
-      // update lastModified
-      (s: PersistentState) => set(['drafts', assignmentId, 'lastModified'], Date.now(), s),
-      // set all of form's values to draft's fields but with comments as null if they are empty
-      set(
-        ['drafts', assignmentId, 'fields'],
-        mapValues((field) => set('comment', field.comment || null, field), formValues),
-      ),
-    ])(persistentState) as PersistentState;
+    const currentDraft = persistentState.drafts[assignmentId];
+    if (currentDraft?.assignmentId) {
+      return pipe([
+        // set draft as dirty
+        set(['drafts', assignmentId, 'isDirty'], true),
+        // set started_at if not already set
+        (s: PersistentState) =>
+          s.drafts[assignmentId].started_at ? s : set(['drafts', assignmentId, 'started_at'], Date.now(), s),
+        // update lastModified
+        (s: PersistentState) => set(['drafts', assignmentId, 'lastModified'], Date.now(), s),
+        // set all of form's values to draft's fields but with comments as null if they are empty
+        set(
+          ['drafts', assignmentId, 'fields'],
+          mapValues((field) => set('comment', field.comment || null, field), formValues),
+        ),
+      ])(persistentState) as PersistentState;
+    } else {
+      return persistentState;
+    }
   });
 };
 
 export const updateDraftCoords = (assignmentId: number, coords: Coords) => {
   PersistentUserStore.update((s) => {
-    return pipe(
-      set(['drafts', assignmentId, 'latitude'], coords.latitude),
-      set(['drafts', assignmentId, 'longitude'], coords.longitude),
-    )(s) as PersistentState;
+    const currentDraft = s.drafts[assignmentId];
+    if (currentDraft?.assignmentId) {
+      return pipe(
+        set(['drafts', assignmentId, 'latitude'], coords.latitude),
+        set(['drafts', assignmentId, 'longitude'], coords.longitude),
+      )(s) as PersistentState;
+    } else {
+      return s;
+    }
   });
 };
 
@@ -270,17 +280,20 @@ export const submitDraftAction = (assignmentId: number) => {
       ...s.drafts[assignmentId],
       ended_at: Date.now(),
     } as DraftFormUpload;
-
-    return {
-      ...s,
-      drafts: omit([assignmentId.toString()], s.drafts),
-      pendingUploads: s.pendingUploads.concat([
-        {
-          draft: uploadDraft,
-          photoUploadUrls: {},
-          submittedAt: null,
-        },
-      ]),
-    };
+    if (s.drafts[assignmentId]?.assignmentId) {
+      return {
+        ...s,
+        drafts: omit([assignmentId.toString()], s.drafts),
+        pendingUploads: s.pendingUploads.concat([
+          {
+            draft: uploadDraft,
+            photoUploadUrls: {},
+            submittedAt: null,
+          },
+        ]),
+      };
+    } else {
+      return s;
+    }
   });
 };

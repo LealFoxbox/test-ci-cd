@@ -7,7 +7,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Formik, FormikProps } from 'formik';
 import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
-import * as Sentry from '@sentry/react-native';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
@@ -27,7 +26,6 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
-import { logErrorToSentry } from 'src/utils/logger';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -79,14 +77,6 @@ function parseFieldsWithCategories(draft: DraftForm) {
 
   const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
 
-  if (!draft.categories) {
-    console.warn('[APP] FormScreen - DRAFT CATEGORIES => UNDEFINED');
-    logErrorToSentry('[APP] FormScreen - DRAFT CATEGORIES', {
-      severity: Sentry.Severity.Warning,
-      draft,
-    });
-  }
-
   return toPairs(groupBy('category_id', filteredFields))
     .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
     .flatMap(([catId, values]) => [
@@ -113,6 +103,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const navigation = useNavigation();
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
+  const [isUpdatingSignature, setIsUpdatingSignature] = useState(false);
 
   const [expandedPhoto, setExpandedPhoto] = useState<{ photos: string[]; index: number }>({
     photos: [],
@@ -132,10 +123,12 @@ const EditFormScreen: React.FC<{}> = () => {
     // This is for when coming back from the signature screen
     (async () => {
       if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
+        setIsUpdatingSignature(false);
         const newValues = await updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
 
         if (newValues && mounted) {
           formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
+          setIsUpdatingSignature(false);
         }
       }
     })();
@@ -217,7 +210,7 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(RATING_CHOICES_MODAL, p);
   };
 
-  const deletedFields = Object.values(draft.fields).filter((f) => f.deleted);
+  const deletedFields = Object.values(draft.fields || {}).filter((f) => f.deleted);
 
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
@@ -332,7 +325,7 @@ const EditFormScreen: React.FC<{}> = () => {
                   dark
                   style={{ marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
                   icon="arrow-up-circle"
-                  disabled={!validateFormScreen(formikProps.values)}
+                  disabled={isGpsLoading || !validateFormScreen(formikProps.values) || isUpdatingSignature}
                 >
                   Submit
                 </Button>

@@ -14,7 +14,7 @@ const DEFAULT_CONTEXT = 'custom information';
 export function logErrorToSentry(description: string, context: Context = {}) {
   try {
     if (config.isDev) {
-      console.log(description, context);
+      console.warn(description, context);
       return;
     }
     const scope = new Sentry.Scope();
