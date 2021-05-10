@@ -9,7 +9,7 @@ export interface TextCardProps {
   commentInputProps: CommentInputProps;
   photos: DraftPhoto[];
   onTapPhoto: (index: number) => void;
-  onTakePhoto: (params: { uri: string; fileName: string }, isFromGallery: boolean) => void;
+  onTakePhoto: (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
   onDeletePhoto: (photo: DraftPhoto) => void;
   onDelete: () => void;
   allowDelete: boolean;
