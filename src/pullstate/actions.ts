@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react-native';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
 import { cleanMongo } from 'src/services/mongodb';
-import { User } from 'src/types';
+import { DraftForm, PendingUpload, User } from 'src/types';
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
 import { DownloadType } from 'src/services/downloader/backDownloads';
@@ -19,6 +19,22 @@ import { PersistentUserStore, initPersistentStore } from './persistentStore';
 import { initialState as persistentInitialState } from './persistentStore/initialState';
 
 let persistentStoreUnsub = () => {};
+
+export const removeDraftIncorrect = (currentDrafts: Record<string, DraftForm> = {}) => {
+  const drafts = Object.values(currentDrafts || {});
+  const correctDrafts = drafts.filter((draft) => draft.assignmentId);
+  if (correctDrafts.length !== drafts.length) {
+    logErrorToSentry('[APP][INFO][CLE-DRA]', {
+      severity: Sentry.Severity.Info,
+      draft: drafts.filter((draft) => !draft.assignmentId),
+    });
+  }
+  return fromPairs(correctDrafts.map((draft) => [draft.assignmentId, draft])) || {};
+};
+
+export const removeUploadsIncorrect = (uploads: PendingUpload[] = []) => {
+  return uploads?.filter(({ draft }) => draft?.assignmentId) || [];
+};
 
 export const loginAction = async ({ user, outdatedUserData }: { user: User; outdatedUserData?: boolean }) => {
   persistentStoreUnsub = await initPersistentStore(user.id);
@@ -133,17 +149,9 @@ export const clearAllFilesPaths = (type: DownloadType) => {
 
 export const clearDraftsEmpty = () => {
   PersistentUserStore.update((s) => {
-    const drafts = Object.values(s.drafts || {});
-    const correctDrafts = drafts.filter((draft) => draft.assignmentId);
-    if (correctDrafts.length !== drafts.length) {
-      logErrorToSentry('[APP][INFO][CLE-DRA]', {
-        severity: Sentry.Severity.Info,
-        draft: drafts.filter((draft) => !draft.assignmentId),
-      });
-    }
     return {
       ...s,
-      drafts: fromPairs(correctDrafts.map((draft) => [draft.assignmentId, draft])),
+      drafts: removeDraftIncorrect(s.drafts || {}),
     };
   });
 };
