@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -9,6 +9,9 @@ import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
 import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
 import { LoginStore } from 'src/pullstate/loginStore';
+import { clearDraftsEmpty } from 'src/pullstate/actions';
+import { PersistentUserStore } from 'src/pullstate/persistentStore';
+import { selectMongoComplete } from 'src/pullstate/selectors';
 
 import InspectionsNavigator from './InspectionsNavigator';
 import ScheduleNavigator from './ScheduleNavigator';
@@ -62,6 +65,17 @@ const MainStack = createStackNavigator<MainNavigatorParamList>();
 const BottomTabNavigator: React.FC = () => {
   const { colors } = useTheme();
   const userData = LoginStore.useState((s) => s.userData);
+  const { initialized, isMongoComplete } = PersistentUserStore.useState((s) => ({
+    initialized: s.initialized,
+    isMongoComplete: selectMongoComplete(s),
+  }));
+  const shouldQueryInspections = initialized && isMongoComplete;
+
+  useEffect(() => {
+    if (shouldQueryInspections) {
+      clearDraftsEmpty();
+    }
+  }, [shouldQueryInspections]);
 
   if (!userData) {
     return null;

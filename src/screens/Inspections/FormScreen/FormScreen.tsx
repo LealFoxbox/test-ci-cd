@@ -103,7 +103,6 @@ const EditFormScreen: React.FC<{}> = () => {
   const navigation = useNavigation();
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
-  const [isUpdatingSignature, setIsUpdatingSignature] = useState(false);
 
   const [expandedPhoto, setExpandedPhoto] = useState<{ photos: string[]; index: number }>({
     photos: [],
@@ -123,12 +122,10 @@ const EditFormScreen: React.FC<{}> = () => {
     // This is for when coming back from the signature screen
     (async () => {
       if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
-        setIsUpdatingSignature(false);
         const newValues = await updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
 
         if (newValues && mounted) {
           formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
-          setIsUpdatingSignature(false);
         }
       }
     })();
@@ -325,7 +322,7 @@ const EditFormScreen: React.FC<{}> = () => {
                   dark
                   style={{ marginTop: 10, marginBottom: 20, marginHorizontal: 10 }}
                   icon="arrow-up-circle"
-                  disabled={isGpsLoading || !validateFormScreen(formikProps.values) || isUpdatingSignature}
+                  disabled={!validateFormScreen(formikProps.values)}
                 >
                   Submit
                 </Button>

@@ -1,6 +1,7 @@
 import { flatMap, fromPairs, mapValues, omit, pipe, sample, sampleSize, set } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import RNFS from 'react-native-fs';
+import * as Sentry from '@sentry/react-native';
 
 import config, { getMockFlags } from 'src/config';
 import {
@@ -19,6 +20,7 @@ import {
   TextField,
 } from 'src/types';
 import { Coords } from 'src/utils/getCurrentPosition';
+import { logErrorToSentry } from 'src/utils/logger';
 
 import { PersistentUserStore } from './persistentStore';
 import { PersistentState } from './persistentStore/initialState';
@@ -293,6 +295,11 @@ export const submitDraftAction = (assignmentId: number) => {
         ]),
       };
     } else {
+      logErrorToSentry('[INFO][SUBMIT_DRAFT_ACTION]', {
+        severity: Sentry.Severity.Info,
+        assignmentId,
+        draft: s.drafts[assignmentId],
+      });
       return s;
     }
   });

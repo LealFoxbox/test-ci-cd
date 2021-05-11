@@ -136,7 +136,7 @@ export const clearDraftsEmpty = () => {
     const drafts = Object.values(s.drafts || {});
     const correctDrafts = drafts.filter((draft) => draft.assignmentId);
     if (correctDrafts.length !== drafts.length) {
-      logErrorToSentry('[APP] ClearDrafts', {
+      logErrorToSentry('[APP][INFO][CLE-DRA]', {
         severity: Sentry.Severity.Info,
         draft: drafts.filter((draft) => !draft.assignmentId),
       });
