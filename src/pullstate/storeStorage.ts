@@ -8,7 +8,6 @@ export type OldState = Record<string, unknown>;
 export type ReconcileFn<T> = (initialState: T, oldState: OldState) => T;
 
 // TODO: check if there's a better way to specify S has to have lastTimeThisStateChangedTypes
-
 export function initStoreStorage<S = { lastTimeThisStateChangedTypes?: string }>({
   storeName,
   store,
@@ -22,6 +21,7 @@ export function initStoreStorage<S = { lastTimeThisStateChangedTypes?: string }>
     restoreStoredData: async (reconcileFn: ReconcileFn<S>) => {
       const localStorageValue = await storage.getItem(storeName);
       const oldState = JSON.parse(localStorageValue != null ? localStorageValue : '{}') as Record<string, unknown>;
+
       const reconciledState = {
         ...reconcileFn(initialState, oldState),
         lastTimeThisStateChangedTypes: initialState.lastTimeThisStateChangedTypes,
