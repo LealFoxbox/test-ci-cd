@@ -241,6 +241,10 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
         ),
       ])(persistentState) as PersistentState;
     } else {
+      logErrorToSentry('[INFO][UPDATE_DRAFT_FIELD_ACTION]', {
+        severity: Sentry.Severity.Info,
+        assignmentId,
+      });
       return persistentState;
     }
   });
@@ -255,6 +259,10 @@ export const updateDraftCoords = (assignmentId: number, coords: Coords) => {
         set(['drafts', assignmentId, 'longitude'], coords.longitude),
       )(s) as PersistentState;
     } else {
+      logErrorToSentry('[INFO][UPDATE_DRAFT_COORDS]', {
+        severity: Sentry.Severity.Info,
+        assignmentId,
+      });
       return s;
     }
   });
