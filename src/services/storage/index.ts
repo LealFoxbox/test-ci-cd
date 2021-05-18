@@ -1,5 +1,9 @@
 import { PermissionsAndroid } from 'react-native';
 import ReactNativeBlobUtil, { FetchBlobResponse, ReactNativeBlobUtilConfig } from 'react-native-blob-util';
+import * as Sentry from '@sentry/react-native';
+
+import config from 'src/config';
+import { logErrorToSentry } from 'src/utils/logger';
 
 interface FetchDownload {
   options: ReactNativeBlobUtilConfig;
@@ -14,13 +18,45 @@ interface FetchUpload {
 
 export const downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir;
 
-export async function requestStoragePermission(): Promise<boolean> {
+export async function askStoragePermission(): Promise<boolean> {
   try {
-    const read = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
-    const write = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-    return read === PermissionsAndroid.RESULTS.GRANTED && write === PermissionsAndroid.RESULTS.GRANTED;
+    let storagePermission = true;
+    if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
+      const read = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      const write = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
+        title: 'Storage Access Permission',
+        message: 'We would like to access your photos for uploading',
+        buttonPositive: 'Okay',
+      });
+      storagePermission = read === PermissionsAndroid.RESULTS.GRANTED && write === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return storagePermission;
   } catch (error) {
-    console.warn(error.message);
+    logErrorToSentry('[INFO][askStoragePermission]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
+    return false;
+  }
+}
+
+export async function askWriteStoragePermission(): Promise<boolean> {
+  try {
+    let storagePermission = true;
+    if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
+      const checkPermission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
+        title: 'Storage Access Permission',
+        message: 'We would like to access your photos for uploading',
+        buttonPositive: 'Okay',
+      });
+      storagePermission = checkPermission === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return storagePermission;
+  } catch (error) {
+    logErrorToSentry('[INFO][askWriteStoragePermission]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
     return false;
   }
 }
@@ -40,7 +76,10 @@ export async function uploaderStorage({ url, data }: FetchUpload) {
       data,
     );
   } catch (error) {
-    console.warn('[APP][DOWNLOADER] ERROR => UPLOADER_STORAGE');
+    logErrorToSentry('[INFO][uploaderStorage]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
     throw new Error('[APP] [ERROR] uploader storage');
   }
 }

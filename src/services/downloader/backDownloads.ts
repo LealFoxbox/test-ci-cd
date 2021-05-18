@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 
-import { downloadDir, downloaderStorage, requestStoragePermission } from 'src/services/storage';
-import config from 'src/config';
+import { askStoragePermission, downloadDir, downloaderStorage } from 'src/services/storage';
 import { DownloadStore } from 'src/pullstate/downloadStore';
 
 import { getApiUrl } from '../api/utils';
@@ -30,11 +29,7 @@ export async function downloadFile(params: { type: DownloadType; subdomain: stri
   const options = {
     path: `${downloadDir}/${fileName}`,
   };
-  let storagePermission = true;
-
-  if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
-    storagePermission = await requestStoragePermission();
-  }
+  const storagePermission = await askStoragePermission();
 
   if (storagePermission) {
     const res = await downloaderStorage({
