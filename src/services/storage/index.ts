@@ -1,7 +1,9 @@
 import { PermissionsAndroid } from 'react-native';
 import ReactNativeBlobUtil, { FetchBlobResponse, ReactNativeBlobUtilConfig } from 'react-native-blob-util';
+import * as Sentry from '@sentry/react-native';
 
 import config from 'src/config';
+import { logErrorToSentry } from 'src/utils/logger';
 
 interface FetchDownload {
   options: ReactNativeBlobUtilConfig;
@@ -30,7 +32,10 @@ export async function askStoragePermission(): Promise<boolean> {
     }
     return storagePermission;
   } catch (error) {
-    console.warn(error.message);
+    logErrorToSentry('[INFO][askStoragePermission]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
     return false;
   }
 }
@@ -46,10 +51,12 @@ export async function askWriteStoragePermission(): Promise<boolean> {
       });
       storagePermission = checkPermission === PermissionsAndroid.RESULTS.GRANTED;
     }
-    console.warn('response', storagePermission);
     return storagePermission;
-  } catch (e) {
-    console.warn('e', e.message);
+  } catch (error) {
+    logErrorToSentry('[INFO][askWriteStoragePermission]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
     return false;
   }
 }
@@ -69,7 +76,10 @@ export async function uploaderStorage({ url, data }: FetchUpload) {
       data,
     );
   } catch (error) {
-    console.warn('[APP][DOWNLOADER] ERROR => UPLOADER_STORAGE');
+    logErrorToSentry('[INFO][uploaderStorage]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
     throw new Error('[APP] [ERROR] uploader storage');
   }
 }
