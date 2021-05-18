@@ -1,6 +1,8 @@
 import { PermissionsAndroid } from 'react-native';
 import ReactNativeBlobUtil, { FetchBlobResponse, ReactNativeBlobUtilConfig } from 'react-native-blob-util';
 
+import config from 'src/config';
+
 interface FetchDownload {
   options: ReactNativeBlobUtilConfig;
   url: string;
@@ -14,13 +16,40 @@ interface FetchUpload {
 
 export const downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir;
 
-export async function requestStoragePermission(): Promise<boolean> {
+export async function askStoragePermission(): Promise<boolean> {
   try {
-    const read = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
-    const write = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-    return read === PermissionsAndroid.RESULTS.GRANTED && write === PermissionsAndroid.RESULTS.GRANTED;
+    let storagePermission = true;
+    if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
+      const read = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      const write = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
+        title: 'Storage Access Permission',
+        message: 'We would like to access your photos for uploading',
+        buttonPositive: 'Okay',
+      });
+      storagePermission = read === PermissionsAndroid.RESULTS.GRANTED && write === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return storagePermission;
   } catch (error) {
     console.warn(error.message);
+    return false;
+  }
+}
+
+export async function askWriteStoragePermission(): Promise<boolean> {
+  try {
+    let storagePermission = true;
+    if (parseInt(config.SYSTEM_VERSION, 10) < 10) {
+      const checkPermission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
+        title: 'Storage Access Permission',
+        message: 'We would like to access your photos for uploading',
+        buttonPositive: 'Okay',
+      });
+      storagePermission = checkPermission === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    console.warn('response', storagePermission);
+    return storagePermission;
+  } catch (e) {
+    console.warn('e', e.message);
     return false;
   }
 }

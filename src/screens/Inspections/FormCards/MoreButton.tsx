@@ -6,7 +6,7 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 
-import { downloadDir } from 'src/services/storage';
+import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
 
 type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
@@ -31,20 +31,6 @@ async function askCameraPermission() {
     const response = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
       title: 'Camera Access Permission',
       message: 'We would like to use your camera',
-      buttonPositive: 'Okay',
-    });
-
-    return response === PermissionsAndroid.RESULTS.GRANTED;
-  } catch (e) {
-    return false;
-  }
-}
-
-async function askStoragePermission() {
-  try {
-    const response = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
-      title: 'Storage Access Permission',
-      message: 'We would like to access your photos for uploading',
       buttonPositive: 'Okay',
     });
 
@@ -86,7 +72,7 @@ async function createAddHandler(
 
   try {
     if (isAttachment) {
-      const hasPermission = await askStoragePermission();
+      const hasPermission = await askWriteStoragePermission();
 
       if (hasPermission) {
         launchImageLibrary(
