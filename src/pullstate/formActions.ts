@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/react-native';
 
 import config, { getMockFlags } from 'src/config';
 import {
+  BaseField,
   DraftField,
   DraftForm,
   DraftFormUpload,
@@ -36,6 +37,10 @@ interface FormCreationParams {
   coords: { latitude: number | null; longitude: number | null };
 }
 
+export function getFormFieldId(field: BaseField): number {
+  return field?.id ? field.id : field.formFieldId;
+}
+
 function createEmptyDraftForm({
   form,
   assignmentId,
@@ -51,7 +56,7 @@ function createEmptyDraftForm({
     const baseField = {
       name: field.display_name,
       deleted: false,
-
+      id: field.id || 'id',
       rating_id: rating?.id,
       formFieldId: field.line_item_id,
       weight: field.weight,
@@ -119,7 +124,7 @@ function createEmptyDraftForm({
     private: false,
     latitude: coords.latitude,
     longitude: coords.longitude,
-    fields: fromPairs(fields.map((field) => [field.formFieldId, field])),
+    fields: fromPairs(fields.map((field) => [getFormFieldId(field), field])),
     isDirty: false,
 
     notes: form.notes,

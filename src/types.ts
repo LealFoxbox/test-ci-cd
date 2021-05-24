@@ -174,7 +174,7 @@ export interface DraftPhoto {
   created_at: number; // timestamp in format "2020-01-08T14:52:56-07:00",
 }
 
-interface BaseField {
+export interface BaseField {
   name: string;
   deleted: boolean;
 
@@ -187,6 +187,7 @@ interface BaseField {
   comment: string | null; //  If the user adds a comment to a line item, then clients should send the comment as a string. Otherwise, set as null. Ratings of type Textfield will save their result to the comment field.
 
   photos: DraftPhoto[];
+  id?: number;
 }
 
 export interface ScoreField extends BaseField {

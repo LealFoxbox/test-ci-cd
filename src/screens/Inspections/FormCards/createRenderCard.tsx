@@ -6,7 +6,7 @@ import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
 import { Title } from 'react-native-paper';
 
-import { updateDraftFieldsAction } from 'src/pullstate/formActions';
+import { getFormFieldId, updateDraftFieldsAction } from 'src/pullstate/formActions';
 import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { isCorrectNumberCard } from 'src/screens/Inspections/FormScreen/validation';
@@ -65,7 +65,7 @@ export const createRenderCard = (
       return <Title style={{ marginLeft: 10 }}>{draftField}</Title>;
     }
 
-    const fieldValue = values[draftField.formFieldId];
+    const fieldValue = values[getFormFieldId(draftField)];
     const rating = ratings[fieldValue.rating_id] as Rating | undefined;
 
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
@@ -82,14 +82,14 @@ export const createRenderCard = (
         created_at: Date.now(),
       };
 
-      const newValues = set(`${draftField.formFieldId}.photos`, fieldValue.photos.concat([newPhoto]), values);
+      const newValues = set(`${getFormFieldId(draftField)}.photos`, fieldValue.photos.concat([newPhoto]), values);
 
-      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
     const handleDeletePhoto = async (photo: DraftPhoto) => {
       const newPhotos = differenceBy({ uri: photo.uri }, fieldValue.photos, [photo]);
-      const newValues = set(`${draftField.formFieldId}.photos`, newPhotos, values);
+      const newValues = set(`${getFormFieldId(draftField)}.photos`, newPhotos, values);
 
       try {
         await RNFS.unlink(photo.uri);
@@ -97,17 +97,17 @@ export const createRenderCard = (
         console.warn('[APP] UNLINK');
       }
 
-      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
     const handleAddComment = () => {
-      setFieldValue(`${fieldValue.formFieldId}`, set('comment', '', fieldValue));
+      setFieldValue(`${getFormFieldId(fieldValue)}`, set('comment', '', fieldValue));
     };
     const handleDelete = () => {
-      const newValues = set(`${draftField.formFieldId}.deleted`, true, values);
+      const newValues = set(`${getFormFieldId(draftField)}.deleted`, true, values);
 
       // prevented the user from deleting every single field
-      setFieldValue(`${fieldValue.formFieldId}`, newValues[fieldValue.formFieldId]);
+      setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
       updateDraftFieldsAction(assignmentId, newValues);
     };
 
@@ -116,7 +116,7 @@ export const createRenderCard = (
     const commentInputProps: CommentInputProps = {
       value: fieldValue.comment,
       onChangeText: (value) => {
-        setFieldValue(`${fieldValue.formFieldId}`, { ...fieldValue, comment: value });
+        setFieldValue(`${getFormFieldId(fieldValue)}`, { ...fieldValue, comment: value });
       },
       onBlur: handleBlur,
       placeholder: 'Add a comment...',
@@ -124,8 +124,8 @@ export const createRenderCard = (
     };
 
     const textCardProps = {
-      id: fieldValue.formFieldId,
-      key: fieldValue.formFieldId,
+      id: getFormFieldId(fieldValue),
+      key: getFormFieldId(fieldValue),
       name: fieldValue.name,
       description: fieldValue.description,
       commentInputProps: commentInputProps,
@@ -148,7 +148,7 @@ export const createRenderCard = (
       const numberInputProps: TextInputProps = {
         value: fieldValue.number_choice || '',
         onChangeText: (value) => {
-          setFieldValue(`${fieldValue.formFieldId}`, {
+          setFieldValue(`${getFormFieldId(fieldValue)}`, {
             ...fieldValue,
             number_choice: value,
           });
@@ -173,7 +173,7 @@ export const createRenderCard = (
         <SignatureCard
           {...baseCardProps}
           onOpen={() => {
-            goToSignature(fieldValue.formFieldId);
+            goToSignature(getFormFieldId(fieldValue));
           }}
         />
       );
@@ -188,7 +188,7 @@ export const createRenderCard = (
             goToRatingChoices({
               title: rating?.name || '',
               ratingId: rating?.id || 0,
-              formFieldId: fieldValue.formFieldId,
+              formFieldId: getFormFieldId(fieldValue),
             })
           }
         />
@@ -206,9 +206,9 @@ export const createRenderCard = (
           selectedRangeChoice={selectedRangeChoice}
           rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
-            const newValues = set(`${draftField.formFieldId}.selectedChoice`, choice, values);
+            const newValues = set(`${getFormFieldId(draftField)}.selectedChoice`, choice, values);
 
-            setFieldValue(`${fieldValue.formFieldId}`, newValues[draftField.formFieldId]);
+            setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(draftField)]);
             updateDraftFieldsAction(assignmentId, newValues);
           }}
         />
