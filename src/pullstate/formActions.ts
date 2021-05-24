@@ -56,7 +56,7 @@ function createEmptyDraftForm({
     const baseField = {
       name: field.display_name,
       deleted: false,
-      id: field.id || 'id',
+      id: field.id,
       rating_id: rating?.id,
       formFieldId: field.line_item_id,
       weight: field.weight,
