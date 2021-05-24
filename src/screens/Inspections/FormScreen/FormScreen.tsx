@@ -20,6 +20,7 @@ import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
 import {
+  getFormFieldId,
   submitDraftAction,
   updateDraftCoords,
   updateDraftFieldsAction,
@@ -209,6 +210,7 @@ const EditFormScreen: React.FC<{}> = () => {
 
   const deletedFields = Object.values(draft.fields || {}).filter((f) => f.deleted);
 
+  const draftData = parseFieldsWithCategories(draft);
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
@@ -328,8 +330,8 @@ const EditFormScreen: React.FC<{}> = () => {
                 </Button>
               </>
             }
-            data={parseFieldsWithCategories(draft)}
-            keyExtractor={(item) => (isString(item) ? item : `${item.formFieldId}`)}
+            data={draftData}
+            keyExtractor={(item) => (isString(item) ? item : `${getFormFieldId(item)}`)}
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,
               assignmentId,

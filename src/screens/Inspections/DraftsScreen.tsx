@@ -45,7 +45,7 @@ const DraftsScreen: React.FC<{}> = () => {
                 };
                 navigation.navigate(INSPECTIONS_FORM, p);
               }}
-              hasPhotos={Object.values(item.fields || {}).some((f) => f.photos.length > 0)}
+              hasPhotos={Object.values(item.fields || {}).some((f) => f.photos?.length > 0)}
               lastModified={item.lastModified || item.started_at || Date.now()}
             />
           </SwipableRow>

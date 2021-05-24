@@ -16,6 +16,7 @@ import { RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/M
 import { UploadsNavigatorParamList } from 'src/navigation/UploadsNavigator';
 import { DraftForm } from 'src/types';
 import { useResult } from 'src/utils/useResult';
+import { getFormFieldId } from 'src/pullstate/formActions';
 
 import { createRenderCard } from '../Inspections/FormCards/createRenderCard';
 import OptionRow from '../Inspections/FormScreen/OptionRow';
@@ -208,7 +209,7 @@ const ReadonlyFormScreen: React.FC<{}> = () => {
           </>
         }
         data={parseFieldsWithCategories(draft)}
-        keyExtractor={(item) => (isString(item) ? item : `${item.formFieldId}`)}
+        keyExtractor={(item) => (isString(item) ? item : `${getFormFieldId(item)}`)}
         renderItem={createRenderCard(
           {
             values: draft.fields,
