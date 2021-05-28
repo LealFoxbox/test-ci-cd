@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { BackHandler, FlatList, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ActivityIndicator, Button, Card, Chip, Divider, useTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -20,6 +20,7 @@ import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
 import {
+  deleteDraftAction,
   getFormFieldId,
   submitDraftAction,
   updateDraftCoords,
@@ -104,6 +105,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const navigation = useNavigation();
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
+  const componentNavigationMounted = useRef<boolean>(true);
 
   const [expandedPhoto, setExpandedPhoto] = useState<{ photos: string[]; index: number }>({
     photos: [],
@@ -116,6 +118,35 @@ const EditFormScreen: React.FC<{}> = () => {
   const [isReady, onReady] = useResult<undefined>();
 
   const hasCoordinates = !!draft && draft.latitude !== null && draft.longitude !== null;
+
+  useLayoutEffect(() => {
+    // we set goBackCallback to call in header component and remove draft without changes
+    if (componentNavigationMounted.current) {
+      navigation.setParams({
+        goBackCallback: () => {
+          if (draft?.isDirty === false) {
+            componentNavigationMounted.current = false;
+            deleteDraftAction(draft?.assignmentId);
+          }
+        },
+      });
+    }
+
+    return () => {};
+  }, [navigation, draft]);
+
+  const handleBackPress = useCallback(() => {
+    // we return false to signal that we haven't handled the event (so that RN takes care of it)
+    if (draft?.isDirty === false) {
+      deleteDraftAction(draft?.assignmentId);
+    }
+    return false;
+  }, [draft]);
+
+  useEffect(() => {
+    const hardwareBackPressListener = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => hardwareBackPressListener.remove();
+  }, [handleBackPress]);
 
   useEffect(() => {
     let mounted = true;
