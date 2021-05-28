@@ -32,7 +32,7 @@ const ClosedSearchHeader: React.FC<{ onPressSearch: () => void; title: string; h
   );
 };
 
-type Params = undefined | { title: string; hasSubheader: boolean; hasSearch: boolean };
+type Params = undefined | { title: string; hasSubheader: boolean; hasSearch: boolean; goBackCallback?: () => void };
 
 const Header: React.FC<StackHeaderProps> = (props) => {
   const params = props.scene.route.params as Params;
@@ -66,6 +66,7 @@ const Header: React.FC<StackHeaderProps> = (props) => {
       return (
         <Appbar.BackAction
           onPress={() => {
+            typeof params?.goBackCallback === 'function' && params?.goBackCallback();
             props.navigation.goBack();
           }}
         />
