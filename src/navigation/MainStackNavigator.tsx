@@ -83,7 +83,9 @@ const BottomTabNavigator: React.FC = () => {
           component={InspectionsNavigator}
           options={{
             tabBarLabel: 'Inspections',
-            tabBarIcon: ({ color }) => <MaterialIcons name="assignment" color={color} size={26} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons testID={'assignment-button-navigator'} name="assignment" color={color} size={26} />
+            ),
           }}
         />
       )}
@@ -93,7 +95,9 @@ const BottomTabNavigator: React.FC = () => {
           component={ScheduleNavigator}
           options={{
             tabBarLabel: 'Schedule',
-            tabBarIcon: ({ color }) => <MaterialIcons name="date-range" color={color} size={26} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons testID={'schedule-button-navigator'} name="date-range" color={color} size={26} />
+            ),
           }}
         />
       )}
@@ -104,7 +108,13 @@ const BottomTabNavigator: React.FC = () => {
           options={{
             tabBarLabel: 'Tickets',
             tabBarIcon: ({ color }) => (
-              <MaterialIcons name="warning" color={color} size={26} style={{ marginRight: -1 }} />
+              <MaterialIcons
+                name="warning"
+                testID={'warning-button-navigator'}
+                color={color}
+                size={26}
+                style={{ marginRight: -1 }}
+              />
             ),
           }}
         />
@@ -115,7 +125,9 @@ const BottomTabNavigator: React.FC = () => {
           component={UploadsNavigator}
           options={{
             tabBarLabel: 'Uploads',
-            tabBarIcon: ({ color }) => <MaterialIcons name="arrow-circle-up" color={color} size={26} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons testID={'uploads-button-navigator'} name="arrow-circle-up" color={color} size={26} />
+            ),
           }}
         />
       )}
@@ -124,7 +136,9 @@ const BottomTabNavigator: React.FC = () => {
         component={AccountNavigator}
         options={{
           tabBarLabel: 'Account',
-          tabBarIcon: ({ color }) => <MaterialIcons name="account-circle" color={color} size={26} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons testID={'uploads-button-navigator'} name="account-circle" color={color} size={26} />
+          ),
         }}
       />
     </TabStack.Navigator>

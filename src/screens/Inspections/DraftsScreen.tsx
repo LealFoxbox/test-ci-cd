@@ -1,8 +1,9 @@
 import React from 'react';
-import { Divider } from 'react-native-paper';
+import { Divider, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { FlatList } from 'react-native';
 import { sortBy } from 'lodash/fp';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -25,6 +26,8 @@ const DraftsScreen: React.FC<{}> = () => {
   const navigation = useNavigation();
   const drafts = PersistentUserStore.useState((s) => sortBy('started_at', Object.values(s.drafts)));
 
+  const theme = useTheme();
+
   return (
     <Container>
       <FlatList
@@ -34,7 +37,10 @@ const DraftsScreen: React.FC<{}> = () => {
         data={drafts}
         ItemSeparatorComponent={Divider}
         renderItem={({ item }) => (
-          <SwipableRow leftLabel="Delete draft" onPressLeft={() => deleteDraftAction(item.assignmentId)}>
+          <SwipableRow
+            rightLabel={<MaterialCommunityIcons color={theme.colors.surface} name="delete-outline" size={32} />}
+            onPressRight={() => deleteDraftAction(item.assignmentId)}
+          >
             <DraftRow
               label={item.name}
               content={item.locationPath}
