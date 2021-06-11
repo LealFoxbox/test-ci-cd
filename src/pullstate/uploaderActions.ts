@@ -1,5 +1,5 @@
 import RNFS from 'react-native-fs';
-import { find, findIndex, mapValues, omit, set } from 'lodash/fp';
+import { find, findIndex, flatMap, mapValues, omit, set } from 'lodash/fp';
 
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { UploadStore } from 'src/pullstate/uploadStore';
@@ -123,3 +123,48 @@ export function cleanUploadErrorsAction() {
     return mapValues((u) => ({ ...u, error: null }), s);
   });
 }
+
+export const deleteUploadAction = (guid: string) => {
+  PersistentUserStore.update((s) => {
+    const draft = s.uploads.find((u) => u.draft.guid === guid)?.draft;
+    const allPhotos = flatMap('photos', draft?.fields) as DraftPhoto[];
+    allPhotos.forEach((photo) => {
+      try {
+        void RNFS.unlink(photo.uri);
+      } catch (e) {
+        console.warn('deleteDraftAction photo unlink error: ', e);
+      }
+    });
+
+    return {
+      ...s,
+      uploads: s.uploads.filter((u) => u.draft.guid !== guid),
+    };
+  });
+};
+
+export const deleteUploadingAction = (upload: PendingUpload) => {
+  const { guid } = upload.draft;
+  PersistentUserStore.update((s) => {
+    const uploadDraft = s.uploads.find((u) => u.draft.guid === guid)?.draft;
+    const pendingDraft = s.pendingUploads.find((u) => u.draft.guid === guid)?.draft;
+    const allPhotos = flatMap('photos', uploadDraft?.fields) as DraftPhoto[];
+    const allPendingPhotos = flatMap('photos', pendingDraft?.fields) as DraftPhoto[];
+    [...allPhotos, ...allPendingPhotos].forEach((photo) => {
+      try {
+        void RNFS.unlink(photo.uri);
+      } catch (e) {
+        console.warn('deleteDraftAction photo unlink error: ', e);
+      }
+    });
+    return {
+      ...s,
+      pendingUploads: s.pendingUploads.filter((p) => p.draft.guid !== guid),
+      uploads: s.uploads.filter((u) => u.draft.guid !== guid),
+    };
+  });
+
+  UploadStore.update((s) => {
+    return omit([guid], s);
+  });
+};

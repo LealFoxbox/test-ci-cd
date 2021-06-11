@@ -106,6 +106,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
   const componentNavigationMounted = useRef<boolean>(true);
+  const componentMounted = useRef<boolean>(true);
 
   const [expandedPhoto, setExpandedPhoto] = useState<{ photos: string[]; index: number }>({
     photos: [],
@@ -149,21 +150,21 @@ const EditFormScreen: React.FC<{}> = () => {
   }, [handleBackPress]);
 
   useEffect(() => {
-    let mounted = true;
-
     // This is for when coming back from the signature screen
+    componentMounted.current = true;
+
     (async () => {
       if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
         const newValues = await updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
 
-        if (newValues && mounted) {
+        if (newValues && componentMounted.current) {
           formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
         }
       }
     })();
 
     return () => {
-      mounted = false;
+      componentMounted.current = false;
     };
   }, [assignmentId, newPhoto, previousPhoto]);
 
@@ -181,8 +182,7 @@ const EditFormScreen: React.FC<{}> = () => {
   }, [assignmentId, rangeChoicesSelection, previousRangeChoicesSelection]);
 
   useEffect(() => {
-    let mounted = true;
-
+    componentMounted.current = true;
     (async () => {
       if (!hasCoordinates && draft) {
         setGpsLoading(true);
@@ -190,14 +190,14 @@ const EditFormScreen: React.FC<{}> = () => {
 
         updateDraftCoords(draft.assignmentId, coords);
 
-        if (mounted) {
+        if (componentMounted.current) {
           setGpsLoading(false);
         }
       }
     })();
 
     return () => {
-      mounted = false;
+      componentMounted.current = false;
     };
   }, [draft, draft?.assignmentId, hasCoordinates]);
 

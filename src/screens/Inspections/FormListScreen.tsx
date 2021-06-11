@@ -103,7 +103,7 @@ const FormListScreen: React.FC<{}> = () => {
 
               if (hasDraft) {
                 return (
-                  <SwipableRow leftLabel="Delete draft" onPressLeft={() => deleteDraftAction(item.id)}>
+                  <SwipableRow rightLabel="Delete draft" onPressRight={() => deleteDraftAction(item.id)}>
                     {row}
                   </SwipableRow>
                 );

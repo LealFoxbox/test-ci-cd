@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { Button, Divider, Paragraph, ProgressBar, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,25 +10,48 @@ import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
 import { UploadStore } from 'src/pullstate/uploadStore';
 import { getUploadState } from 'src/pullstate/uploadStore/selectors';
-import { cleanUploadErrorsAction } from 'src/pullstate/uploaderActions';
+import { cleanUploadErrorsAction, deleteUploadAction, deleteUploadingAction } from 'src/pullstate/uploaderActions';
 import { UPLOADS_READONLY_FORM } from 'src/navigation/screenNames';
 import { UploadsReadonlyFormParams } from 'src/navigation/UploadsNavigator';
 import ConnectionBanner from 'src/components/ConnectionBanner';
 import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import config, { getMockFlags } from 'src/config';
+import SwipableRow from 'src/components/SwipableRow';
+import DeleteUploadDialog from 'src/screens/Uploads/DeleteUploadDialog';
+import { PendingUpload } from 'src/types';
 
 import UploadRow from './UploadRow';
 import BlankScreen from './BlankScreen';
 
 const UploadsScreen: React.FC<{}> = () => {
+  const [visible, setVisible] = useState<boolean>(false);
   const uploads = PersistentUserStore.useState((s) =>
     s.pendingUploads.concat(orderBy('submittedAt', 'desc', s.uploads)),
   );
   const uploadStates = UploadStore.useState((s) => s);
   const isStaging = LoginStore.useState((s) => s.isStaging);
+  const [uploadDraftSelected, setUploadDraftSelected] = useState<PendingUpload>();
   const connected = useNetworkStatus();
   const theme = useTheme();
   const navigation = useNavigation();
+
+  const handleConfirmDelete = useCallback(() => {
+    if (uploadDraftSelected) {
+      deleteUploadingAction(uploadDraftSelected);
+    }
+  }, [uploadDraftSelected]);
+
+  const handlePressDeleteNotUploaded = useCallback(
+    (item: PendingUpload) => () => {
+      setUploadDraftSelected(item);
+      setVisible(true);
+    },
+    [],
+  );
+
+  const handleHideDialog = useCallback(() => {
+    setVisible(false);
+  }, []);
 
   useFocusEffect(cleanUploadErrorsAction);
 
@@ -96,54 +119,70 @@ const UploadsScreen: React.FC<{}> = () => {
 
               if (!error && state !== null) {
                 return (
-                  <UploadRow
-                    head="uploading..."
-                    title={item.draft.name}
-                    content={
-                      <>
-                        <Paragraph
-                          style={{
-                            lineHeight: 30,
-                          }}
-                        >
-                          {item.draft.locationPath}
-                        </Paragraph>
-                        <ProgressBar progress={progress / 100} color={theme.colors.primary} />
-                      </>
-                    }
-                    icon="file-document-outline"
-                    IconComponent={MaterialCommunityIcons}
-                    onPress={gotoForm}
-                  />
+                  <SwipableRow
+                    rightLabel={<MaterialCommunityIcons color={theme.colors.surface} name="delete-outline" size={32} />}
+                    onPressRight={handlePressDeleteNotUploaded(item)}
+                  >
+                    <UploadRow
+                      head="uploading..."
+                      title={item.draft.name}
+                      content={
+                        <>
+                          <Paragraph
+                            style={{
+                              lineHeight: 30,
+                            }}
+                          >
+                            {item.draft.locationPath}
+                          </Paragraph>
+                          <ProgressBar progress={progress / 100} color={theme.colors.primary} />
+                        </>
+                      }
+                      icon="file-document-outline"
+                      IconComponent={MaterialCommunityIcons}
+                      onPress={gotoForm}
+                    />
+                  </SwipableRow>
                 );
               } else {
                 return (
+                  <SwipableRow
+                    rightLabel={<MaterialCommunityIcons color={theme.colors.surface} name="delete-outline" size={32} />}
+                    onPressRight={handlePressDeleteNotUploaded(item)}
+                  >
+                    <UploadRow
+                      head="waiting to upload"
+                      title={item.draft.name}
+                      content={item.draft.locationPath}
+                      icon="file-document-outline"
+                      IconComponent={MaterialCommunityIcons}
+                      onPress={gotoForm}
+                    />
+                  </SwipableRow>
+                );
+              }
+            } else {
+              return (
+                <SwipableRow
+                  rightLabel={<MaterialCommunityIcons color={theme.colors.surface} name="delete-outline" size={32} />}
+                  onPressRight={() => deleteUploadAction(item.draft.guid)}
+                >
                   <UploadRow
-                    head="waiting to upload"
+                    head={`uploaded ${format(item.submittedAt, `MMM dd, yyyy 'at' p`)}`}
                     title={item.draft.name}
                     content={item.draft.locationPath}
                     icon="file-document-outline"
                     IconComponent={MaterialCommunityIcons}
                     onPress={gotoForm}
                   />
-                );
-              }
-            } else {
-              return (
-                <UploadRow
-                  head={`uploaded ${format(item.submittedAt, `MMM dd, yyyy 'at' p`)}`}
-                  title={item.draft.name}
-                  content={item.draft.locationPath}
-                  icon="file-document-outline"
-                  IconComponent={MaterialCommunityIcons}
-                  onPress={gotoForm}
-                />
+                </SwipableRow>
               );
             }
           }}
           keyExtractor={(item) => `${item.draft.guid}`}
         />
       )}
+      <DeleteUploadDialog onConfirm={handleConfirmDelete} hideDialog={handleHideDialog} visible={visible} />
     </View>
   );
 };
