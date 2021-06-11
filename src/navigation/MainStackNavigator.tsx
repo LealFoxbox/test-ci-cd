@@ -137,7 +137,7 @@ const BottomTabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Account',
           tabBarIcon: ({ color }) => (
-            <MaterialIcons testID={'uploads-button-navigator'} name="account-circle" color={color} size={26} />
+            <MaterialIcons testID={'account-button-navigator'} name="account-circle" color={color} size={26} />
           ),
         }}
       />
