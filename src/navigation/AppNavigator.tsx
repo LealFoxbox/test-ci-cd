@@ -9,6 +9,7 @@ import { LoginStore } from 'src/pullstate/loginStore';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { requestLocationPermission } from 'src/utils/getCurrentPosition';
 import { askStoragePermission } from 'src/services/storage';
+import { useAutomaticallyRemove } from 'src/services/automaticallyRemove';
 
 import AuthNavigator from './AuthNavigator';
 import MainStackNavigator from './MainStackNavigator';
@@ -21,6 +22,7 @@ function AppNavigator() {
 
   const [, triggerDownload] = useDownloader();
   const [, triggerUpload] = useUploader();
+  const [, triggerAutomaticallyRemove] = useAutomaticallyRemove();
 
   useEffect(() => {
     if (!splashHidden && status !== 'starting') {
@@ -45,6 +47,12 @@ function AppNavigator() {
       })();
     }
   }, [userData, triggerDownload, triggerUpload, status, persistentStoreIsInitialized]);
+
+  useEffect(() => {
+    if (userData && status !== 'starting' && persistentStoreIsInitialized) {
+      triggerAutomaticallyRemove();
+    }
+  }, [persistentStoreIsInitialized, status, triggerAutomaticallyRemove, userData]);
 
   if (status === 'shouldLogIn') {
     return <AuthNavigator />;
