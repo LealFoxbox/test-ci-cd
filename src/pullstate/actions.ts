@@ -2,12 +2,14 @@ import { fromPairs, omit } from 'lodash/fp';
 import * as Sentry from '@sentry/react-native';
 
 import { deleteAllJSONFiles } from 'src/services/downloader/fileUtils';
-import { cleanMongo } from 'src/services/mongodb';
+import storage from 'src/pullstate/sensitiveStorage';
+import { cleanAsyncStorage, cleanMongo } from 'src/services/mongodb';
 import { DraftForm, PendingUpload, User } from 'src/types';
 import { fetchtUser } from 'src/services/api/user';
 import { axiosCatchTo } from 'src/utils/catchTo';
 import { DownloadType } from 'src/services/downloader/backDownloads';
 import { logErrorToSentry } from 'src/utils/logger';
+import { removeAllStorage } from 'src/services/storage';
 
 import { LoginStore } from './loginStore';
 import { initialState as loginInitialState } from './loginStore/initialState';
@@ -72,6 +74,17 @@ export const logoutAction = async () => {
   PersistentUserStore.update(() => persistentInitialState);
   DownloadStore.update(() => downloadInitialState);
   UploadStore.update(() => uploadInitialState);
+};
+
+export const clearAllDataAction = async () => {
+  try {
+    await removeAllStorage();
+    await logoutAction();
+    await cleanAsyncStorage();
+    await storage.clearAll();
+  } catch (error) {
+    console.warn('error clear data', error.message);
+  }
 };
 
 export const toggleStagingAction = () => {

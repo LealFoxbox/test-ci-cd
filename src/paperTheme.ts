@@ -67,6 +67,7 @@ const {
 
 export { css, styled };
 
-export const withTheme = (WrrappedComponent: any) => paperWithTheme<{ theme: PaperTheme }, any>(WrrappedComponent);
+export const withTheme = (WrrappedComponent: any) =>
+  paperWithTheme<{ theme: PaperTheme; backgroundColor?: string }, any>(WrrappedComponent);
 
 export default paperTheme;

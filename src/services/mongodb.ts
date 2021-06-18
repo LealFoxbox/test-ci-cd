@@ -262,3 +262,11 @@ export async function cleanMongo() {
   await structuresDb.clean();
   await assignmentsDb.clean();
 }
+
+export async function cleanAsyncStorage() {
+  try {
+    await AsyncStorage.clear();
+  } catch (error) {
+    console.warn('Asyncstorage.clear', error.message);
+  }
+}

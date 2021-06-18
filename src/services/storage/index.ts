@@ -83,3 +83,14 @@ export async function uploaderStorage({ url, data }: FetchUpload) {
     throw new Error('[APP] [ERROR] uploader storage');
   }
 }
+
+export async function removeAllStorage(): Promise<void> {
+  try {
+    await ReactNativeBlobUtil.fs.unlink(downloadDir);
+  } catch (error) {
+    logErrorToSentry('[INFO][removeAllStorage]', {
+      severity: Sentry.Severity.Info,
+      infoMessage: error?.message,
+    });
+  }
+}

@@ -27,6 +27,8 @@ interface RowProps {
   onPress?: () => void;
   spinner?: boolean;
   disabled?: boolean;
+  titleColor?: string;
+  iconColor?: string;
 }
 
 const Row: React.FC<RowProps> = ({
@@ -38,15 +40,31 @@ const Row: React.FC<RowProps> = ({
   disabled,
   spinner,
   onPress,
+  titleColor,
+  iconColor,
 }) => {
   const theme = useTheme();
+  const iconComponentColor = iconColor || theme.colors.placeholder;
   const content = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingLeft: 15 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        paddingLeft: 15,
+      }}
+    >
       {spinner && <ActivityIndicator size="small" />}
-      {icon && !spinner && <IconComponent name={icon} size={24} color={theme.colors.placeholder} />}
+      {icon && !spinner && <IconComponent name={icon} size={24} color={iconComponentColor} />}
       {!icon && !spinner && <View style={{ marginRight: 24 }} />}
       <Card.Content style={{ flex: 1 }}>
-        <Title>{label}</Title>
+        <Title
+          style={{
+            color: titleColor,
+          }}
+        >
+          {label}
+        </Title>
         {isString(value) ? <Paragraph>{value}</Paragraph> : value}
       </Card.Content>
     </View>
