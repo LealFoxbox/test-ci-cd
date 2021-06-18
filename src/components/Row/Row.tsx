@@ -45,6 +45,7 @@ const Row: React.FC<RowProps> = ({
 }) => {
   const theme = useTheme();
   const iconComponentColor = iconColor || theme.colors.placeholder;
+  const styleComponentTitle = titleColor ? { color: titleColor } : undefined;
   const content = (
     <View
       style={{
@@ -58,13 +59,7 @@ const Row: React.FC<RowProps> = ({
       {icon && !spinner && <IconComponent name={icon} size={24} color={iconComponentColor} />}
       {!icon && !spinner && <View style={{ marginRight: 24 }} />}
       <Card.Content style={{ flex: 1 }}>
-        <Title
-          style={{
-            color: titleColor,
-          }}
-        >
-          {label}
-        </Title>
+        <Title style={styleComponentTitle}>{label}</Title>
         {isString(value) ? <Paragraph>{value}</Paragraph> : value}
       </Card.Content>
     </View>
