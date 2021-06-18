@@ -68,9 +68,7 @@ exports[`Row should render 1`] = `
                   "lineHeight": 30,
                   "marginVertical": 2,
                 },
-                Object {
-                  "color": undefined,
-                },
+                undefined,
               ],
               Array [
                 Object {
@@ -79,9 +77,7 @@ exports[`Row should render 1`] = `
                   "lineHeight": 30,
                   "marginVertical": 2,
                 },
-                Object {
-                  "color": undefined,
-                },
+                undefined,
               ],
             ],
           ]
