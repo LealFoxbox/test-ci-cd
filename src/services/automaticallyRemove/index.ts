@@ -13,9 +13,9 @@ const HOURS_TO_REMOVE = 1;
 
 export function useAutomaticallyRemove(): ReturnType<typeof useTrigger> {
   const [shouldTrigger, setShouldTrigger, resetTrigger] = useTrigger();
-  const isStaging = LoginStore.useState((s) => s.isStaging);
-  const { token } = LoginStore.useState((s) => ({
+  const { token, isStaging } = LoginStore.useState((s) => ({
     token: s.userData?.single_access_token,
+    isStaging: s.isStaging,
   }));
   const pendingUploads = PersistentUserStore.useState((s) =>
     s.pendingUploads.concat(orderBy('submittedAt', 'desc', s.uploads)),
