@@ -2,6 +2,7 @@ import React from 'react';
 import { FlatList, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Divider, Text, Title, useTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { INSPECTIONS_FORM } from 'src/navigation/screenNames';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
@@ -103,7 +104,10 @@ const FormListScreen: React.FC<{}> = () => {
 
               if (hasDraft) {
                 return (
-                  <SwipableRow rightLabel="Delete draft" onPressRight={() => deleteDraftAction(item.id)}>
+                  <SwipableRow
+                    rightLabel={<MaterialCommunityIcons color={theme.colors.surface} name="delete-outline" size={32} />}
+                    onPressRight={() => deleteDraftAction(item.id)}
+                  >
                     {row}
                   </SwipableRow>
                 );
