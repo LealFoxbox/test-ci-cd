@@ -1,7 +1,6 @@
 import { flatMap, fromPairs, mapValues, omit, pipe, sample, sampleSize, set } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import RNFS from 'react-native-fs';
-import * as Sentry from '@sentry/react-native';
 
 import config, { getMockFlags } from 'src/config';
 import {
@@ -21,7 +20,6 @@ import {
   TextField,
 } from 'src/types';
 import { Coords } from 'src/utils/getCurrentPosition';
-import { logErrorToSentry } from 'src/utils/logger';
 
 import { PersistentUserStore } from './persistentStore';
 import { PersistentState } from './persistentStore/initialState';
@@ -246,10 +244,6 @@ export const updateDraftFieldsAction = (assignmentId: number, formValues: Record
         ),
       ])(persistentState) as PersistentState;
     } else {
-      logErrorToSentry('[INFO][UPDATE_DRAFT_FIELD_ACTION]', {
-        severity: Sentry.Severity.Info,
-        assignmentId,
-      });
       return persistentState;
     }
   });
@@ -264,10 +258,6 @@ export const updateDraftCoords = (assignmentId: number, coords: Coords) => {
         set(['drafts', assignmentId, 'longitude'], coords.longitude),
       )(s) as PersistentState;
     } else {
-      logErrorToSentry('[INFO][UPDATE_DRAFT_COORDS]', {
-        severity: Sentry.Severity.Info,
-        assignmentId,
-      });
       return s;
     }
   });
@@ -308,11 +298,6 @@ export const submitDraftAction = (assignmentId: number) => {
         ]),
       };
     } else {
-      logErrorToSentry('[INFO][SUBMIT_DRAFT_ACTION]', {
-        severity: Sentry.Severity.Info,
-        assignmentId,
-        draft: s.drafts[assignmentId],
-      });
       return s;
     }
   });
