@@ -32,10 +32,6 @@ export async function askStoragePermission(): Promise<boolean> {
     }
     return storagePermission;
   } catch (error) {
-    logErrorToSentry('[INFO][askStoragePermission]', {
-      severity: Sentry.Severity.Info,
-      infoMessage: error?.message,
-    });
     return false;
   }
 }
@@ -53,10 +49,6 @@ export async function askWriteStoragePermission(): Promise<boolean> {
     }
     return storagePermission;
   } catch (error) {
-    logErrorToSentry('[INFO][askWriteStoragePermission]', {
-      severity: Sentry.Severity.Info,
-      infoMessage: error?.message,
-    });
     return false;
   }
 }
