@@ -4,7 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
+import { ErrorBoundary } from 'react-error-boundary';
 
+import ErrorFallback from 'src/components/ErrorFallback';
 import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
 import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
@@ -68,80 +70,87 @@ const BottomTabNavigator: React.FC = () => {
   }
 
   return (
-    <TabStack.Navigator
-      inactiveColor={colors.backdrop}
-      activeColor={colors.primary}
-      barStyle={{
-        backgroundColor: colors.surface,
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
+        console.warn('test');
       }}
-      shifting={false}
-      backBehavior="none"
     >
-      {userData.features.inspection_feature.enabled && (
-        <TabStack.Screen
-          name={INSPECTIONS_NAVIGATOR}
-          component={InspectionsNavigator}
-          options={{
-            tabBarLabel: 'Inspections',
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons testID={'assignment-button-navigator'} name="assignment" color={color} size={26} />
-            ),
-          }}
-        />
-      )}
-      {userData.features.schedule_feature.enabled && (
-        <TabStack.Screen
-          name={SCHEDULE_NAVIGATOR}
-          component={ScheduleNavigator}
-          options={{
-            tabBarLabel: 'Schedule',
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons testID={'schedule-button-navigator'} name="date-range" color={color} size={26} />
-            ),
-          }}
-        />
-      )}
-      {userData.features.ticket_feature.enabled && (
-        <TabStack.Screen
-          name={TICKETS_NAVIGATOR}
-          component={TicketsNavigator}
-          options={{
-            tabBarLabel: 'Tickets',
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons
-                name="warning"
-                testID={'warning-button-navigator'}
-                color={color}
-                size={26}
-                style={{ marginRight: -1 }}
-              />
-            ),
-          }}
-        />
-      )}
-      {userData.features.inspection_feature.enabled && (
-        <TabStack.Screen
-          name={UPLOADS_NAVIGATOR}
-          component={UploadsNavigator}
-          options={{
-            tabBarLabel: 'Uploads',
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons testID={'uploads-button-navigator'} name="arrow-circle-up" color={color} size={26} />
-            ),
-          }}
-        />
-      )}
-      <TabStack.Screen
-        name={ACCOUNT_NAVIGATOR}
-        component={AccountNavigator}
-        options={{
-          tabBarLabel: 'Account',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons testID={'account-button-navigator'} name="account-circle" color={color} size={26} />
-          ),
+      <TabStack.Navigator
+        inactiveColor={colors.backdrop}
+        activeColor={colors.primary}
+        barStyle={{
+          backgroundColor: colors.surface,
         }}
-      />
-    </TabStack.Navigator>
+        shifting={false}
+        backBehavior="none"
+      >
+        {userData.features.inspection_feature.enabled && (
+          <TabStack.Screen
+            name={INSPECTIONS_NAVIGATOR}
+            component={InspectionsNavigator}
+            options={{
+              tabBarLabel: 'Inspections',
+              tabBarIcon: ({ color }) => (
+                <MaterialIcons testID={'assignment-button-navigator'} name="assignment" color={color} size={26} />
+              ),
+            }}
+          />
+        )}
+        {userData.features.schedule_feature.enabled && (
+          <TabStack.Screen
+            name={SCHEDULE_NAVIGATOR}
+            component={ScheduleNavigator}
+            options={{
+              tabBarLabel: 'Schedule',
+              tabBarIcon: ({ color }) => (
+                <MaterialIcons testID={'schedule-button-navigator'} name="date-range" color={color} size={26} />
+              ),
+            }}
+          />
+        )}
+        {userData.features.ticket_feature.enabled && (
+          <TabStack.Screen
+            name={TICKETS_NAVIGATOR}
+            component={TicketsNavigator}
+            options={{
+              tabBarLabel: 'Tickets',
+              tabBarIcon: ({ color }) => (
+                <MaterialIcons
+                  name="warning"
+                  testID={'warning-button-navigator'}
+                  color={color}
+                  size={26}
+                  style={{ marginRight: -1 }}
+                />
+              ),
+            }}
+          />
+        )}
+        {userData.features.inspection_feature.enabled && (
+          <TabStack.Screen
+            name={UPLOADS_NAVIGATOR}
+            component={UploadsNavigator}
+            options={{
+              tabBarLabel: 'Uploads',
+              tabBarIcon: ({ color }) => (
+                <MaterialIcons testID={'uploads-button-navigator'} name="arrow-circle-up" color={color} size={26} />
+              ),
+            }}
+          />
+        )}
+        <TabStack.Screen
+          name={ACCOUNT_NAVIGATOR}
+          component={AccountNavigator}
+          options={{
+            tabBarLabel: 'Account',
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons testID={'account-button-navigator'} name="account-circle" color={color} size={26} />
+            ),
+          }}
+        />
+      </TabStack.Navigator>
+    </ErrorBoundary>
   );
 };
 
