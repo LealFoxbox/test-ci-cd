@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Divider } from 'react-native-paper';
+import { useErrorHandler } from 'react-error-boundary';
 
 import config from 'src/config';
 import { styled } from 'src/paperTheme';
@@ -33,7 +34,8 @@ const metadata = `
 const AccountScreen: React.FC = () => {
   const { userData, isStaging } = LoginStore.useState((s) => ({ userData: s.userData, isStaging: s.isStaging }));
 
-  const [visible, setVisible] = React.useState(false);
+  const handleError = useErrorHandler();
+  const [visible, setVisible] = useState(false);
   const connected = useNetworkStatus();
 
   const emailSubject = encodeURIComponent(`${config.APP_NAME} ${appVersionAndBuild}`);
@@ -45,6 +47,14 @@ const AccountScreen: React.FC = () => {
 
   const handleLogout = () => {
     void logoutAction();
+  };
+  const handleBomb = () => {
+    try {
+      throw new Error('Something went wrong');
+    } catch (error) {
+      handleError(error);
+      throw error;
+    }
   };
 
   return (
@@ -76,6 +86,14 @@ const AccountScreen: React.FC = () => {
           <Row label="App version" value={`${config.APP_NAME} ${appVersionAndBuild}`} />
           {isStaging && (
             <>
+              <Divider />
+              <Row
+                accessibilityLabel="bomb"
+                label="Test Error Fallback"
+                icon="error"
+                value="Crash"
+                onPress={handleBomb}
+              />
               <Divider />
               <Row label="Environment" value="Staging" />
             </>

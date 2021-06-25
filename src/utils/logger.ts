@@ -19,7 +19,9 @@ export function logErrorToSentry(description: string, context: Context = {}) {
     }
     const scope = new Sentry.Scope();
     const { tags = {}, severity, ...contextData } = context;
-    const messageWithErrorCode = `${description}`;
+    const messageWithErrorCode = `${description}-alpha`;
+    // TODO remove alpha version or put in env
+    const newTags = { ...tags, alpha: true };
 
     scope.setLevel(severity || Sentry.Severity.Error);
     const defaultContextData = {
@@ -36,11 +38,12 @@ export function logErrorToSentry(description: string, context: Context = {}) {
 
     scope.setContext(DEFAULT_CONTEXT, { ...defaultContextData, ...formattedContextData });
 
-    if (Object.keys(tags).length) {
-      scope.setTags(tags);
+    if (Object.keys(newTags).length) {
+      scope.setTags(newTags);
     }
     Sentry.captureMessage(messageWithErrorCode, scope);
   } catch (error) {
     console.warn('error', error);
+    Sentry.captureMessage(error?.message || 'Error in logger');
   }
 }
