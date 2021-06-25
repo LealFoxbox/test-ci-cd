@@ -17,7 +17,7 @@ const Stack = createStackNavigator<ScheduleNavigatorParamList>();
 
 const ScheduleNavigator: React.FC = () => {
   return (
-    <Stack.Navigator screenOptions={{ header: Header }}>
+    <Stack.Navigator screenOptions={{ header: Header, animationEnabled: false }}>
       <Stack.Screen name={SCHEDULE_HOME} component={ScheduleScreen} initialParams={{ title: 'Schedule' }} />
       <Stack.Screen name={SCHEDULE_INSPECTIONS_FORM} component={InspectionFormScreen} />
     </Stack.Navigator>
