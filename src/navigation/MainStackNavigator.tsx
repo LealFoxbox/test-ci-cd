@@ -11,6 +11,7 @@ import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
 import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
 import { LoginStore } from 'src/pullstate/loginStore';
+import CameraScreen from 'src/screens/Inspections/CameraScreen/CameraScreen';
 
 import InspectionsNavigator from './InspectionsNavigator';
 import ScheduleNavigator from './ScheduleNavigator';
@@ -19,6 +20,7 @@ import AccountNavigator from './AccountNavigator';
 import {
   ACCOUNT_NAVIGATOR,
   BOTTOM_TAB_NAVIGATOR,
+  CAMERA_MODAL,
   INSPECTIONS_NAVIGATOR,
   RATING_CHOICES_MODAL,
   SCHEDULE_NAVIGATOR,
@@ -37,6 +39,11 @@ export type MainTabsNavigatorParamList = {
 };
 
 export type MainNavigatorParamList = {
+  [CAMERA_MODAL]: {
+    screenName?: string;
+    formFieldId: number;
+    callback: () => void;
+  };
   [BOTTOM_TAB_NAVIGATOR]: undefined;
   [SIGNATURE_MODAL]: {
     title: string;
@@ -55,6 +62,8 @@ export type MainNavigatorParamList = {
 
 export type SignatureModalRoute = RouteProp<MainNavigatorParamList, typeof SIGNATURE_MODAL>;
 export type SignatureModalParams = SignatureModalRoute['params'];
+export type CameraModalRoute = RouteProp<MainNavigatorParamList, typeof CAMERA_MODAL>;
+export type CameraModalParams = CameraModalRoute['params'];
 export type RatingChoicesModalRoute = RouteProp<MainNavigatorParamList, typeof RATING_CHOICES_MODAL>;
 export type RatingChoicesModalParams = RatingChoicesModalRoute['params'];
 
@@ -159,6 +168,7 @@ const MainStackNavigator: React.FC = () => (
     <MainStack.Screen name={BOTTOM_TAB_NAVIGATOR} component={BottomTabNavigator} options={{ headerShown: false }} />
     <MainStack.Screen name={SIGNATURE_MODAL} component={SignatureScreen} />
     <MainStack.Screen name={RATING_CHOICES_MODAL} component={RatingChoicesScreen} />
+    <MainStack.Screen name={CAMERA_MODAL} component={CameraScreen} options={{ headerShown: false }} />
   </MainStack.Navigator>
 );
 

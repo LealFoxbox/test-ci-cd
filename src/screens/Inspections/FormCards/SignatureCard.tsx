@@ -30,11 +30,13 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   showComment,
   allowDelete,
   isReadonly,
+  onTakeCamera,
 }) => {
   return (
     <Container>
       <Card>
         <CardHeader
+          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onAddComment={onAddComment}

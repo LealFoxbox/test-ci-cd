@@ -37,6 +37,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
   isReadonly,
   showComment,
   allowDelete,
+  onTakeCamera,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -62,6 +63,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
     <Container>
       <Card>
         <CardHeader
+          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onTakePhoto={onTakePhoto}

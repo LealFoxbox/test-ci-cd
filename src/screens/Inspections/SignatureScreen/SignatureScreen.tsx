@@ -60,9 +60,9 @@ const SignatureScreen: React.FC = () => {
           RNFS.writeFile(path, encoded, 'base64')
             .then(() => {
               // since this is navigating back we don't need to fill in every param for InspectionFormParams
-              const newPhoto: InspectionFormParams['newPhoto'] = { path, fileName, formFieldId };
+              const newSignature: InspectionFormParams['newSignature'] = { path, fileName, formFieldId };
 
-              navigation.navigate(screenName || INSPECTIONS_FORM, { newPhoto });
+              navigation.navigate(screenName || INSPECTIONS_FORM, { newSignature });
             })
             .catch((err) => {
               console.warn('Signature Screen RNFS writefile error: ', err);

@@ -20,6 +20,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
   allowPhotos,
   allowDelete,
   isReadonly,
+  onTakeCamera,
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingVertical: 10 }}>
@@ -39,6 +40,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
           showCommentOption={showCommentOption}
           allowPhotos={allowPhotos}
           allowDelete={allowDelete}
+          onTakeCamera={onTakeCamera}
         />
       )}
     </View>

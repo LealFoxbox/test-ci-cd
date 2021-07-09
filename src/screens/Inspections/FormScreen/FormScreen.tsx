@@ -13,9 +13,9 @@ import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { PersistentUserStore } from 'src/pullstate/persistentStore';
 import { LoginStore } from 'src/pullstate/loginStore';
-import { RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
+import { CAMERA_MODAL, RATING_CHOICES_MODAL, SIGNATURE_MODAL } from 'src/navigation/screenNames';
 import { InspectionFormParams, InspectionFormRoute } from 'src/navigation/InspectionsNavigator';
-import { RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/MainStackNavigator';
+import { CameraModalParams, RatingChoicesModalParams, SignatureModalParams } from 'src/navigation/MainStackNavigator';
 import { DraftField, DraftForm, DraftPhoto } from 'src/types';
 import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
@@ -28,6 +28,7 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
+import { fileUrlCopy } from 'src/screens/Inspections/FormCards/MoreButton';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -36,10 +37,10 @@ import OptionRow from './OptionRow';
 
 async function updateSignature(
   assignmentId: number,
-  newPhoto: InspectionFormParams['newPhoto'],
+  newSignature: InspectionFormParams['newSignature'],
   formValues: Record<string, DraftField>,
 ) {
-  if (!newPhoto) {
+  if (!newSignature) {
     return;
   }
 
@@ -47,14 +48,14 @@ async function updateSignature(
 
   const data: DraftPhoto = {
     isFromGallery: false,
-    uri: newPhoto.path,
-    fileName: newPhoto.fileName,
+    uri: newSignature.path,
+    fileName: newSignature.fileName,
     latitude: coords.latitude,
     longitude: coords.longitude,
     created_at: Date.now(),
   };
 
-  const oldPhotos = formValues[newPhoto.formFieldId]?.photos || [];
+  const oldPhotos = formValues[newSignature.formFieldId]?.photos || [];
 
   oldPhotos.forEach(({ uri }) => {
     try {
@@ -64,7 +65,38 @@ async function updateSignature(
     }
   });
 
-  const newValues = set([newPhoto.formFieldId, 'photos'], [data], formValues);
+  const newValues = set([newSignature.formFieldId, 'photos'], [data], formValues);
+
+  updateDraftFieldsAction(assignmentId, newValues);
+
+  return newValues;
+}
+
+async function updatePhoto(
+  assignmentId: number,
+  newPhoto: InspectionFormParams['newPhoto'],
+  formValues: Record<string, DraftField>,
+) {
+  if (!newPhoto) {
+    return;
+  }
+
+  const newUri = await fileUrlCopy(newPhoto.path, newPhoto.fileName);
+
+  const coords = await getCurrentPosition();
+
+  const photo: DraftPhoto = {
+    isFromGallery: false,
+    uri: newUri,
+    fileName: newPhoto.fileName,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    created_at: Date.now(),
+  };
+
+  const fieldValue = formValues[newPhoto.formFieldId];
+
+  const newValues = set([newPhoto.formFieldId, 'photos'], fieldValue.photos.concat([photo]), formValues);
 
   updateDraftFieldsAction(assignmentId, newValues);
 
@@ -90,7 +122,7 @@ function parseFieldsWithCategories(draft: DraftForm) {
 
 const EditFormScreen: React.FC<{}> = () => {
   const {
-    params: { assignmentId, newPhoto, rangeChoicesSelection },
+    params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto },
     name: screenName,
   } = useRoute<InspectionFormRoute>();
 
@@ -103,6 +135,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const formikBagRef = useRef<FormikProps<Record<string, DraftField>> | null>(null);
   const theme = useTheme();
   const navigation = useNavigation();
+  const previousSignature = usePrevious(newSignature);
   const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
   const componentNavigationMounted = useRef<boolean>(true);
@@ -154,8 +187,27 @@ const EditFormScreen: React.FC<{}> = () => {
     componentMounted.current = true;
 
     (async () => {
+      if (formikBagRef.current && newSignature && newSignature !== previousSignature) {
+        const newValues = await updateSignature(assignmentId, newSignature, formikBagRef.current.values);
+
+        if (newValues && componentMounted.current) {
+          formikBagRef.current.setFieldValue(`${newSignature.formFieldId}`, newValues[newSignature.formFieldId]);
+        }
+      }
+    })();
+
+    return () => {
+      componentMounted.current = false;
+    };
+  }, [assignmentId, newSignature, previousSignature]);
+
+  useEffect(() => {
+    // This is for when coming back from the camera screen
+    componentMounted.current = true;
+
+    (async () => {
       if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
-        const newValues = await updateSignature(assignmentId, newPhoto, formikBagRef.current.values);
+        const newValues = await updatePhoto(assignmentId, newPhoto, formikBagRef.current.values);
 
         if (newValues && componentMounted.current) {
           formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
@@ -220,6 +272,15 @@ const EditFormScreen: React.FC<{}> = () => {
     navigation.navigate(SIGNATURE_MODAL, p);
   };
 
+  const goToCamera = (formFieldId: number, callback: () => void) => {
+    const p: CameraModalParams = {
+      formFieldId,
+      screenName,
+      callback,
+    };
+    navigation.navigate(CAMERA_MODAL, p);
+  };
+
   const goToRatingChoices = ({
     title,
     ratingId,
@@ -242,6 +303,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const deletedFields = Object.values(draft.fields || {}).filter((f) => f.deleted);
 
   const draftData = parseFieldsWithCategories(draft);
+
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
@@ -370,6 +432,7 @@ const EditFormScreen: React.FC<{}> = () => {
               theme,
               goToSignature,
               goToRatingChoices,
+              goToCamera,
               isReadonly: false,
             })}
           />
