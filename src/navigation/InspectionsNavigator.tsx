@@ -43,6 +43,7 @@ export type InspectionsNavigatorParamList = {
   [INSPECTIONS_FORM]: {
     title: string;
     assignmentId: number;
+    newSignature?: { path: string; fileName: string; formFieldId: number };
     newPhoto?: { path: string; fileName: string; formFieldId: number };
     rangeChoicesSelection?: {
       listChoiceIds: number[];

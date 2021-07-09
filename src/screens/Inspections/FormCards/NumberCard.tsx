@@ -38,11 +38,13 @@ const NumberCard: React.FC<NumberCardProps> = ({
   allowDelete,
   error,
   errorMessage,
+  onTakeCamera,
 }) => {
   return (
     <Container>
       <Card>
         <CardHeader
+          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onTakePhoto={onTakePhoto}

@@ -16,6 +16,7 @@ export interface TextCardProps {
   isReadonly: boolean;
   error?: boolean;
   errorMessage?: string;
+  onTakeCamera: (callback: () => void) => void;
 }
 
 export interface BaseCardProps extends TextCardProps {

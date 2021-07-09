@@ -24,11 +24,13 @@ const TextCard: React.FC<TextCardProps> = ({
   onDelete,
   allowDelete,
   isReadonly,
+  onTakeCamera,
 }) => {
   return (
     <Container>
       <Card>
         <CardHeader
+          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onTakePhoto={onTakePhoto}

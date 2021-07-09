@@ -2,13 +2,13 @@ import React, { useCallback, useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 
 import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
 
-type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
+export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
@@ -17,6 +17,7 @@ export interface MoreButtonProps {
   showCommentOption: boolean;
   allowPhotos: boolean;
   allowDelete: boolean;
+  onTakeCamera: (callback: () => void) => void;
 }
 
 export async function fileUrlCopy(uri: string, fileName: string) {
@@ -46,6 +47,7 @@ async function createAddHandler(
   enableButton: boolean,
   enableButtonHandler: (val: boolean) => void,
   isAttachment: boolean,
+  launchCamera?: () => void,
 ) {
   // flag to stop it being called again until the menu is dismissed
   if (!enableButton) return;
@@ -91,18 +93,9 @@ async function createAddHandler(
     } else {
       const hasPermission = await askCameraPermission();
 
-      if (hasPermission) {
-        launchCamera(
-          {
-            mediaType: 'photo',
-            maxWidth: 2000, //	To resize the image
-            maxHeight: 2000, //	To resize the image
-            quality: 0.8, //	0 to 1, photos
-            includeBase64: false,
-            saveToPhotos: false, //	saves the image/video file captured to public photo
-          },
-          callback,
-        );
+      if (hasPermission && launchCamera) {
+        closeMenu();
+        launchCamera();
       } else {
         enableButtonHandler(true);
       }
@@ -121,6 +114,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   showCommentOption,
   allowPhotos,
   allowDelete,
+  onTakeCamera,
 }) => {
   const [visible, setVisible] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -134,7 +128,11 @@ const MoreButton: React.FC<MoreButtonProps> = ({
 
   const closeMenu = useCallback(() => setVisible(false), [setVisible]);
 
-  const handlePhoto = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false);
+  const launchCamera = useCallback(() => {
+    onTakeCamera(() => enableButtonHandler(true));
+  }, [onTakeCamera]);
+  const handlePhoto = () =>
+    createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false, launchCamera);
 
   const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
 
