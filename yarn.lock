@@ -9601,10 +9601,10 @@ react-native-flipper@^0.69.0:
   resolved "https://registry.yarnpkg.com/react-native-flipper/-/react-native-flipper-0.69.0.tgz#6e0ff2d1c91da49bf5536c9ad6cd2980f9e5d0f7"
   integrity sha512-5ZqlNWCd5+h9G309sQiV/uSogATM3y2RRblsF8Lyx2NexmISeTYv8/oGxtBvq89Kysit8ZY1wExyF9laT4wx6w==
 
-react-native-flurry-sdk@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-flurry-sdk/-/react-native-flurry-sdk-6.1.0.tgz#9534222a62505bcd37260a050213f98fc8f91048"
-  integrity sha512-Zm94jlRJx1D04JN32C5a42H79uV0JU5+/Uyhd92sQ9aBIf1zMRb12dLi+Nso6GDKQwVFJNVfXXiDLCLQQb9SCQ==
+react-native-flurry-sdk@6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/react-native-flurry-sdk/-/react-native-flurry-sdk-6.4.0.tgz#b2a6e16fe8a5ee9dc3450597ef46cbd502fe52dc"
+  integrity sha512-uPLSK+j+fSFvozxDWxZQ1GP+CVgySjyaCSfGd2H+sZZszf5LmvppCnYNdvkaq8xb7cxoV199lQZ4kUXU1lO1Mw==
 
 react-native-fs@^2.16.6:
   version "2.16.6"
