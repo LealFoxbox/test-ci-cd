@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CameraScreen } from 'react-native-camera-kit';
-import { ImageSourcePropType } from 'react-native';
+import { BackHandler, ImageSourcePropType } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import FlashOnImage from 'src/assets/camera/flashOn.png';
 import FlashOffImage from 'src/assets/camera/flashOff.png';
@@ -64,6 +64,16 @@ const Camera: React.FC = () => {
       navigation.navigate(screenName || INSPECTIONS_FORM);
     }
   };
+
+  const handleBackPress = useCallback(() => {
+    callback && callback();
+    return false;
+  }, [callback]);
+
+  useEffect(() => {
+    const hardwareBackPressListener = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => hardwareBackPressListener.remove();
+  }, [handleBackPress]);
 
   return (
     <Container>
