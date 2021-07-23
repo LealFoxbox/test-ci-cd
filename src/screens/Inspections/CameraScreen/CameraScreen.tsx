@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CameraScreen } from 'react-native-camera-kit';
-import { ImageSourcePropType } from 'react-native';
+import { BackHandler, ImageSourcePropType } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import FlashOnImage from 'src/assets/camera/flashOn.png';
 import FlashOffImage from 'src/assets/camera/flashOff.png';
@@ -9,6 +9,7 @@ import FlipImage from 'src/assets/camera/cameraFlipIcon.png';
 import CameraButton from 'src/assets/camera/cameraButton.png';
 import TorchOnImage from 'src/assets/camera/torchOn.png';
 import TorchOffImage from 'src/assets/camera/torchOff.png';
+import Orientation from 'react-native-orientation-locker';
 
 import { MainNavigatorParamList } from 'src/navigation/MainStackNavigator';
 import { CAMERA_MODAL, INSPECTIONS_FORM } from 'src/navigation/screenNames';
@@ -49,6 +50,7 @@ const Camera: React.FC = () => {
   const {
     params: { screenName, formFieldId, callback },
   } = useRoute<RouteProp<MainNavigatorParamList, typeof CAMERA_MODAL>>();
+
   const onBottomButtonPressed = (event: EventButtonPress) => {
     callback && callback();
     if (event.type === 'capture') {
@@ -64,6 +66,21 @@ const Camera: React.FC = () => {
       navigation.navigate(screenName || INSPECTIONS_FORM);
     }
   };
+
+  useEffect(() => {
+    Orientation.lockToPortrait();
+  }, []);
+
+  const handleBackPress = useCallback(() => {
+    callback && callback();
+    navigation.navigate(screenName || INSPECTIONS_FORM);
+    return true;
+  }, [callback, navigation, screenName]);
+
+  useEffect(() => {
+    const hardwareBackPressListener = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => hardwareBackPressListener.remove();
+  }, [handleBackPress]);
 
   return (
     <Container>

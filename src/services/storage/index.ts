@@ -53,6 +53,22 @@ export async function askWriteStoragePermission(): Promise<boolean> {
   }
 }
 
+export async function askReadStoragePermission(): Promise<boolean> {
+  try {
+    let storagePermission = true;
+    const checkPermission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE, {
+      title: 'Storage Access Permission',
+      message: 'We would like to access your photos for uploading',
+      buttonPositive: 'Okay',
+    });
+    storagePermission = checkPermission === PermissionsAndroid.RESULTS.GRANTED;
+    return storagePermission;
+  } catch (error) {
+    console.log('error', error.message);
+    return false;
+  }
+}
+
 export async function downloaderStorage({ options, url, headers }: FetchDownload): Promise<FetchBlobResponse> {
   return ReactNativeBlobUtil.config(options).fetch('GET', url, headers);
 }
@@ -84,5 +100,13 @@ export async function removeAllStorage(): Promise<void> {
       severity: Sentry.Severity.Info,
       infoMessage: error?.message,
     });
+  }
+}
+
+export async function getBase64Image(imagePath: string): Promise<string> {
+  try {
+    return (await ReactNativeBlobUtil.fs.readFile(imagePath, 'base64')) as string;
+  } catch (error) {
+    return '';
   }
 }

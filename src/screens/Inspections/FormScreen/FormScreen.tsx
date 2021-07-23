@@ -28,7 +28,7 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
-import { fileUrlCopy } from 'src/screens/Inspections/FormCards/MoreButton';
+import { resizedImage } from 'src/services/resizedImage';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -81,7 +81,12 @@ async function updatePhoto(
     return;
   }
 
-  const newUri = await fileUrlCopy(newPhoto.path, newPhoto.fileName);
+  const newUri = await resizedImage({
+    uri: newPhoto.path,
+    fileName: newPhoto.fileName,
+    width: 2000,
+    height: 2000,
+  });
 
   const coords = await getCurrentPosition();
 

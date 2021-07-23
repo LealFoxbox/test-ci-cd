@@ -19,9 +19,8 @@ export function logErrorToSentry(description: string, context: Context = {}) {
     }
     const scope = new Sentry.Scope();
     const { tags = {}, severity, ...contextData } = context;
-    const messageWithErrorCode = `${description}-alpha`;
-    // TODO remove alpha version or put in env
-    const newTags = { ...tags, alpha: true };
+    const messageWithErrorCode = `${description}`;
+    const newTags = { ...tags };
 
     scope.setLevel(severity || Sentry.Severity.Error);
     const defaultContextData = {
