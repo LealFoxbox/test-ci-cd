@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Divider } from 'react-native-paper';
 import { useErrorHandler } from 'react-error-boundary';
+import InAppReview from 'react-native-in-app-review';
 
 import config from 'src/config';
 import { styled } from 'src/paperTheme';
@@ -48,14 +49,52 @@ const AccountScreen: React.FC = () => {
   const handleLogout = () => {
     void logoutAction();
   };
-  const handleBomb = () => {
+  const handleBomb = useCallback(() => {
     try {
       throw new Error('Something went wrong');
     } catch (error) {
       handleError(error);
       throw error;
     }
-  };
+  }, [handleError]);
+
+  const handleStart = useCallback(() => {
+    //
+    if (InAppReview.isAvailable()) {
+      // trigger UI InAppreview
+      InAppReview.RequestInAppReview()
+        .then((hasFlowFinishedSuccessfully) => {
+          // when return true in android it means user finished or close review flow
+          console.warn('InAppReview in android', hasFlowFinishedSuccessfully);
+
+          // 1- you have option to do something ex: (navigate Home page) (in android).
+          // 2- you have option to do something,
+          // ex: (save date today to lanuch InAppReview after 15 days) (in android and ios).
+
+          // 3- another option:
+          if (hasFlowFinishedSuccessfully) {
+            // do something for ios
+            // do something for android
+          }
+
+          // for android:
+          // The flow has finished. The API does not indicate whether the user
+          // reviewed or not, or even whether the review dialog was shown. Thus, no
+          // matter the result, we continue our app flow.
+
+          // for ios
+          // the flow lanuched successfully, The API does not indicate whether the user
+          // reviewed or not, or he/she closed flow yet as android, Thus, no
+          // matter the result, we continue our app flow.
+        })
+        .catch((error) => {
+          //we continue our app flow.
+          // we have some error could happen while lanuching InAppReview,
+          // Check table for errors and code number that can return in catch.
+          console.warn(error);
+        });
+    }
+  }, []);
 
   return (
     <Container>
@@ -96,6 +135,18 @@ const AccountScreen: React.FC = () => {
               />
               <Divider />
               <Row label="Environment" value="Staging" />
+            </>
+          )}
+          {isStaging && (
+            <>
+              <Divider />
+              <Row
+                accessibilityLabel="rating"
+                label="Rating"
+                icon="star"
+                value="Show in app review"
+                onPress={handleStart}
+              />
             </>
           )}
           <LogoutDialog visible={visible} hideDialog={hideDialog} handlePress={handleLogout} />
