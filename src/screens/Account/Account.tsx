@@ -62,6 +62,9 @@ const AccountScreen: React.FC = () => {
       throw error;
     }
   }, [handleError]);
+  const openEmailSupport = useCallback(() => {
+    openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`);
+  }, [emailBody, emailSubject]);
 
   return (
     <Container>
@@ -84,7 +87,7 @@ const AccountScreen: React.FC = () => {
             label="Email Support"
             value="Get help using the app"
             icon="email"
-            onPress={() => openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`)}
+            onPress={openEmailSupport}
           />
           <Divider />
           <ClearDataRow disabled={false} />
