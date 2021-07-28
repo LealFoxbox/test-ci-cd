@@ -14,6 +14,8 @@ export type LoginState = {
   userData: User | null;
   outdatedUserData: boolean;
   isStaging: boolean;
+  // getBuildNumber | isAvailable
+  rates: Record<string, boolean>;
 };
 
 export const initialState: LoginState = {
@@ -22,4 +24,5 @@ export const initialState: LoginState = {
   userData: null,
   outdatedUserData: false,
   isStaging: config.isDev,
+  rates: {},
 };

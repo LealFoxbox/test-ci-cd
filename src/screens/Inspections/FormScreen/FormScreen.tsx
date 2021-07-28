@@ -29,6 +29,9 @@ import {
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { resizedImage } from 'src/services/resizedImage';
+import { requestRate } from 'src/services/rate';
+import config from 'src/config';
+import { rateAction } from 'src/pullstate/actions';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -131,10 +134,14 @@ const EditFormScreen: React.FC<{}> = () => {
     name: screenName,
   } = useRoute<InspectionFormRoute>();
 
-  const userData = LoginStore.useState((s) => s.userData);
-  const { draft, ratings } = PersistentUserStore.useState((s) => ({
+  const { userData, requestRateBuild } = LoginStore.useState((s) => ({
+    userData: s.userData,
+    requestRateBuild: !s.rates?.[config.APP_BUILD],
+  }));
+  const { draft, ratings, totalUploads } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,
     draft: s.drafts[assignmentId] as DraftForm | undefined,
+    totalUploads: s.pendingUploads.concat(s.uploads).length,
   }));
 
   const formikBagRef = useRef<FormikProps<Record<string, DraftField>> | null>(null);
@@ -157,6 +164,8 @@ const EditFormScreen: React.FC<{}> = () => {
   const [isReady, onReady] = useResult<undefined>();
 
   const hasCoordinates = !!draft && draft.latitude !== null && draft.longitude !== null;
+
+  const isAvailableRate = totalUploads >= 4 && requestRateBuild;
 
   useLayoutEffect(() => {
     // we set goBackCallback to call in header component and remove draft without changes
@@ -258,14 +267,21 @@ const EditFormScreen: React.FC<{}> = () => {
     };
   }, [draft, draft?.assignmentId, hasCoordinates]);
 
+  const submit = useCallback(async () => {
+    if (isAvailableRate) {
+      await requestRate();
+      rateAction({
+        appBuild: config.APP_BUILD,
+        isRateCompleted: true,
+      });
+    }
+    submitDraftAction(assignmentId);
+    navigation.goBack();
+  }, [assignmentId, isAvailableRate, navigation]);
+
   if (!userData || !draft) {
     return <View />;
   }
-
-  const submit = () => {
-    submitDraftAction(assignmentId);
-    navigation.goBack();
-  };
 
   const goToSignature = (formFieldId: number) => {
     const p: SignatureModalParams = {

@@ -53,6 +53,18 @@ export const loginAction = async ({ user, outdatedUserData }: { user: User; outd
   });
 };
 
+export const rateAction = ({ appBuild, isRateCompleted }: { appBuild: string; isRateCompleted: boolean }) => {
+  LoginStore.update((s) => {
+    return {
+      ...s,
+      rates: {
+        ...s.rates,
+        [appBuild]: isRateCompleted,
+      },
+    };
+  });
+};
+
 export const logoutAction = async () => {
   await deleteAllJSONFiles();
   await cleanMongo();

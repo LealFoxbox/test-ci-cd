@@ -1,10 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { Divider } from 'react-native-paper';
 import { useErrorHandler } from 'react-error-boundary';
-import InAppReview from 'react-native-in-app-review';
 
 import config from 'src/config';
-import { styled } from 'src/paperTheme';
+import paperTheme, { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
 import { LoginStore } from 'src/pullstate/loginStore';
@@ -13,11 +12,17 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { logoutAction } from 'src/pullstate/actions';
 import ClearDataRow from 'src/screens/Account/ClearDataRow';
 import LogoutDialog from 'src/screens/Account/LogoutDialog';
+import ReviewOrangeButton from 'src/screens/Account/ReviewOrangeButton';
 
 import DownloadRow from './DownloadRow';
 
 const Container = styled.View`
   flex: 1;
+`;
+
+const ContainerReview = styled.View`
+  flex: 1;
+  background-color: ${paperTheme.colors.surface};
 `;
 
 const appVersionAndBuild = `${config.APP_VERSION} (${config.APP_BUILD})`;
@@ -57,44 +62,6 @@ const AccountScreen: React.FC = () => {
       throw error;
     }
   }, [handleError]);
-
-  const handleStart = useCallback(() => {
-    //
-    if (InAppReview.isAvailable()) {
-      // trigger UI InAppreview
-      InAppReview.RequestInAppReview()
-        .then((hasFlowFinishedSuccessfully) => {
-          // when return true in android it means user finished or close review flow
-          console.warn('InAppReview in android', hasFlowFinishedSuccessfully);
-
-          // 1- you have option to do something ex: (navigate Home page) (in android).
-          // 2- you have option to do something,
-          // ex: (save date today to lanuch InAppReview after 15 days) (in android and ios).
-
-          // 3- another option:
-          if (hasFlowFinishedSuccessfully) {
-            // do something for ios
-            // do something for android
-          }
-
-          // for android:
-          // The flow has finished. The API does not indicate whether the user
-          // reviewed or not, or even whether the review dialog was shown. Thus, no
-          // matter the result, we continue our app flow.
-
-          // for ios
-          // the flow lanuched successfully, The API does not indicate whether the user
-          // reviewed or not, or he/she closed flow yet as android, Thus, no
-          // matter the result, we continue our app flow.
-        })
-        .catch((error) => {
-          //we continue our app flow.
-          // we have some error could happen while lanuching InAppReview,
-          // Check table for errors and code number that can return in catch.
-          console.warn(error);
-        });
-    }
-  }, []);
 
   return (
     <Container>
@@ -137,18 +104,9 @@ const AccountScreen: React.FC = () => {
               <Row label="Environment" value="Staging" />
             </>
           )}
-          {isStaging && (
-            <>
-              <Divider />
-              <Row
-                accessibilityLabel="rating"
-                label="Rating"
-                icon="star"
-                value="Show in app review"
-                onPress={handleStart}
-              />
-            </>
-          )}
+          <ContainerReview>
+            <ReviewOrangeButton />
+          </ContainerReview>
           <LogoutDialog visible={visible} hideDialog={hideDialog} handlePress={handleLogout} />
         </>
       )}
