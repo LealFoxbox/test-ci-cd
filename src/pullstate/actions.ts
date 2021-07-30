@@ -10,9 +10,10 @@ import { axiosCatchTo } from 'src/utils/catchTo';
 import { DownloadType } from 'src/services/downloader/backDownloads';
 import { logErrorToSentry } from 'src/utils/logger';
 import { removeAllStorage } from 'src/services/storage';
+import config from 'src/config';
 
 import { LoginStore } from './loginStore';
-import { initialState as loginInitialState } from './loginStore/initialState';
+import { RatesStatus, initialState as loginInitialState } from './loginStore/initialState';
 import { DownloadStore } from './downloadStore';
 import { initialState as downloadInitialState } from './downloadStore/initialState';
 import { UploadStore } from './uploadStore';
@@ -53,13 +54,47 @@ export const loginAction = async ({ user, outdatedUserData }: { user: User; outd
   });
 };
 
-export const rateAction = ({ appBuild, isRateCompleted }: { appBuild: string; isRateCompleted: boolean }) => {
+export const rateInitAction = ({ appBuild }: { appBuild: string }) => {
   LoginStore.update((s) => {
     return {
       ...s,
       rates: {
         ...s.rates,
-        [appBuild]: isRateCompleted,
+        [appBuild]: {
+          inspections: 1,
+          status: 'update',
+          isCompleted: false,
+        },
+      },
+    };
+  });
+};
+
+const getRateStatus = (totalInspections: number, isCompleted: boolean): RatesStatus => {
+  if (totalInspections < config.AMOUNT_INSPECTIONS_TO_RATE) {
+    return 'update';
+  }
+  if (totalInspections >= config.AMOUNT_INSPECTIONS_TO_RATE && !isCompleted) {
+    return 'request';
+  }
+  if (isCompleted) {
+    return 'completed';
+  }
+  return 'update';
+};
+
+export const rateAction = ({ appBuild, isRateCompleted }: { appBuild: string; isRateCompleted: boolean }) => {
+  LoginStore.update((s) => {
+    const totalInspections = (s?.rates?.[appBuild]?.inspections || 0) + 1;
+    return {
+      ...s,
+      rates: {
+        ...s.rates,
+        [appBuild]: {
+          inspections: totalInspections,
+          isCompleted: isRateCompleted,
+          status: getRateStatus(totalInspections, isRateCompleted),
+        },
       },
     };
   });

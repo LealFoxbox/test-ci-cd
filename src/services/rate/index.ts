@@ -41,7 +41,7 @@ export async function requestRate(): Promise<boolean> {
     ]);
   });
   if (agreedToRate) {
-    return await rate({ inApp: true });
+    return await rate();
   }
   return false;
 }

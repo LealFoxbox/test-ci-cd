@@ -16,11 +16,7 @@ import ReviewOrangeButton from 'src/screens/Account/ReviewOrangeButton';
 
 import DownloadRow from './DownloadRow';
 
-const Container = styled.View`
-  flex: 1;
-`;
-
-const ContainerReview = styled.View`
+const Container = styled.ScrollView`
   flex: 1;
   background-color: ${paperTheme.colors.surface};
 `;
@@ -67,7 +63,7 @@ const AccountScreen: React.FC = () => {
   }, [emailBody, emailSubject]);
 
   return (
-    <Container>
+    <Container alwaysBounceVertical={false} bounces={false} automaticallyAdjustContentInsets={false}>
       <ConnectionBanner connected={connected} />
       {!!userData && (
         <>
@@ -107,9 +103,7 @@ const AccountScreen: React.FC = () => {
               <Row label="Environment" value="Staging" />
             </>
           )}
-          <ContainerReview>
-            <ReviewOrangeButton />
-          </ContainerReview>
+          <ReviewOrangeButton />
           <LogoutDialog visible={visible} hideDialog={hideDialog} handlePress={handleLogout} />
         </>
       )}

@@ -20,6 +20,7 @@ const prodApiUrl = 'orangeqc.com/api/v4';
 interface Config {
   isDev: boolean;
   APP_NAME: string;
+  AMOUNT_INSPECTIONS_TO_RATE: number;
   APP_VERSION: string;
   APP_BUILD: string;
   DEVICE_ID: string;
@@ -50,6 +51,7 @@ interface Config {
 
 const config: Config = {
   isDev: __DEV__,
+  AMOUNT_INSPECTIONS_TO_RATE: 2,
   APP_NAME: appName,
   APP_VERSION: getVersion(),
   APP_BUILD: getBuildNumber(),
