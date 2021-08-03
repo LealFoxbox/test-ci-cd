@@ -23,7 +23,9 @@ const RequestRateDialog: React.FC<RequestRateDialog> = ({ visible, hideDialog })
   const handleConfirm = useCallback(async () => {
     try {
       hideDialog();
-      await rate();
+      await rate({
+        inApp: true,
+      });
       rateAction({
         appBuild: config.APP_BUILD,
         isRateCompleted: true,
