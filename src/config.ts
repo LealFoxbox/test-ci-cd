@@ -51,7 +51,7 @@ interface Config {
 
 const config: Config = {
   isDev: __DEV__,
-  AMOUNT_INSPECTIONS_TO_RATE: 2,
+  AMOUNT_INSPECTIONS_TO_RATE: 4,
   APP_NAME: appName,
   APP_VERSION: getVersion(),
   APP_BUILD: getBuildNumber(),

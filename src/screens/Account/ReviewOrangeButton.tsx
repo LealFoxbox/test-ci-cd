@@ -26,6 +26,7 @@ const TextStyled = styled(Text)`
 
 const ViewStyled = styled(View)`
   margin-top: 16px;
+  margin-bottom: 26px;
   justify-content: center;
   align-items: center;
   width: 100%;
