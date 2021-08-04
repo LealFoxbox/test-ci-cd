@@ -135,7 +135,7 @@ android {
         applicationId "com.orangeqc.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 132
+        versionCode 140
         versionName "2.2.6"
         multiDexEnabled true
     }
@@ -187,6 +187,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(':react-native-config')
+    implementation project(':react-native-in-app-review')
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
