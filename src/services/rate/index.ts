@@ -2,15 +2,38 @@ import * as Sentry from '@sentry/react-native';
 import Rate, { AndroidMarket } from 'react-native-rate';
 import { Alert } from 'react-native';
 import { getBundleId } from 'react-native-device-info';
+import InAppReview from 'react-native-in-app-review';
 
 import { logErrorToSentry } from 'src/utils/logger';
 
-export async function rate({ inApp }: { inApp?: boolean } = { inApp: false }): Promise<boolean> {
+export async function rateInApp(): Promise<boolean> {
+  try {
+    const isAvailable = InAppReview.isAvailable();
+    if (isAvailable) {
+      const hasFlowFinishedSuccessfully = await InAppReview.RequestInAppReview();
+      // when return true in android it means user finished or close review flow
+      // ex: (save date today to lanuch InAppReview after 15 days) (in android and ios).
+      // The flow has finished. The API does not indicate whether the user
+      // reviewed or not, or even whether the review dialog was shown. Thus, no
+      // matter the result, we continue our app flow.
+      return !!hasFlowFinishedSuccessfully;
+    }
+    return false;
+  } catch (error) {
+    logErrorToSentry('[ERROR][rateInApp]', {
+      severity: Sentry.Severity.Error,
+      infoMessage: error?.message,
+    });
+    return false;
+  }
+}
+
+export async function rate(): Promise<boolean> {
   try {
     const options = {
       GooglePackageName: getBundleId(),
       preferredAndroidMarket: AndroidMarket.Google,
-      preferInApp: inApp,
+      preferInApp: false,
       openAppStoreIfInAppFails: true,
     };
     return new Promise((resolve, reject) => {

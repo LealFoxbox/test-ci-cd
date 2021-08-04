@@ -3,7 +3,7 @@ import { Button, Dialog, Portal, useTheme } from 'react-native-paper';
 import * as Sentry from '@sentry/react-native';
 
 import { styled } from 'src/paperTheme';
-import { rate } from 'src/services/rate';
+import { rate, rateInApp } from 'src/services/rate';
 import { rateAction } from 'src/pullstate/actions';
 import config from 'src/config';
 import { logErrorToSentry } from 'src/utils/logger';
@@ -23,9 +23,12 @@ const RequestRateDialog: React.FC<RequestRateDialog> = ({ visible, hideDialog })
   const handleConfirm = useCallback(async () => {
     try {
       hideDialog();
-      await rate({
-        inApp: true,
-      });
+      // try with in app review
+      const rateResult = await rateInApp();
+      if (!rateResult) {
+        // try to redirect to play store
+        await rate();
+      }
       rateAction({
         appBuild: config.APP_BUILD,
         isRateCompleted: true,
