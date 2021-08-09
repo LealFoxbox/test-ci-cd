@@ -8,12 +8,22 @@ export type LoginStateVersions = undefined | 'outdatedUserDataFlag';
 
 export type UserSessionStatus = 'starting' | 'shouldLogIn' | 'loggedIn' | 'logoutTriggered';
 
+export type RatesStatus = 'request' | 'update' | 'completed';
+
+type Rate = {
+  inspections?: number;
+  isCompleted: boolean;
+  status?: RatesStatus;
+};
+
 export type LoginState = {
   lastTimeThisStateChangedTypes: LoginStateVersions;
   status: UserSessionStatus;
   userData: User | null;
   outdatedUserData: boolean;
   isStaging: boolean;
+  // getBuildNumber
+  rates: Record<string, Rate>;
 };
 
 export const initialState: LoginState = {
@@ -22,4 +32,5 @@ export const initialState: LoginState = {
   userData: null,
   outdatedUserData: false,
   isStaging: config.isDev,
+  rates: {},
 };

@@ -80,17 +80,23 @@ exports[`AccountScreen should render 1`] = `
                 ]
               }
             >
-              <View
+              <RCTScrollView
+                alwaysBounceVertical={false}
+                automaticallyAdjustContentInsets={false}
+                bounces={false}
                 style={
                   Array [
                     Object {
+                      "backgroundColor": "#FFFFFF",
                       "flexBasis": 0,
                       "flexGrow": 1,
                       "flexShrink": 1,
                     },
                   ]
                 }
-              />
+              >
+                <View />
+              </RCTScrollView>
             </View>
           </View>
         </View>

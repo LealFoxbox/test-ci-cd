@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Divider } from 'react-native-paper';
 import { useErrorHandler } from 'react-error-boundary';
 
 import config from 'src/config';
-import { styled } from 'src/paperTheme';
+import paperTheme, { styled } from 'src/paperTheme';
 import { openURL } from 'src/utils/linking';
 import Row from 'src/components/Row';
 import { LoginStore } from 'src/pullstate/loginStore';
@@ -12,11 +12,13 @@ import { useNetworkStatus } from 'src/utils/useNetworkStatus';
 import { logoutAction } from 'src/pullstate/actions';
 import ClearDataRow from 'src/screens/Account/ClearDataRow';
 import LogoutDialog from 'src/screens/Account/LogoutDialog';
+import ReviewOrangeButton from 'src/screens/Account/ReviewOrangeButton';
 
 import DownloadRow from './DownloadRow';
 
-const Container = styled.View`
+const Container = styled.ScrollView`
   flex: 1;
+  background-color: ${paperTheme.colors.surface};
 `;
 
 const appVersionAndBuild = `${config.APP_VERSION} (${config.APP_BUILD})`;
@@ -48,17 +50,20 @@ const AccountScreen: React.FC = () => {
   const handleLogout = () => {
     void logoutAction();
   };
-  const handleBomb = () => {
+  const handleBomb = useCallback(() => {
     try {
       throw new Error('Something went wrong');
     } catch (error) {
       handleError(error);
       throw error;
     }
-  };
+  }, [handleError]);
+  const openEmailSupport = useCallback(() => {
+    openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`);
+  }, [emailBody, emailSubject]);
 
   return (
-    <Container>
+    <Container alwaysBounceVertical={false} bounces={false} automaticallyAdjustContentInsets={false}>
       <ConnectionBanner connected={connected} />
       {!!userData && (
         <>
@@ -78,7 +83,7 @@ const AccountScreen: React.FC = () => {
             label="Email Support"
             value="Get help using the app"
             icon="email"
-            onPress={() => openURL(`mailto:support@orangeqc.com?subject=${emailSubject}&body=${emailBody}`)}
+            onPress={openEmailSupport}
           />
           <Divider />
           <ClearDataRow disabled={false} />
@@ -98,6 +103,7 @@ const AccountScreen: React.FC = () => {
               <Row label="Environment" value="Staging" />
             </>
           )}
+          <ReviewOrangeButton />
           <LogoutDialog visible={visible} hideDialog={hideDialog} handlePress={handleLogout} />
         </>
       )}

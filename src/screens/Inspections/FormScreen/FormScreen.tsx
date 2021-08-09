@@ -127,11 +127,13 @@ function parseFieldsWithCategories(draft: DraftForm) {
 
 const EditFormScreen: React.FC<{}> = () => {
   const {
-    params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto },
+    params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto, onSubmit: onSubmitInspection },
     name: screenName,
   } = useRoute<InspectionFormRoute>();
 
-  const userData = LoginStore.useState((s) => s.userData);
+  const { userData } = LoginStore.useState((s) => ({
+    userData: s.userData,
+  }));
   const { draft, ratings } = PersistentUserStore.useState((s) => ({
     ratings: s.ratings,
     draft: s.drafts[assignmentId] as DraftForm | undefined,
@@ -258,14 +260,15 @@ const EditFormScreen: React.FC<{}> = () => {
     };
   }, [draft, draft?.assignmentId, hasCoordinates]);
 
+  const submit = useCallback(() => {
+    submitDraftAction(assignmentId);
+    navigation.goBack();
+    typeof onSubmitInspection === 'function' && onSubmitInspection();
+  }, [assignmentId, navigation, onSubmitInspection]);
+
   if (!userData || !draft) {
     return <View />;
   }
-
-  const submit = () => {
-    submitDraftAction(assignmentId);
-    navigation.goBack();
-  };
 
   const goToSignature = (formFieldId: number) => {
     const p: SignatureModalParams = {

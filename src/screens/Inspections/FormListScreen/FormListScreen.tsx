@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Divider, Text, Title, useTheme } from 'react-native-paper';
@@ -16,8 +16,11 @@ import NavRow from 'src/components/NavRow';
 import SwipableRow from 'src/components/SwipableRow/SwipableRow';
 import Notes from 'src/components/Notes';
 import LoadingOverlay from 'src/components/LoadingOverlay';
+import { rateAction } from 'src/pullstate/actions';
+import config from 'src/config';
+import RequestRateDialog from 'src/screens/Inspections/FormListScreen/RequestRateDialog';
 
-import BlankScreen from './BlankScreen';
+import BlankScreen from '../BlankScreen';
 
 const FormListScreen: React.FC<{}> = () => {
   const {
@@ -35,6 +38,26 @@ const FormListScreen: React.FC<{}> = () => {
   const theme = useTheme();
   const [isReady, onReady] = useResult<undefined>();
   const navigation = useNavigation();
+  const [isVisibleRateDialog, setIsVisibleRateDialog] = useState(false);
+  const { rateStatus } = LoginStore.useState((s) => ({
+    rateStatus: s.rates?.[config.APP_BUILD]?.status,
+  }));
+
+  const handleHideDialog = useCallback(() => {
+    setIsVisibleRateDialog(false);
+  }, []);
+
+  const onSubmitInspection = useCallback(() => {
+    if (!rateStatus || rateStatus === 'update') {
+      rateAction({
+        appBuild: config.APP_BUILD,
+        isRateCompleted: false,
+      });
+    }
+    if (rateStatus === 'request') {
+      setIsVisibleRateDialog(true);
+    }
+  }, [rateStatus]);
 
   if (isLoadingAssignments) {
     return <LoadingOverlay />;
@@ -95,6 +118,7 @@ const FormListScreen: React.FC<{}> = () => {
                     const p: InspectionFormParams = {
                       assignmentId: item.id,
                       title: label,
+                      onSubmit: onSubmitInspection,
                     };
 
                     navigation.navigate(INSPECTIONS_FORM, p);
@@ -117,6 +141,7 @@ const FormListScreen: React.FC<{}> = () => {
             keyExtractor={(item) => `${item.id}`}
           />
           {!isReady && <LoadingOverlay />}
+          <RequestRateDialog hideDialog={handleHideDialog} visible={isVisibleRateDialog} />
         </>
       )}
     </View>

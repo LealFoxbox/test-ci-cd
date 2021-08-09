@@ -5,7 +5,7 @@ import { useTheme } from 'react-native-paper';
 import { RouteProp } from '@react-navigation/native';
 
 import InspectionsScreen from 'src/screens/Inspections';
-import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen';
+import InspectionsFormListScreen from 'src/screens/Inspections/FormListScreen/FormListScreen';
 import InspectionSearchScreen from 'src/screens/Inspections/SearchScreen';
 import InspectionFormScreen from 'src/screens/Inspections/FormScreen';
 import DraftsScreen from 'src/screens/Inspections/DraftsScreen';
@@ -49,6 +49,7 @@ export type InspectionsNavigatorParamList = {
       listChoiceIds: number[];
       formFieldId: number;
     };
+    onSubmit?: () => void;
   };
 };
 

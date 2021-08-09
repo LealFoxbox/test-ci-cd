@@ -25,7 +25,7 @@ interface CreateRenderCardParams {
   theme: ReactNativePaper.Theme;
   isReadonly: boolean;
   goToSignature: (formFieldId: number) => void;
-  goToCamera: (formFieldId: number, callback: () => void) => void;
+  goToCamera?: (formFieldId: number, callback: () => void) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
 }
 
@@ -73,7 +73,9 @@ export const createRenderCard = (
     const handleBlur = () => updateDraftFieldsAction(assignmentId, values);
     const handleTapPhoto = (index: number) => setExpandedPhoto({ index, photos: draftField.photos.map((p) => p.uri) });
     const handleCamera = (callback: () => void) => {
-      goToCamera(getFormFieldId(fieldValue), callback);
+      if (typeof goToCamera === 'function') {
+        goToCamera(getFormFieldId(fieldValue), callback);
+      }
     };
     const handleTakePhoto = async ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
       const coords = await getCurrentPosition();

@@ -14,6 +14,8 @@ target 'OrangeQC' do
 
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
 
+  pod 'react-native-in-app-review', :path => '../node_modules/react-native-in-app-review'
+
   target 'OrangeQCTests' do
     inherit! :complete
     # Pods for testing
