@@ -21,6 +21,7 @@ import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
 import {
   deleteDraftAction,
+  deleteDraftSectionAction,
   getFormFieldId,
   submitDraftAction,
   updateDraftCoords,
@@ -29,6 +30,7 @@ import {
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { resizedImage } from 'src/services/resizedImage';
+import DeleteSectionDialog from 'src/screens/Inspections/FormCards/DeleteSectionDialog';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -119,10 +121,23 @@ function parseFieldsWithCategories(draft: DraftForm) {
   return toPairs(groupBy('category_id', filteredFields))
     .sort((a, b) => categoryIds.indexOf(a[0]) - categoryIds.indexOf(b[0]))
     .flatMap(([catId, values]) => [
-      catId === 'undefined' || catId === 'null' ? '' : draft.categories?.[catId] || 'Category',
+      catId === 'undefined' || catId === 'null'
+        ? ''
+        : {
+            name: draft.categories?.[catId] || 'Category',
+            category_id: catId,
+            ratingTypeId: 100 as const,
+            id: catId,
+            is_category: true,
+          },
       sortBy('position', values),
     ])
     .flat();
+}
+
+interface DeleteSectionState {
+  isOpen: boolean;
+  categoryId?: string;
 }
 
 const EditFormScreen: React.FC<{}> = () => {
@@ -147,6 +162,10 @@ const EditFormScreen: React.FC<{}> = () => {
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
   const componentNavigationMounted = useRef<boolean>(true);
   const componentMounted = useRef<boolean>(true);
+  const [deleteSectionState, setDeleteSectionState] = useState<DeleteSectionState>({
+    isOpen: false,
+    categoryId: undefined,
+  });
 
   const [expandedPhoto, setExpandedPhoto] = useState<{ photos: string[]; index: number }>({
     photos: [],
@@ -159,6 +178,19 @@ const EditFormScreen: React.FC<{}> = () => {
   const [isReady, onReady] = useResult<undefined>();
 
   const hasCoordinates = !!draft && draft.latitude !== null && draft.longitude !== null;
+
+  const hideDeleteSection = useCallback(() => {
+    setDeleteSectionState(() => ({ isOpen: false, categoryId: undefined }));
+  }, []);
+
+  const openDeleteSection = useCallback(
+    (categoryId?: string) => () => {
+      if (categoryId) {
+        setDeleteSectionState(() => ({ isOpen: true, categoryId: categoryId }));
+      }
+    },
+    [],
+  );
 
   useLayoutEffect(() => {
     // we set goBackCallback to call in header component and remove draft without changes
@@ -260,6 +292,17 @@ const EditFormScreen: React.FC<{}> = () => {
     };
   }, [draft, draft?.assignmentId, hasCoordinates]);
 
+  const handlePressDeleteSection = useCallback(() => {
+    if (deleteSectionState.categoryId) {
+      const categories = Object.keys(draft?.categories ?? {}).filter((c) => c === deleteSectionState?.categoryId);
+      const fields = Object.values(draft?.fields ?? {})
+        .filter((f) => f.category_id === Number(deleteSectionState.categoryId))
+        .map((field) => field.id?.toString()) as string[];
+      deleteDraftSectionAction(fields, categories, assignmentId);
+    }
+    setDeleteSectionState({ isOpen: false, categoryId: undefined });
+  }, [assignmentId, deleteSectionState.categoryId, draft?.categories, draft?.fields]);
+
   const submit = useCallback(() => {
     submitDraftAction(assignmentId);
     navigation.goBack();
@@ -312,13 +355,14 @@ const EditFormScreen: React.FC<{}> = () => {
 
   const draftData = parseFieldsWithCategories(draft);
 
+  const showDeleteIcon = Object.values(draft.categories ?? {}).length > 1;
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
         images={expandedPhoto.photos.map((uri) => ({
           uri: `file://${uri}`,
         }))}
-        imageIndex={expandedPhoto.index !== -1 ? expandedPhoto.index : 0}
+        imageIndex={expandedPhoto.index !== -1 ? expandedPhoto.index : 100}
         visible={expandedPhoto.index !== -1}
         onRequestClose={() => setExpandedPhoto((s) => ({ ...s, index: -1 }))}
       />
@@ -432,7 +476,9 @@ const EditFormScreen: React.FC<{}> = () => {
               </>
             }
             data={draftData}
-            keyExtractor={(item) => (isString(item) ? item : `${getFormFieldId(item)}`)}
+            keyExtractor={(item) =>
+              isString(item) ? item : item.ratingTypeId === 100 ? `${item.category_id}` : `${getFormFieldId(item)}`
+            }
             renderItem={createRenderCard(formikProps, {
               setExpandedPhoto,
               assignmentId,
@@ -442,11 +488,18 @@ const EditFormScreen: React.FC<{}> = () => {
               goToRatingChoices,
               goToCamera,
               isReadonly: false,
+              openDeleteSection,
+              showDeleteIcon,
             })}
           />
         )}
       </Formik>
       {!isReady && <LoadingOverlay />}
+      <DeleteSectionDialog
+        visible={deleteSectionState.isOpen}
+        hideDialog={hideDeleteSection}
+        handlePress={handlePressDeleteSection}
+      />
     </View>
   );
 };

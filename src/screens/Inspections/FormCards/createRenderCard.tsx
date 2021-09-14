@@ -4,12 +4,12 @@ import { TextInputProps } from 'react-native-paper/lib/typescript/src/components
 import { FormikProps } from 'formik';
 import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
-import { Title } from 'react-native-paper';
 
 import { getFormFieldId, updateDraftFieldsAction } from 'src/pullstate/formActions';
-import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
+import { CategoryField, DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { isCorrectNumberCard } from 'src/screens/Inspections/FormScreen/validation';
+import SectionHeader from 'src/screens/Inspections/FormCards/SectionHeader';
 
 import TextCard from './TextCard';
 import NumberCard from './NumberCard';
@@ -25,8 +25,10 @@ interface CreateRenderCardParams {
   theme: ReactNativePaper.Theme;
   isReadonly: boolean;
   goToSignature: (formFieldId: number) => void;
+  openDeleteSection: (categoryId?: string) => () => void;
   goToCamera?: (formFieldId: number, callback: () => void) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
+  showDeleteIcon: boolean;
 }
 
 function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | undefined) {
@@ -56,15 +58,27 @@ export const createRenderCard = (
     goToSignature,
     goToCamera,
     goToRatingChoices,
+    openDeleteSection,
+    showDeleteIcon,
   }: CreateRenderCardParams,
-): ListRenderItem<DraftField | string> => {
+): ListRenderItem<DraftField | string | CategoryField> => {
   return ({ item: draftField }) => {
     if (typeof draftField === 'string') {
       if (!draftField) {
         return null;
       }
+      return <SectionHeader title={draftField} theme={theme} showDeleteIcon={false} />;
+    }
 
-      return <Title style={{ marginLeft: 10 }}>{draftField}</Title>;
+    if (draftField.ratingTypeId === 100) {
+      return (
+        <SectionHeader
+          title={draftField.name}
+          theme={theme}
+          onPress={openDeleteSection(draftField.category_id)}
+          showDeleteIcon={showDeleteIcon}
+        />
+      );
     }
 
     const fieldValue = values[getFormFieldId(draftField)];

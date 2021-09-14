@@ -227,6 +227,35 @@ export const deleteDraftAction = (assignmentId: number) => {
   });
 };
 
+export const deleteDraftSectionAction = (fieldsDelete: string[], categoriesDelete: string[], assignmentId: number) => {
+  PersistentUserStore.update((persistentState) => {
+    const currentDraft = persistentState.drafts[assignmentId];
+    if (currentDraft?.assignmentId) {
+      return pipe([
+        // set draft as dirty
+        set(['drafts', assignmentId, 'isDirty'], true),
+        // set started_at if not already set
+        (s: PersistentState) =>
+          s.drafts[assignmentId].started_at ? s : set(['drafts', assignmentId, 'started_at'], Date.now(), s),
+        // update lastModified
+        (s: PersistentState) => set(['drafts', assignmentId, 'lastModified'], Date.now(), s),
+        // set all of form's values to draft's fields but with comments as null if they are empty
+        set(['drafts', assignmentId, 'fields'], omit(fieldsDelete, persistentState.drafts[assignmentId].fields ?? {})),
+        set(
+          ['drafts', assignmentId, 'categories'],
+          omit(categoriesDelete, persistentState.drafts[assignmentId].categories ?? {}),
+        ),
+      ])(persistentState) as PersistentState;
+    } else {
+      logErrorToSentry('[INFO][UPDATE_DRAFT_FIELD_ACTION]', {
+        severity: Sentry.Severity.Info,
+        assignmentId,
+      });
+      return persistentState;
+    }
+  });
+};
+
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
   PersistentUserStore.update((persistentState) => {
     const currentDraft = persistentState.drafts[assignmentId];
