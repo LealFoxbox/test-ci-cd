@@ -4,6 +4,7 @@ import { TextInputProps } from 'react-native-paper/lib/typescript/src/components
 import { FormikProps } from 'formik';
 import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
+import { fromPairs } from 'lodash';
 
 import { getFormFieldId, updateDraftFieldsAction } from 'src/pullstate/formActions';
 import { CategoryField, DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
@@ -25,7 +26,13 @@ interface CreateRenderCardParams {
   theme: ReactNativePaper.Theme;
   isReadonly: boolean;
   goToSignature: (formFieldId: number) => void;
-  openDeleteSection: (categoryId?: string) => () => void;
+  openDeleteSection: ({
+    categoryId,
+    handleRemove,
+  }: {
+    categoryId?: string;
+    handleRemove: (categoryId: string | number | null) => void;
+  }) => () => void;
   goToCamera?: (formFieldId: number, callback: () => void) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
   showDeleteIcon: boolean;
@@ -70,12 +77,34 @@ export const createRenderCard = (
       return <SectionHeader title={draftField} theme={theme} showDeleteIcon={false} />;
     }
 
+    const handleDeleteSection = (categoryId: string | number | null) => {
+      // const newValues = set(`${getFormFieldId(draftField)}.deleted`, true, values);
+      const fields = Object.values(values ?? {}).map((f) => {
+        if (f.category_id === Number(categoryId)) {
+          const newValues = set(`${getFormFieldId(f)}.deleted`, true, values);
+          setFieldValue(`${getFormFieldId(f)}`, newValues[getFormFieldId(f)]);
+          return {
+            ...f,
+            deleted: true,
+          };
+        } else {
+          return f;
+        }
+      });
+      const newValues = fromPairs(fields.map((f) => [`${getFormFieldId(f)}`, f]));
+      // prevented the user from deleting every single field
+      updateDraftFieldsAction(assignmentId, newValues);
+    };
+
     if (draftField.ratingTypeId === 100) {
       return (
         <SectionHeader
           title={draftField.name}
           theme={theme}
-          onPress={openDeleteSection(draftField.category_id)}
+          onPress={openDeleteSection({
+            categoryId: draftField.category_id,
+            handleRemove: handleDeleteSection,
+          })}
           showDeleteIcon={showDeleteIcon}
         />
       );

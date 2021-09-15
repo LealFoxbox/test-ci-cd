@@ -21,7 +21,6 @@ import usePrevious from 'src/utils/usePrevious';
 import { useResult } from 'src/utils/useResult';
 import {
   deleteDraftAction,
-  deleteDraftSectionAction,
   getFormFieldId,
   submitDraftAction,
   updateDraftCoords,
@@ -135,9 +134,17 @@ function parseFieldsWithCategories(draft: DraftForm) {
     .flat();
 }
 
+function getFieldCategories(draft: DraftForm) {
+  const filteredFields = Object.values(draft.fields).filter((f) => !f.deleted);
+
+  const categoryIds = uniq(map('category_id', filteredFields)).map((c) => c?.toString() || 'null');
+  return categoryIds;
+}
+
 interface DeleteSectionState {
   isOpen: boolean;
   categoryId?: string;
+  handle?: (categoryId: string | number | null) => void;
 }
 
 const EditFormScreen: React.FC<{}> = () => {
@@ -184,9 +191,15 @@ const EditFormScreen: React.FC<{}> = () => {
   }, []);
 
   const openDeleteSection = useCallback(
-    (categoryId?: string) => () => {
+    ({
+      categoryId,
+      handleRemove,
+    }: {
+      categoryId?: string;
+      handleRemove: (categoryId: string | number | null) => void;
+    }) => () => {
       if (categoryId) {
-        setDeleteSectionState(() => ({ isOpen: true, categoryId: categoryId }));
+        setDeleteSectionState(() => ({ isOpen: true, categoryId: categoryId, handle: handleRemove }));
       }
     },
     [],
@@ -294,14 +307,10 @@ const EditFormScreen: React.FC<{}> = () => {
 
   const handlePressDeleteSection = useCallback(() => {
     if (deleteSectionState.categoryId) {
-      const categories = Object.keys(draft?.categories ?? {}).filter((c) => c === deleteSectionState?.categoryId);
-      const fields = Object.values(draft?.fields ?? {})
-        .filter((f) => f.category_id === Number(deleteSectionState.categoryId))
-        .map((field) => field.id?.toString()) as string[];
-      deleteDraftSectionAction(fields, categories, assignmentId);
+      deleteSectionState.handle?.(deleteSectionState.categoryId);
     }
-    setDeleteSectionState({ isOpen: false, categoryId: undefined });
-  }, [assignmentId, deleteSectionState.categoryId, draft?.categories, draft?.fields]);
+    setDeleteSectionState({ isOpen: false, categoryId: undefined, handle: undefined });
+  }, [deleteSectionState]);
 
   const submit = useCallback(() => {
     submitDraftAction(assignmentId);
@@ -355,7 +364,8 @@ const EditFormScreen: React.FC<{}> = () => {
 
   const draftData = parseFieldsWithCategories(draft);
 
-  const showDeleteIcon = Object.values(draft.categories ?? {}).length > 1;
+  const categoryIds = getFieldCategories(draft);
+  const showDeleteIcon = categoryIds.length > 1;
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1, justifyContent: 'center' }}>
       <ExpandedGallery
