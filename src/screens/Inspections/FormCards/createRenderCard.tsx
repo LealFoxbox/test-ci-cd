@@ -55,7 +55,7 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | u
 }
 
 export const createRenderCard = (
-  { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
+  { values, setFieldValue, setValues }: FormikProps<Record<string, DraftField>>,
   {
     setExpandedPhoto,
     assignmentId,
@@ -78,21 +78,15 @@ export const createRenderCard = (
     }
 
     const handleDeleteSection = (categoryId: string | number | null) => {
-      // const newValues = set(`${getFormFieldId(draftField)}.deleted`, true, values);
       const fields = Object.values(values ?? {}).map((f) => {
-        if (f.category_id === Number(categoryId)) {
-          const newValues = set(`${getFormFieldId(f)}.deleted`, true, values);
-          setFieldValue(`${getFormFieldId(f)}`, newValues[getFormFieldId(f)]);
-          return {
-            ...f,
-            deleted: true,
-          };
-        } else {
-          return f;
-        }
+        return {
+          ...f,
+          deleted: f.category_id === Number(categoryId) ? true : f.deleted,
+        };
       });
       const newValues = fromPairs(fields.map((f) => [`${getFormFieldId(f)}`, f]));
       // prevented the user from deleting every single field
+      setValues(newValues, false);
       updateDraftFieldsAction(assignmentId, newValues);
     };
 
