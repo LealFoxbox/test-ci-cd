@@ -135,7 +135,7 @@ android {
         applicationId "com.orangeqc.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 144
+        versionCode 145
         versionName "2.2.7"
         multiDexEnabled true
     }
