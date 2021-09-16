@@ -2,12 +2,26 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid, View } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
 import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
+import { styled } from 'src/paperTheme';
+
+const Container = styled.View`
+  position: relative;
+  width: ${widthAreaTouch};
+  height: 30px;
+`;
+
+const ViewStyled = styled.View`
+  top: -30px;
+  left: ${-widthAreaTouch + 35};
+  position: absolute;
+  z-index: 1;
+`;
 
 export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
@@ -160,21 +174,8 @@ const MoreButton: React.FC<MoreButtonProps> = ({
       onDismiss={closeMenu}
       style={{ marginLeft: -20, marginTop: paddingVerticalAreaTouch + 8 }}
       anchor={
-        <View
-          style={{
-            position: 'relative',
-            width: widthAreaTouch,
-            height: 30,
-          }}
-        >
-          <View
-            style={{
-              top: -30,
-              left: -widthAreaTouch + 35,
-              position: 'absolute',
-              zIndex: 1,
-            }}
-          >
+        <Container>
+          <ViewStyled>
             <TouchableOpacity
               style={{
                 width: widthAreaTouch + 25,
@@ -192,8 +193,8 @@ const MoreButton: React.FC<MoreButtonProps> = ({
                 size={30}
               />
             </TouchableOpacity>
-          </View>
-        </View>
+          </ViewStyled>
+        </Container>
       }
     >
       {!deleteMode && allowPhotos && (
