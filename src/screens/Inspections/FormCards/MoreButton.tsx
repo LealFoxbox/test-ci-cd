@@ -2,8 +2,9 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid, TouchableOpacity, View } from 'react-native';
+import { PermissionsAndroid, View } from 'react-native';
 import RNFS from 'react-native-fs';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
 import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
@@ -161,19 +162,37 @@ const MoreButton: React.FC<MoreButtonProps> = ({
       anchor={
         <View
           style={{
-            alignItems: 'flex-end',
-            paddingVertical: paddingVerticalAreaTouch,
+            position: 'relative',
             width: widthAreaTouch,
-            paddingRight: 10,
+            height: 30,
           }}
         >
-          <TouchableOpacity
-            onPress={openMenu}
-            accessibilityRole="button"
-            hitSlop={{ top: 100, right: 100, bottom: 100, left: 100 }}
+          <View
+            style={{
+              top: -30,
+              left: -widthAreaTouch + 35,
+              position: 'absolute',
+              zIndex: 1,
+            }}
           >
-            <MaterialCommunityIcons color={theme.colors.primary} name="dots-horizontal-circle" size={30} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                width: widthAreaTouch + 25,
+                alignItems: 'flex-end',
+                height: 90,
+              }}
+              onPress={openMenu}
+              accessibilityRole="button"
+              hitSlop={{ top: 1000, right: 1000, bottom: 1000, left: 1000 }}
+            >
+              <MaterialCommunityIcons
+                style={{ paddingRight: 20, paddingTop: 30 }}
+                color={theme.colors.primary}
+                name="dots-horizontal-circle"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       }
     >
