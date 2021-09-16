@@ -23,7 +23,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
   onTakeCamera,
 }) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingVertical: 10 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 0, paddingVertical: 10 }}>
       <Card.Title
         style={{ flex: 1, marginRight: 10 }}
         titleNumberOfLines={0}

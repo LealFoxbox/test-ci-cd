@@ -1,12 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid } from 'react-native';
+import { PermissionsAndroid, TouchableOpacity, View } from 'react-native';
 import RNFS from 'react-native-fs';
 
 import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
+import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
 
 export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
@@ -157,10 +157,24 @@ const MoreButton: React.FC<MoreButtonProps> = ({
     <Menu
       visible={visible}
       onDismiss={closeMenu}
+      style={{ marginLeft: -20, marginTop: paddingVerticalAreaTouch + 8 }}
       anchor={
-        <TouchableOpacity onPress={openMenu} accessibilityRole="button">
-          <MaterialCommunityIcons color={theme.colors.primary} name="dots-horizontal-circle" size={28} />
-        </TouchableOpacity>
+        <View
+          style={{
+            alignItems: 'flex-end',
+            paddingVertical: paddingVerticalAreaTouch,
+            width: widthAreaTouch,
+            paddingRight: 10,
+          }}
+        >
+          <TouchableOpacity
+            onPress={openMenu}
+            accessibilityRole="button"
+            hitSlop={{ top: 100, right: 100, bottom: 100, left: 100 }}
+          >
+            <MaterialCommunityIcons color={theme.colors.primary} name="dots-horizontal-circle" size={30} />
+          </TouchableOpacity>
+        </View>
       }
     >
       {!deleteMode && allowPhotos && (
