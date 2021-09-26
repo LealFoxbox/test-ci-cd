@@ -224,6 +224,14 @@ export interface SelectField extends BaseField {
   list_choice_ids: number[]; // Only provide a value if the user makes a selection from the list picker. Please note that multiple choice list pickers could contain multiple integers in an array. A single choice list picker would contain an array of one integer. If no selection was made, client must provide null or empty array.
 }
 
+export interface CategoryField {
+  category_id: string;
+  id?: string;
+  name: string;
+  is_category: boolean;
+  ratingTypeId: 100;
+}
+
 export type DraftField = ScoreField | TextField | SignatureField | NumberField | PointsField | SelectField;
 
 export interface DraftForm {

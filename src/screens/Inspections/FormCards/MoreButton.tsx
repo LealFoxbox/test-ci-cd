@@ -1,12 +1,27 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 import { PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
+import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
+import { styled } from 'src/paperTheme';
+
+const Container = styled.View`
+  position: relative;
+  width: ${widthAreaTouch};
+  height: 30px;
+`;
+
+const ViewStyled = styled.View`
+  top: -30px;
+  left: ${-widthAreaTouch + 35};
+  position: absolute;
+  z-index: 1;
+`;
 
 export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
@@ -157,10 +172,29 @@ const MoreButton: React.FC<MoreButtonProps> = ({
     <Menu
       visible={visible}
       onDismiss={closeMenu}
+      style={{ marginLeft: -20, marginTop: paddingVerticalAreaTouch + 8 }}
       anchor={
-        <TouchableOpacity onPress={openMenu} accessibilityRole="button">
-          <MaterialCommunityIcons color={theme.colors.primary} name="dots-horizontal-circle" size={28} />
-        </TouchableOpacity>
+        <Container>
+          <ViewStyled>
+            <TouchableOpacity
+              style={{
+                width: widthAreaTouch + 25,
+                alignItems: 'flex-end',
+                height: 90,
+              }}
+              onPress={openMenu}
+              accessibilityRole="button"
+              hitSlop={{ top: 1000, right: 1000, bottom: 1000, left: 1000 }}
+            >
+              <MaterialCommunityIcons
+                style={{ paddingRight: 20, paddingTop: 30 }}
+                color={theme.colors.primary}
+                name="dots-horizontal-circle"
+                size={30}
+              />
+            </TouchableOpacity>
+          </ViewStyled>
+        </Container>
       }
     >
       {!deleteMode && allowPhotos && (

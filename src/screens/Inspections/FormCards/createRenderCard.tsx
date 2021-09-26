@@ -4,12 +4,13 @@ import { TextInputProps } from 'react-native-paper/lib/typescript/src/components
 import { FormikProps } from 'formik';
 import { differenceBy, find, set } from 'lodash/fp';
 import RNFS from 'react-native-fs';
-import { Title } from 'react-native-paper';
+import { fromPairs } from 'lodash';
 
 import { getFormFieldId, updateDraftFieldsAction } from 'src/pullstate/formActions';
-import { DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
+import { CategoryField, DraftField, DraftPhoto, NumberRating, RangeChoice, Rating, SelectRating } from 'src/types';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
 import { isCorrectNumberCard } from 'src/screens/Inspections/FormScreen/validation';
+import SectionHeader from 'src/screens/Inspections/FormCards/SectionHeader';
 
 import TextCard from './TextCard';
 import NumberCard from './NumberCard';
@@ -25,8 +26,16 @@ interface CreateRenderCardParams {
   theme: ReactNativePaper.Theme;
   isReadonly: boolean;
   goToSignature: (formFieldId: number) => void;
+  openDeleteSection: ({
+    categoryId,
+    handleRemove,
+  }: {
+    categoryId?: string;
+    handleRemove: (categoryId: string | number | null) => void;
+  }) => () => void;
   goToCamera?: (formFieldId: number, callback: () => void) => void;
   goToRatingChoices: (params: { title: string; ratingId: number; formFieldId: number }) => void;
+  showDeleteIcon: boolean;
 }
 
 function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | undefined) {
@@ -46,7 +55,7 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | u
 }
 
 export const createRenderCard = (
-  { values, setFieldValue }: FormikProps<Record<string, DraftField>>,
+  { values, setFieldValue, setValues }: FormikProps<Record<string, DraftField>>,
   {
     setExpandedPhoto,
     assignmentId,
@@ -56,15 +65,43 @@ export const createRenderCard = (
     goToSignature,
     goToCamera,
     goToRatingChoices,
+    openDeleteSection,
+    showDeleteIcon,
   }: CreateRenderCardParams,
-): ListRenderItem<DraftField | string> => {
+): ListRenderItem<DraftField | string | CategoryField> => {
   return ({ item: draftField }) => {
     if (typeof draftField === 'string') {
       if (!draftField) {
         return null;
       }
+      return <SectionHeader title={draftField} theme={theme} showDeleteIcon={false} />;
+    }
 
-      return <Title style={{ marginLeft: 10 }}>{draftField}</Title>;
+    const handleDeleteSection = (categoryId: string | number | null) => {
+      const fields = Object.values(values ?? {}).map((f) => {
+        return {
+          ...f,
+          deleted: f.category_id === Number(categoryId) ? true : f.deleted,
+        };
+      });
+      const newValues = fromPairs(fields.map((f) => [`${getFormFieldId(f)}`, f]));
+      // prevented the user from deleting every single field
+      setValues(newValues, false);
+      updateDraftFieldsAction(assignmentId, newValues);
+    };
+
+    if (draftField.ratingTypeId === 100) {
+      return (
+        <SectionHeader
+          title={draftField.name}
+          theme={theme}
+          onPress={openDeleteSection({
+            categoryId: draftField.category_id,
+            handleRemove: handleDeleteSection,
+          })}
+          showDeleteIcon={showDeleteIcon}
+        />
+      );
     }
 
     const fieldValue = values[getFormFieldId(draftField)];

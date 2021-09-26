@@ -135,8 +135,8 @@ android {
         applicationId "com.orangeqc.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 140
-        versionName "2.2.6"
+        versionCode 145
+        versionName "2.2.7"
         multiDexEnabled true
     }
     splits {
