@@ -52,6 +52,7 @@ export const fetchtUser = (params: FetchUserParams) => {
   return axios({
     method: 'get',
     url: `${getApiUrl(params.companyId)}/authenticate`,
+    timeout: 500,
     withCredentials: false,
     params: {
       user_credentials: params.token,
