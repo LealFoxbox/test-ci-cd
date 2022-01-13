@@ -46,7 +46,6 @@ const CardFooter: React.FC<CardFooterProps> = ({
       <Container>
         {showComment && (
           <TextInput
-            multiline
             style={{ marginBottom: 10 }}
             keyboardType="default"
             disabled={isReadonly}

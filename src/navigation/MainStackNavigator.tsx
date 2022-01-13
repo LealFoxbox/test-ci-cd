@@ -11,7 +11,7 @@ import Header from 'src/components/Header';
 import SignatureScreen from 'src/screens/Inspections/SignatureScreen';
 import RatingChoicesScreen from 'src/screens/Inspections/RatingChoicesScreen';
 import { LoginStore } from 'src/pullstate/loginStore';
-import CameraScreen from 'src/screens/Inspections/CameraScreen/CameraScreen';
+import CameraScreen from 'src/screens/Inspections/CameraScreen/CameraScreenPicker';
 
 import InspectionsNavigator from './InspectionsNavigator';
 import ScheduleNavigator from './ScheduleNavigator';

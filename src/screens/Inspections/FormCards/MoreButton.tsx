@@ -25,6 +25,10 @@ const ViewStyled = styled.View`
 
 export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
 
+type EventButtonPress = ImagePickerResponse & {
+  uri: string;
+};
+
 export interface MoreButtonProps {
   onAddComment?: () => void;
   onTakePhoto?: onTakePhotoType;
@@ -68,18 +72,25 @@ async function createAddHandler(
   if (!enableButton) return;
   enableButtonHandler(false);
 
-  const callback = async (response: ImagePickerResponse) => {
+  const callback = async (response: EventButtonPress) => {
     try {
-      if (!response.didCancel && !response.errorCode) {
-        if (response.uri) {
-          const fileName = `photo - ${Date.now()}.jpg`;
-          const newUri = await fileUrlCopy(response.uri, fileName);
-          if (onTakePhoto) {
-            await onTakePhoto({ uri: newUri, fileName }, isAttachment);
-          }
-        } else {
-          console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
-        }
+      let capture = null;
+
+      if (response.assets && response.assets.length) {
+        capture = response.assets?.[0];
+      } else {
+        capture = response;
+      }
+
+      if (response.didCancel || response.errorCode || !capture || !capture?.uri) {
+        console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
+        return;
+      }
+
+      const fileName = `photo - ${Date.now()}.jpg`;
+      const newUri = await fileUrlCopy(capture.uri, fileName);
+      if (onTakePhoto) {
+        await onTakePhoto({ uri: newUri, fileName }, isAttachment);
       }
     } catch (error) {
       console.warn('[APP] createAddHandler callback', error.message);
@@ -92,7 +103,7 @@ async function createAddHandler(
       const hasPermission = await askWriteStoragePermission();
 
       if (hasPermission) {
-        launchImageLibrary(
+        void launchImageLibrary(
           {
             mediaType: 'photo',
             maxWidth: 2000, //	To resize the image
@@ -100,7 +111,9 @@ async function createAddHandler(
             quality: 0.8, //	0 to 1, photos
             includeBase64: false,
           },
-          callback,
+          (response) => {
+            void callback(response as EventButtonPress);
+          },
         );
       } else {
         enableButtonHandler(true);
