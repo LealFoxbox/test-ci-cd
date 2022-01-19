@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 
 import config from 'src/config';
+import { LoginStore } from 'src/pullstate/loginStore';
 
 type Context = {
   [p: string]: unknown;
@@ -8,8 +9,28 @@ type Context = {
   tags?: { [k: string]: string };
   errorInstance?: Error;
 };
+interface UserData {
+  id: string;
+  email: string;
+  username: string;
+}
 
 const DEFAULT_CONTEXT = 'custom information';
+
+function getUserData() {
+  const sentryUser: UserData = { id: '', email: '', username: '' };
+  const { userData } = LoginStore.getRawState();
+
+  if (!userData?.id) {
+    return null;
+  } else {
+    sentryUser.id = userData.id.toString();
+    sentryUser.email = userData?.email ?? '';
+    sentryUser.username = userData?.login ?? '';
+  }
+
+  return sentryUser;
+}
 
 export function logErrorToSentry(description: string, context: Context = {}) {
   try {
@@ -18,6 +39,8 @@ export function logErrorToSentry(description: string, context: Context = {}) {
       return;
     }
     const scope = new Sentry.Scope();
+
+    scope.setUser(getUserData());
 
     const { tags = {}, severity, ...contextData } = context;
     const messageWithErrorCode = `${description}`;
