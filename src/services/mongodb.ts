@@ -149,7 +149,7 @@ const asyncMethods = {
     }
 
     await AsyncStorage.getItem(currentKey, (error, item) => {
-      if (!error && item && item.length >= 1400000) {
+      if (!error && item && item.length >= 105000) {
         currentKey = `${config.APP_NAME}_structures_${structureKey}`;
         structureKey++;
 
