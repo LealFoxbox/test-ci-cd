@@ -171,9 +171,15 @@ const asyncMethods = {
   },
 };
 
-const getData = async (id: number | null, keys: string[], search = false, input: string): Promise<Structure[]> => {
+const getData = async (
+  id: number | null,
+  keys: string[],
+  search = false,
+  input: string,
+  findOne?: false,
+): Promise<Structure[] | Structure> => {
   try {
-    if (!id && !search) return [];
+    if (!id && !search && !findOne) return [];
 
     let list = '';
 
@@ -209,6 +215,10 @@ const getData = async (id: number | null, keys: string[], search = false, input:
         }
         return false;
       });
+    } else if (findOne) {
+      const structure = jsonList.find((item) => item.id === id);
+
+      return structure as Structure;
     } else {
       filteredList = jsonList.filter((item) => item.parent_id === id);
     }
@@ -287,7 +297,7 @@ export function createStructureDb() {
       const keys = await AsyncStorage.getAllKeys();
 
       if (keys && keys.length > 2) {
-        return getData(null, keys, true, input);
+        return await getData(null, keys, true, input);
       } else {
         return db
           .find({ [field]: createSearchRegex(input) })
@@ -296,8 +306,14 @@ export function createStructureDb() {
       }
     },
 
-    get(id: number | null) {
-      return db.findOne({ id }).exec() as Promise<Structure | undefined>;
+    async get(id: number | null) {
+      const keys = await AsyncStorage.getAllKeys();
+
+      if (keys && keys.length > 2) {
+        return (await getData(id, keys, false, '', true)) as Structure;
+      } else {
+        return db.findOne({ id }).exec() as Promise<Structure | undefined>;
+      }
     },
 
     getAll() {
@@ -315,7 +331,7 @@ export function createStructureDb() {
       const keys = await AsyncStorage.getAllKeys();
 
       if (keys && keys.length > 2) {
-        return getData(id, keys, false, '');
+        return await getData(id, keys, false, '');
       } else {
         return db.find({ parent_id: id }).sort({ display_name: 1 }).exec() as Promise<Structure[]>;
       }

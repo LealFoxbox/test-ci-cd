@@ -33,7 +33,7 @@ const FormListScreen: React.FC<{}> = () => {
     isMongoComplete: selectMongoComplete(s),
   }));
   const isStaging = LoginStore.useState((s) => s.isStaging);
-  const [structure] = dbHooks.structures.useGet(parentId, isMongoComplete);
+  const [structure, isLoadingStructure] = dbHooks.structures.useGet(parentId, isMongoComplete);
   const [assignments, isLoadingAssignments] = dbHooks.assignments.useGetAssignments(parentId, forms);
   const theme = useTheme();
   const [isReady, onReady] = useResult<undefined>();
@@ -59,7 +59,7 @@ const FormListScreen: React.FC<{}> = () => {
     }
   }, [rateStatus]);
 
-  if (isLoadingAssignments) {
+  if (isLoadingAssignments || isLoadingStructure) {
     return <LoadingOverlay />;
   }
 

@@ -10,7 +10,7 @@ export const structures = {
   useGet(id: number | null, isMongoComplete: boolean) {
     const fn = useCallback(async () => {
       await structuresDb.loadPromise;
-      return structuresDb.get(id);
+      return await structuresDb.get(id);
     }, [id]);
     return useResultAsync(fn, isMongoComplete);
   },
