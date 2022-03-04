@@ -69,7 +69,6 @@ const Camera: React.FC = () => {
 
   useEffect(() => {
     handleImagePicker();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

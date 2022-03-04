@@ -22,21 +22,43 @@ type ResizedImageOptions = {
 
 export async function resizedImage(opt: ResizedImageOptions): Promise<string> {
   try {
-    const result = await ImageResizer.createResizedImage(opt.uri, opt.width, opt.height, 'JPEG', 80);
+    const start = Date.now();
+    logErrorToSentry('[INFO][resizedImage] resize process started', {
+      severity: Sentry.Severity.Info,
+      object: opt,
+      timeStarted: start,
+    });
+    const result = await ImageResizer.createResizedImage(opt.uri, opt.width, opt.height, 'JPEG', 25);
+    logErrorToSentry('[INFO][createResizedImage] createResizedImage process started', {
+      severity: Sentry.Severity.Info,
+      object: result,
+      timeSpent: Date.now() - start,
+    });
     const newUri = await fileUrlCopy(result.uri, opt.fileName);
+    logErrorToSentry('[INFO][fileUrlCopy] fileUrlCopy process finished', {
+      severity: Sentry.Severity.Info,
+      object: result,
+      timeSpent: Date.now() - start,
+    });
+    logErrorToSentry('[INFO][resizedImage] resize process finished', {
+      severity: Sentry.Severity.Info,
+      object: opt,
+      timeStarted: Date.now() - start,
+    });
     return newUri;
   } catch (error) {
     try {
       // we try the original photo without resize
       const newUri = await fileUrlCopy(opt.uri, opt.fileName);
-      logErrorToSentry('[INFO][resizedImage]', {
-        severity: Sentry.Severity.Info,
+      logErrorToSentry('[ERROR][resizedImage]', {
+        severity: Sentry.Severity.Error,
         infoMessage: error?.message,
       });
       return newUri;
+      // eslint-disable-next-line no-catch-shadow
     } catch (error) {
-      logErrorToSentry('[INFO][resizedImage - original]', {
-        severity: Sentry.Severity.Info,
+      logErrorToSentry('[ERROR][resizedImage - original]', {
+        severity: Sentry.Severity.Error,
         infoMessage: error?.message,
       });
       return '';
