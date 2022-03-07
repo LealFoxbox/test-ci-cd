@@ -78,7 +78,9 @@ async function createAddHandler(
 
   const callback = async (response: EventButtonPress) => {
     try {
-      logErrorToSentry('[INFO] entering callback', {
+      Sentry.captureException({ response });
+      Sentry.captureMessage('TEST MESSAGE');
+      logErrorToSentry('[INFO][entering callback]', {
         severity: Sentry.Severity.Info,
         response,
       });
@@ -89,7 +91,7 @@ async function createAddHandler(
       } else {
         capture = response;
       }
-      logErrorToSentry('[INFO] callback response.assets && response.assets.length', {
+      logErrorToSentry('[INFO][callback response.assets && response.assets.length]', {
         severity: Sentry.Severity.Info,
         timeSpent: Date.now() - startAddHandler,
       });
@@ -98,7 +100,7 @@ async function createAddHandler(
         console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
         return;
       }
-      logErrorToSentry('[INFO] callback response.didCancel || response.errorCode || !capture || !capture?.uri', {
+      logErrorToSentry('[INFO][ callback response.didCancel || response.errorCode || !capture || !capture?.uri]', {
         severity: Sentry.Severity.Info,
         timeSpent: Date.now() - startAddHandler,
       });
@@ -109,12 +111,12 @@ async function createAddHandler(
       if (onTakePhoto) {
         await onTakePhoto({ uri: newUri, fileName }, isAttachment);
       }
-      logErrorToSentry('[INFO] callback worked', {
+      logErrorToSentry('[INFO][callback worked]', {
         severity: Sentry.Severity.Info,
         timeSpent: cbDate - startAddHandler,
       });
     } catch (error) {
-      logErrorToSentry('[ERROR] createAddHandler callback', {
+      logErrorToSentry('[ERROR][createAddHandler callback]', {
         severity: Sentry.Severity.Error,
         infoMessage: error?.message,
       });
@@ -127,7 +129,7 @@ async function createAddHandler(
     if (isAttachment) {
       const hasPermission = await askWriteStoragePermission();
       if (hasPermission) {
-        logErrorToSentry('[INFO] storage process started', {
+        logErrorToSentry('[INFO][storage process started]', {
           severity: Sentry.Severity.Info,
           timeSpent: checkGalleryOrCamera - startAddHandler,
         });
@@ -143,7 +145,7 @@ async function createAddHandler(
             void callback(response as EventButtonPress);
           },
         );
-        logErrorToSentry('[INFO] camera process finished', {
+        logErrorToSentry('[INFO][camera process finished]', {
           severity: Sentry.Severity.Info,
           totalTimeSpent: Date.now() - startAddHandler,
           timeSpent: Date.now() - checkGalleryOrCamera,
@@ -154,7 +156,7 @@ async function createAddHandler(
     } else {
       const hasPermission = await askCameraPermission();
 
-      logErrorToSentry('[INFO] camera process started', {
+      logErrorToSentry('[INFO][camera process started]', {
         severity: Sentry.Severity.Info,
         timeSpent: checkGalleryOrCamera - startAddHandler,
       });
@@ -162,7 +164,7 @@ async function createAddHandler(
       if (hasPermission && launchCamera) {
         closeMenu();
         launchCamera();
-        logErrorToSentry('[INFO] launch camera ', {
+        logErrorToSentry('[INFO][launch camera]', {
           severity: Sentry.Severity.Info,
           totalTimeSpent: Date.now() - startAddHandler,
           timeSpentWithLaunchCamera: Date.now() - checkGalleryOrCamera,
@@ -170,13 +172,13 @@ async function createAddHandler(
       } else {
         enableButtonHandler(true);
       }
-      logErrorToSentry('[INFO] camera process finished ', {
+      logErrorToSentry('[INFO][camera process finished] ', {
         severity: Sentry.Severity.Info,
         totalTimeSpent: Date.now() - startAddHandler,
       });
     }
   } catch (error) {
-    logErrorToSentry('[ERROR] createAddHandler', {
+    logErrorToSentry('[ERROR][createAddHandler]', {
       severity: Sentry.Severity.Error,
       infoMessage: error?.message,
     });

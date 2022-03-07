@@ -83,7 +83,7 @@ async function updatePhoto(
   formValues: Record<string, DraftField>,
 ) {
   const start = Date.now();
-  logErrorToSentry('[INFO] updatePhoto started', {
+  logErrorToSentry('[INFO][updatePhoto started]', {
     severity: Sentry.Severity.Info,
     start,
   });
