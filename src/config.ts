@@ -50,7 +50,7 @@ interface Config {
 }
 
 const config: Config = {
-  isDev: false,
+  isDev: __DEV__,
   AMOUNT_INSPECTIONS_TO_RATE: 4,
   APP_NAME: appName,
   APP_VERSION: getVersion(),
