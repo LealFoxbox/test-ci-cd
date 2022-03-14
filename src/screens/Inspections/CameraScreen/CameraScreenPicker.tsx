@@ -24,7 +24,6 @@ const Camera: React.FC = () => {
 
   const onBottomButtonPressed = (event: EventButtonPress) => {
     callback && callback();
-
     let capture = null;
 
     if (event.assets && event.assets.length) {

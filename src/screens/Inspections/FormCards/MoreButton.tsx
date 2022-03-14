@@ -12,6 +12,7 @@ import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
 import { styled } from 'src/paperTheme';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { logErrorToSentry } from 'src/utils/logger';
+import { handleImagePicker } from 'src/services/imageHandler/imagePicker';
 
 const Container = styled.View`
   position: relative;
@@ -78,8 +79,6 @@ async function createAddHandler(
 
   const callback = async (response: EventButtonPress) => {
     try {
-      Sentry.captureException({ response });
-      Sentry.captureMessage('TEST MESSAGE');
       logErrorToSentry('[INFO][entering callback]', {
         severity: Sentry.Severity.Info,
         response,
@@ -213,12 +212,35 @@ const MoreButton: React.FC<MoreButtonProps> = ({
 
   const closeMenu = useCallback(() => setVisible(false), [setVisible]);
 
-  const launchCamera = useCallback(() => {
-    onTakeCamera(() => enableButtonHandler(true));
-  }, [onTakeCamera]);
+  // const launchCamera = useCallback(() => {
+  //   onTakeCamera(() => enableButtonHandler(true));
+  // }, [onTakeCamera]);
 
-  const handlePhoto = () =>
-    createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false, launchCamera);
+  // const handlePhoto = () =>
+  //   createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false, launchCamera);
+
+  const handlePhoto = async () => {
+    const now = Date.now();
+    logErrorToSentry('[DEBUG][new handle photo]', {
+      severity: Sentry.Severity.Info,
+      started: now,
+    });
+
+    const photo = await handleImagePicker();
+
+    logErrorToSentry('[DEBUG][new handle photo step 2]', {
+      severity: Sentry.Severity.Info,
+      photo,
+      timeSpent: now - Date.now(),
+    });
+
+    if (photo) void onTakePhoto(photo, false);
+    logErrorToSentry('[DEBUG][new handle photo step 3]', {
+      severity: Sentry.Severity.Info,
+      photo,
+      timeSpent: now - Date.now(),
+    });
+  };
 
   const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
 

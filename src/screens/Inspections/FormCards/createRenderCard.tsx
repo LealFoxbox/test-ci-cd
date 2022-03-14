@@ -116,7 +116,7 @@ export const createRenderCard = (
     };
     const handleTakePhoto = async ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
       const coords = await getCurrentPosition();
-
+      console.log({ uri, fileName });
       const newPhoto: DraftPhoto = {
         isFromGallery,
         uri,

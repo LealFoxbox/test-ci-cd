@@ -38,7 +38,7 @@ import { createRenderCard } from '../FormCards/createRenderCard';
 import { validateFormScreen } from './validation';
 import OptionRow from './OptionRow';
 
-let looping = 0;
+// const looping = 0;
 
 async function updateSignature(
   assignmentId: number,
@@ -77,74 +77,74 @@ async function updateSignature(
   return newValues;
 }
 
-async function updatePhoto(
-  assignmentId: number,
-  newPhoto: InspectionFormParams['newPhoto'],
-  formValues: Record<string, DraftField>,
-) {
-  const start = Date.now();
-  logErrorToSentry('[INFO][updatePhoto started]', {
-    severity: Sentry.Severity.Info,
-    start,
-  });
+// async function updatePhoto(
+//   assignmentId: number,
+//   newPhoto: InspectionFormParams['newPhoto'],
+//   formValues: Record<string, DraftField>,
+// ) {
+//   const start = Date.now();
+//   logErrorToSentry('[INFO][updatePhoto started]', {
+//     severity: Sentry.Severity.Info,
+//     start,
+//   });
 
-  if (!newPhoto) {
-    return;
-  }
+//   if (!newPhoto) {
+//     return;
+//   }
 
-  const resizeTime = Date.now();
-  logErrorToSentry('[INFO] resizedImage FormScreen started', {
-    severity: Sentry.Severity.Info,
-    time: resizeTime - start,
-  });
-  const newUri = await resizedImage({
-    uri: newPhoto.path,
-    fileName: newPhoto.fileName,
-    width: 200,
-    height: 200,
-  });
+//   const resizeTime = Date.now();
+//   logErrorToSentry('[INFO] resizedImage FormScreen started', {
+//     severity: Sentry.Severity.Info,
+//     time: resizeTime - start,
+//   });
+//   const newUri = await resizedImage({
+//     uri: newPhoto.path,
+//     fileName: newPhoto.fileName,
+//     width: 200,
+//     height: 200,
+//   });
 
-  logErrorToSentry('[INFO] resizedImage FormScreen finished', {
-    severity: Sentry.Severity.Info,
-    newUri,
-    timeSpent: Date.now() - resizeTime,
-    totalTimeSpent: Date.now() - start,
-  });
+//   logErrorToSentry('[INFO] resizedImage FormScreen finished', {
+//     severity: Sentry.Severity.Info,
+//     newUri,
+//     timeSpent: Date.now() - resizeTime,
+//     totalTimeSpent: Date.now() - start,
+//   });
 
-  const coords = await getCurrentPosition();
+//   const coords = await getCurrentPosition();
 
-  logErrorToSentry('[INFO] getCurrentPosition finished', {
-    severity: Sentry.Severity.Info,
-    coords,
-    totalTimeSpent: Date.now() - start,
-  });
+//   logErrorToSentry('[INFO] getCurrentPosition finished', {
+//     severity: Sentry.Severity.Info,
+//     coords,
+//     totalTimeSpent: Date.now() - start,
+//   });
 
-  const photo: DraftPhoto = {
-    isFromGallery: false,
-    uri: newUri,
-    fileName: newPhoto.fileName,
-    latitude: coords.latitude,
-    longitude: coords.longitude,
-    created_at: Date.now(),
-  };
+//   const photo: DraftPhoto = {
+//     isFromGallery: false,
+//     uri: newUri,
+//     fileName: newPhoto.fileName,
+//     latitude: coords.latitude,
+//     longitude: coords.longitude,
+//     created_at: Date.now(),
+//   };
 
-  const fieldValue = formValues[newPhoto.formFieldId];
+//   const fieldValue = formValues[newPhoto.formFieldId];
 
-  const newValues = set([newPhoto.formFieldId, 'photos'], fieldValue.photos.concat([photo]), formValues);
+//   const newValues = set([newPhoto.formFieldId, 'photos'], fieldValue.photos.concat([photo]), formValues);
 
-  logErrorToSentry('[INFO] resizedImage newValues finished', {
-    severity: Sentry.Severity.Info,
-    totalTimeSpent: Date.now() - start,
-  });
+//   logErrorToSentry('[INFO] resizedImage newValues finished', {
+//     severity: Sentry.Severity.Info,
+//     totalTimeSpent: Date.now() - start,
+//   });
 
-  updateDraftFieldsAction(assignmentId, newValues);
+//   updateDraftFieldsAction(assignmentId, newValues);
 
-  logErrorToSentry('[INFO] resizedImage  finished', {
-    severity: Sentry.Severity.Info,
-    totalTimeSpent: Date.now() - start,
-  });
-  return newValues;
-}
+//   logErrorToSentry('[INFO] resizedImage  finished', {
+//     severity: Sentry.Severity.Info,
+//     totalTimeSpent: Date.now() - start,
+//   });
+//   return newValues;
+// }
 
 function parseFieldsWithCategories(draft: DraftForm) {
   const filteredFields = sortBy(
@@ -202,7 +202,7 @@ const EditFormScreen: React.FC<{}> = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const previousSignature = usePrevious(newSignature);
-  const previousPhoto = usePrevious(newPhoto);
+  // const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
   const componentNavigationMounted = useRef<boolean>(true);
   const componentMounted = useRef<boolean>(true);
@@ -290,46 +290,50 @@ const EditFormScreen: React.FC<{}> = () => {
     };
   }, [assignmentId, newSignature, previousSignature]);
 
-  useEffect(() => {
-    looping++;
-    const start = Date.now();
-    logErrorToSentry('[INFO] useEffect when coming back from the camera screen', {
-      severity: Sentry.Severity.Info,
-      looping,
-      start,
-    });
-    // This is for when coming back from the camera screen
-    componentMounted.current = true;
+  // useEffect(() => {
+  //   console.log('assignmentId', { assignmentId });
 
-    (async () => {
-      if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
-        const newValues = await updatePhoto(assignmentId, newPhoto, formikBagRef.current.values);
-        logErrorToSentry('[INFO] useEffect middle of IF', {
-          severity: Sentry.Severity.Info,
-          looping,
-          timeSpent: Date.now() - start,
-        });
-        if (newValues && componentMounted.current) {
-          formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
-        }
-      }
+  //   looping++;
+  //   const start = Date.now();
+  //   // logErrorToSentry('[INFO] useEffect when coming back from the camera screen', {
+  //   //   severity: Sentry.Severity.Info,
+  //   //   looping,
+  //   //   start,
+  //   // });
+  //   // This is for when coming back from the camera screen
+  //   componentMounted.current = true;
 
-      logErrorToSentry('[INFO] useEffect end of async', {
-        severity: Sentry.Severity.Info,
-        looping,
-        timeSpent: Date.now() - start,
-      });
-    })();
+  //   (async () => {
+  //     if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
+  //       const newValues = await updatePhoto(assignmentId, newPhoto, formikBagRef.current.values);
+  //       // logErrorToSentry('[INFO] useEffect middle of IF', {
+  //       //   severity: Sentry.Severity.Info,
+  //       //   looping,
+  //       //   timeSpent: Date.now() - start,
+  //       // });
+  //       if (newValues && componentMounted.current) {
+  //         formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
+  //       }
+  //     }
 
-    return () => {
-      logErrorToSentry('[INFO] useEffect return "finish"', {
-        severity: Sentry.Severity.Info,
-        looping,
-        timeSpent: Date.now() - start,
-      });
-      componentMounted.current = false;
-    };
-  }, [assignmentId, newPhoto, previousPhoto]);
+  //     // logErrorToSentry('[INFO] useEffect end of async', {
+  //     //   severity: Sentry.Severity.Info,
+  //     //   looping,
+  //     //   timeSpent: Date.now() - start,
+  //     // });
+  //   })();
+
+  //   return () => {
+  //     logErrorToSentry('[INFO] useEffect return "finish"', {
+  //       severity: Sentry.Severity.Info,
+  //       looping,
+  //       timeSpent: Date.now() - start,
+  //       time: Date.now(),
+  //     });
+
+  //     componentMounted.current = false;
+  //   };
+  // }, [assignmentId, newPhoto, previousPhoto]);
 
   useEffect(() => {
     // This is for when coming back from the rating choices screen
