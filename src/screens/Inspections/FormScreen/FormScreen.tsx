@@ -7,7 +7,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Formik, FormikProps } from 'formik';
 import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
-import * as Sentry from '@sentry/react-native';
+// import * as Sentry from '@sentry/react-native';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
@@ -29,9 +29,9 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
-import { resizedImage } from 'src/services/resizedImage';
+// import { resizedImage } from 'src/services/resizedImage';
 import DeleteSectionDialog from 'src/screens/Inspections/FormCards/DeleteSectionDialog';
-import { logErrorToSentry } from 'src/utils/logger';
+// import { logErrorToSentry } from 'src/utils/logger';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
@@ -186,16 +186,17 @@ interface DeleteSectionState {
 
 const EditFormScreen: React.FC<{}> = () => {
   const {
-    params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto, onSubmit: onSubmitInspection },
+    params: { assignmentId, newSignature, rangeChoicesSelection, onSubmit: onSubmitInspection },
+    // params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto, onSubmit: onSubmitInspection },
     name: screenName,
   } = useRoute<InspectionFormRoute>();
 
   const { userData } = LoginStore.useState((s) => ({
     userData: s.userData,
   }));
-  const { draft, ratings } = PersistentUserStore.useState((s) => ({
-    ratings: s.ratings,
-    draft: s.drafts[assignmentId] as DraftForm | undefined,
+  const { draft, ratings } = PersistentUserStore.useState((state) => ({
+    ratings: state.ratings,
+    draft: state.drafts[assignmentId] as DraftForm | undefined,
   }));
 
   const formikBagRef = useRef<FormikProps<Record<string, DraftField>> | null>(null);

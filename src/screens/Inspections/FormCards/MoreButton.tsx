@@ -12,7 +12,7 @@ import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
 import { styled } from 'src/paperTheme';
 import LoadingOverlay from 'src/components/LoadingOverlay';
 import { logErrorToSentry } from 'src/utils/logger';
-import { handleImagePicker } from 'src/services/imageHandler/imagePicker';
+import { handleCamera, handleGallery } from 'src/services/imageHandler/imagePicker';
 
 const Container = styled.View`
   position: relative;
@@ -35,7 +35,7 @@ type EventButtonPress = ImagePickerResponse & {
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
-  onTakePhoto?: onTakePhotoType;
+  onTakePhoto: onTakePhotoType;
   onDelete: () => void;
   showCommentOption: boolean;
   allowPhotos: boolean;
@@ -198,7 +198,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   showCommentOption,
   allowPhotos,
   allowDelete,
-  onTakeCamera,
+  // onTakeCamera,
 }) => {
   const [visible, setVisible] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -220,29 +220,20 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   //   createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false, launchCamera);
 
   const handlePhoto = async () => {
-    const now = Date.now();
-    logErrorToSentry('[DEBUG][new handle photo]', {
-      severity: Sentry.Severity.Info,
-      started: now,
-    });
-
-    const photo = await handleImagePicker();
-
-    logErrorToSentry('[DEBUG][new handle photo step 2]', {
-      severity: Sentry.Severity.Info,
-      photo,
-      timeSpent: now - Date.now(),
-    });
-
+    const photo = await handleCamera();
+    closeMenu();
     if (photo) void onTakePhoto(photo, false);
-    logErrorToSentry('[DEBUG][new handle photo step 3]', {
-      severity: Sentry.Severity.Info,
-      photo,
-      timeSpent: now - Date.now(),
-    });
+    return;
   };
 
-  const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
+  // const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
+
+  const handleAttach = async () => {
+    const attach = await handleGallery();
+    closeMenu();
+    if (attach) void onTakePhoto(attach, false);
+    return;
+  };
 
   const handleDelete = () => {
     closeMenu();

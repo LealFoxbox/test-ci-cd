@@ -1,5 +1,7 @@
 import { PermissionsAndroid } from 'react-native';
-import { launchCamera } from 'react-native-image-picker';
+import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+
+import { askWriteStoragePermission } from '../storage';
 
 async function askCameraPermission() {
   try {
@@ -15,46 +17,38 @@ async function askCameraPermission() {
   }
 }
 
-// const onBottomButtonPressed = (event: EventButtonPress) => {
-//   // callback && callback();
-//   let capture = null;
+const handleImages = (result: ImagePickerResponse) => {
+  const fileName = `photo - ${Date.now()}.jpg`;
+  if (result.assets && result.assets.length && result.assets?.[0].uri) {
+    return { uri: result.assets[0].uri, fileName };
+  }
+  return false;
+};
 
-//   if (event.assets && event.assets.length) {
-//     capture = event.assets?.[0];
-//   } else {
-//     capture = event;
-//   }
-
-//   if (event.didCancel || event.errorCode || !capture || !capture?.uri) {
-//     // navigation.navigate(screenName || INSPECTIONS_FORM);
-//     return;
-//   }
-
-//   const fileName = `photo - ${Date.now()}.jpg`;
-//   // const newPhoto: InspectionFormParams['newPhoto'] = ;
-//   // navigation.navigate(screenName || INSPECTIONS_FORM, { newPhoto });
-// };
-
-export async function handleImagePicker() {
-  if (await askCameraPermission()) {
+export async function handleCamera() {
+  const hasPermission = await askCameraPermission();
+  if (hasPermission) {
     const result = await launchCamera({
       mediaType: 'photo',
       quality: 0.3,
       saveToPhotos: true,
     });
-
-    const fileName = `photo - ${Date.now()}.jpg`;
-    if (result.assets && result.assets.length && result.assets?.[0].uri) {
-      return { uri: result.assets[0].uri, fileName };
-    }
+    return handleImages(result);
   }
-
   return false;
-  //   ,
-  //   (response) => {
-  //     console.log({ response });
-  //
-  //     // onBottomButtonPressed(response);
-  //   },
-  // );
+}
+
+export async function handleGallery() {
+  const hasPermission = await askWriteStoragePermission();
+  if (hasPermission) {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      maxWidth: 200, //	To resize the image
+      maxHeight: 200, //	To resize the image
+      quality: 0.3, //	0 to 1, photos
+      includeBase64: false,
+    });
+    return handleImages(result);
+  }
+  return false;
 }
