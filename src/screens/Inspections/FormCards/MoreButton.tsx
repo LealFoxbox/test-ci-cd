@@ -1,25 +1,22 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Menu, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid } from 'react-native';
+import { Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import * as Sentry from '@sentry/react-native';
 
-import { askWriteStoragePermission, downloadDir } from 'src/services/storage';
+import { downloadDir } from 'src/services/storage';
 import { paddingVerticalAreaTouch, widthAreaTouch } from 'src/utils/responsive';
 import { styled } from 'src/paperTheme';
 import LoadingOverlay from 'src/components/LoadingOverlay';
-import { logErrorToSentry } from 'src/utils/logger';
-import { handleCamera, handleGallery } from 'src/services/imageHandler/imagePicker';
+import { ImageHandled, handleCamera, handleGallery } from 'src/services/imageHandler/imagePicker';
+import { errorMessages } from 'src/utils/errorMessages';
 
 const Container = styled.View`
   position: relative;
   width: ${widthAreaTouch};
   height: 30px;
 `;
-
 const ViewStyled = styled.View`
   top: -30px;
   left: ${-widthAreaTouch + 35};
@@ -28,10 +25,6 @@ const ViewStyled = styled.View`
 `;
 
 export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
-
-type EventButtonPress = ImagePickerResponse & {
-  uri: string;
-};
 
 export interface MoreButtonProps {
   onAddComment?: () => void;
@@ -50,147 +43,6 @@ export async function fileUrlCopy(uri: string, fileName: string) {
   return statResult.path;
 }
 
-async function askCameraPermission() {
-  try {
-    const response = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
-      title: 'Camera Access Permission',
-      message: 'We would like to use your camera',
-      buttonPositive: 'Okay',
-    });
-
-    return response === PermissionsAndroid.RESULTS.GRANTED;
-  } catch (e) {
-    return false;
-  }
-}
-
-async function createAddHandler(
-  onTakePhoto: onTakePhotoType | undefined,
-  closeMenu: () => void,
-  enableButton: boolean,
-  enableButtonHandler: (val: boolean) => void,
-  isAttachment: boolean,
-  launchCamera?: () => void,
-) {
-  const startAddHandler = Date.now();
-  // flag to stop it being called again until the menu is dismissed
-  if (!enableButton) return;
-  enableButtonHandler(false);
-
-  const callback = async (response: EventButtonPress) => {
-    try {
-      logErrorToSentry('[INFO][entering callback]', {
-        severity: Sentry.Severity.Info,
-        response,
-      });
-      let capture = null;
-
-      if (response.assets && response.assets.length) {
-        capture = response.assets?.[0];
-      } else {
-        capture = response;
-      }
-      logErrorToSentry('[INFO][callback response.assets && response.assets.length]', {
-        severity: Sentry.Severity.Info,
-        timeSpent: Date.now() - startAddHandler,
-      });
-
-      if (response.didCancel || response.errorCode || !capture || !capture?.uri) {
-        console.warn('MoreButton createAddHandler: ImagePickerResponse uri is undefined');
-        return;
-      }
-      logErrorToSentry('[INFO][ callback response.didCancel || response.errorCode || !capture || !capture?.uri]', {
-        severity: Sentry.Severity.Info,
-        timeSpent: Date.now() - startAddHandler,
-      });
-
-      const cbDate = Date.now();
-      const fileName = `photo - ${cbDate}.jpg`;
-      const newUri = await fileUrlCopy(capture.uri, fileName);
-      if (onTakePhoto) {
-        await onTakePhoto({ uri: newUri, fileName }, isAttachment);
-      }
-      logErrorToSentry('[INFO][callback worked]', {
-        severity: Sentry.Severity.Info,
-        timeSpent: cbDate - startAddHandler,
-      });
-    } catch (error) {
-      logErrorToSentry('[ERROR][createAddHandler callback]', {
-        severity: Sentry.Severity.Error,
-        infoMessage: error?.message,
-      });
-    }
-    enableButtonHandler(true);
-  };
-
-  try {
-    const checkGalleryOrCamera = Date.now();
-    if (isAttachment) {
-      const hasPermission = await askWriteStoragePermission();
-      if (hasPermission) {
-        logErrorToSentry('[INFO][storage process started]', {
-          severity: Sentry.Severity.Info,
-          timeSpent: checkGalleryOrCamera - startAddHandler,
-        });
-        void launchImageLibrary(
-          {
-            mediaType: 'photo',
-            maxWidth: 200, //	To resize the image
-            maxHeight: 200, //	To resize the image
-            quality: 0.3, //	0 to 1, photos
-            includeBase64: false,
-          },
-          (response) => {
-            void callback(response as EventButtonPress);
-          },
-        );
-        logErrorToSentry('[INFO][camera process finished]', {
-          severity: Sentry.Severity.Info,
-          totalTimeSpent: Date.now() - startAddHandler,
-          timeSpent: Date.now() - checkGalleryOrCamera,
-        });
-      } else {
-        enableButtonHandler(true);
-      }
-    } else {
-      const hasPermission = await askCameraPermission();
-
-      logErrorToSentry('[INFO][camera process started]', {
-        severity: Sentry.Severity.Info,
-        timeSpent: checkGalleryOrCamera - startAddHandler,
-      });
-
-      if (hasPermission && launchCamera) {
-        closeMenu();
-        launchCamera();
-        logErrorToSentry('[INFO][launch camera]', {
-          severity: Sentry.Severity.Info,
-          totalTimeSpent: Date.now() - startAddHandler,
-          timeSpentWithLaunchCamera: Date.now() - checkGalleryOrCamera,
-        });
-      } else {
-        enableButtonHandler(true);
-      }
-      logErrorToSentry('[INFO][camera process finished] ', {
-        severity: Sentry.Severity.Info,
-        totalTimeSpent: Date.now() - startAddHandler,
-      });
-    }
-  } catch (error) {
-    logErrorToSentry('[ERROR][createAddHandler]', {
-      severity: Sentry.Severity.Error,
-      infoMessage: error?.message,
-    });
-    enableButtonHandler(true);
-  }
-  const endAddHandler = Date.now();
-  logErrorToSentry('[INFO][end of method createAddHandler]', {
-    severity: Sentry.Severity.Info,
-    timeSpent: endAddHandler - startAddHandler,
-  });
-  closeMenu();
-}
-
 const MoreButton: React.FC<MoreButtonProps> = ({
   onAddComment,
   onTakePhoto,
@@ -198,7 +50,6 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   showCommentOption,
   allowPhotos,
   allowDelete,
-  // onTakeCamera,
 }) => {
   const [visible, setVisible] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -206,33 +57,33 @@ const MoreButton: React.FC<MoreButtonProps> = ({
 
   const theme = useTheme();
 
-  const enableButtonHandler = (toggleValue: boolean) => (enableButton.current = toggleValue);
-
   const openMenu = useCallback(() => setVisible(true), [setVisible]);
 
   const closeMenu = useCallback(() => setVisible(false), [setVisible]);
 
-  // const launchCamera = useCallback(() => {
-  //   onTakeCamera(() => enableButtonHandler(true));
-  // }, [onTakeCamera]);
-
-  // const handlePhoto = () =>
-  //   createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, false, launchCamera);
+  function handleImageResult(result: ImageHandled) {
+    closeMenu();
+    try {
+      if (result.error) {
+        return Alert.alert(result.error);
+      }
+      if (result.data) {
+        return void onTakePhoto(result.data, false);
+      }
+      return;
+    } catch (error) {
+      return Alert.alert(errorMessages.generic_problem);
+    }
+  }
 
   const handlePhoto = async () => {
-    const photo = await handleCamera();
-    closeMenu();
-    if (photo) void onTakePhoto(photo, false);
-    return;
+    const result = await handleCamera();
+    return handleImageResult(result);
   };
 
-  // const handleAttach = () => createAddHandler(onTakePhoto, closeMenu, enableButton.current, enableButtonHandler, true);
-
   const handleAttach = async () => {
-    const attach = await handleGallery();
-    closeMenu();
-    if (attach) void onTakePhoto(attach, false);
-    return;
+    const result = await handleGallery();
+    return handleImageResult(result);
   };
 
   const handleDelete = () => {
@@ -251,7 +102,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   if (!allowPhotos && !showCommentOption && !allowDelete) {
     return null;
   }
-  //LoadingOverlay
+
   return (
     <>
       {!enableButton && <LoadingOverlay />}

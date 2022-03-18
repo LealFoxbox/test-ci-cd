@@ -7,7 +7,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Formik, FormikProps } from 'formik';
 import { groupBy, isString, map, set, sortBy, toPairs, uniq } from 'lodash/fp';
 import RNFS from 'react-native-fs';
-// import * as Sentry from '@sentry/react-native';
+import * as Sentry from '@sentry/react-native';
 
 import ExpandedGallery from 'src/components/ExpandedGallery';
 import Notes from 'src/components/Notes';
@@ -29,16 +29,13 @@ import {
   updateDraftFormAction,
 } from 'src/pullstate/formActions';
 import getCurrentPosition from 'src/utils/getCurrentPosition';
-// import { resizedImage } from 'src/services/resizedImage';
 import DeleteSectionDialog from 'src/screens/Inspections/FormCards/DeleteSectionDialog';
-// import { logErrorToSentry } from 'src/utils/logger';
+import { logErrorToSentry } from 'src/utils/logger';
 
 import { createRenderCard } from '../FormCards/createRenderCard';
 
 import { validateFormScreen } from './validation';
 import OptionRow from './OptionRow';
-
-// const looping = 0;
 
 async function updateSignature(
   assignmentId: number,
@@ -66,7 +63,10 @@ async function updateSignature(
     try {
       void RNFS.unlink(uri);
     } catch (e) {
-      console.warn('Error deleting old signature: ', e);
+      logErrorToSentry('[ERROR][Error deleting old signature]', {
+        severity: Sentry.Severity.Warning,
+        error: e,
+      });
     }
   });
 
@@ -76,75 +76,6 @@ async function updateSignature(
 
   return newValues;
 }
-
-// async function updatePhoto(
-//   assignmentId: number,
-//   newPhoto: InspectionFormParams['newPhoto'],
-//   formValues: Record<string, DraftField>,
-// ) {
-//   const start = Date.now();
-//   logErrorToSentry('[INFO][updatePhoto started]', {
-//     severity: Sentry.Severity.Info,
-//     start,
-//   });
-
-//   if (!newPhoto) {
-//     return;
-//   }
-
-//   const resizeTime = Date.now();
-//   logErrorToSentry('[INFO] resizedImage FormScreen started', {
-//     severity: Sentry.Severity.Info,
-//     time: resizeTime - start,
-//   });
-//   const newUri = await resizedImage({
-//     uri: newPhoto.path,
-//     fileName: newPhoto.fileName,
-//     width: 200,
-//     height: 200,
-//   });
-
-//   logErrorToSentry('[INFO] resizedImage FormScreen finished', {
-//     severity: Sentry.Severity.Info,
-//     newUri,
-//     timeSpent: Date.now() - resizeTime,
-//     totalTimeSpent: Date.now() - start,
-//   });
-
-//   const coords = await getCurrentPosition();
-
-//   logErrorToSentry('[INFO] getCurrentPosition finished', {
-//     severity: Sentry.Severity.Info,
-//     coords,
-//     totalTimeSpent: Date.now() - start,
-//   });
-
-//   const photo: DraftPhoto = {
-//     isFromGallery: false,
-//     uri: newUri,
-//     fileName: newPhoto.fileName,
-//     latitude: coords.latitude,
-//     longitude: coords.longitude,
-//     created_at: Date.now(),
-//   };
-
-//   const fieldValue = formValues[newPhoto.formFieldId];
-
-//   const newValues = set([newPhoto.formFieldId, 'photos'], fieldValue.photos.concat([photo]), formValues);
-
-//   logErrorToSentry('[INFO] resizedImage newValues finished', {
-//     severity: Sentry.Severity.Info,
-//     totalTimeSpent: Date.now() - start,
-//   });
-
-//   updateDraftFieldsAction(assignmentId, newValues);
-
-//   logErrorToSentry('[INFO] resizedImage  finished', {
-//     severity: Sentry.Severity.Info,
-//     totalTimeSpent: Date.now() - start,
-//   });
-//   return newValues;
-// }
 
 function parseFieldsWithCategories(draft: DraftForm) {
   const filteredFields = sortBy(
@@ -187,7 +118,6 @@ interface DeleteSectionState {
 const EditFormScreen: React.FC<{}> = () => {
   const {
     params: { assignmentId, newSignature, rangeChoicesSelection, onSubmit: onSubmitInspection },
-    // params: { assignmentId, newSignature, rangeChoicesSelection, newPhoto, onSubmit: onSubmitInspection },
     name: screenName,
   } = useRoute<InspectionFormRoute>();
 
@@ -203,7 +133,6 @@ const EditFormScreen: React.FC<{}> = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const previousSignature = usePrevious(newSignature);
-  // const previousPhoto = usePrevious(newPhoto);
   const previousRangeChoicesSelection = usePrevious(rangeChoicesSelection);
   const componentNavigationMounted = useRef<boolean>(true);
   const componentMounted = useRef<boolean>(true);
@@ -290,51 +219,6 @@ const EditFormScreen: React.FC<{}> = () => {
       componentMounted.current = false;
     };
   }, [assignmentId, newSignature, previousSignature]);
-
-  // useEffect(() => {
-  //   console.log('assignmentId', { assignmentId });
-
-  //   looping++;
-  //   const start = Date.now();
-  //   // logErrorToSentry('[INFO] useEffect when coming back from the camera screen', {
-  //   //   severity: Sentry.Severity.Info,
-  //   //   looping,
-  //   //   start,
-  //   // });
-  //   // This is for when coming back from the camera screen
-  //   componentMounted.current = true;
-
-  //   (async () => {
-  //     if (formikBagRef.current && newPhoto && newPhoto !== previousPhoto) {
-  //       const newValues = await updatePhoto(assignmentId, newPhoto, formikBagRef.current.values);
-  //       // logErrorToSentry('[INFO] useEffect middle of IF', {
-  //       //   severity: Sentry.Severity.Info,
-  //       //   looping,
-  //       //   timeSpent: Date.now() - start,
-  //       // });
-  //       if (newValues && componentMounted.current) {
-  //         formikBagRef.current.setFieldValue(`${newPhoto.formFieldId}`, newValues[newPhoto.formFieldId]);
-  //       }
-  //     }
-
-  //     // logErrorToSentry('[INFO] useEffect end of async', {
-  //     //   severity: Sentry.Severity.Info,
-  //     //   looping,
-  //     //   timeSpent: Date.now() - start,
-  //     // });
-  //   })();
-
-  //   return () => {
-  //     logErrorToSentry('[INFO] useEffect return "finish"', {
-  //       severity: Sentry.Severity.Info,
-  //       looping,
-  //       timeSpent: Date.now() - start,
-  //       time: Date.now(),
-  //     });
-
-  //     componentMounted.current = false;
-  //   };
-  // }, [assignmentId, newPhoto, previousPhoto]);
 
   useEffect(() => {
     // This is for when coming back from the rating choices screen
