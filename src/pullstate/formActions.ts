@@ -228,6 +228,7 @@ export const deleteDraftAction = (assignmentId: number) => {
 };
 
 export const updateDraftFieldsAction = (assignmentId: number, formValues: Record<string, DraftField>) => {
+  console.log('updateDraftFieldsAction', { formValues });
   PersistentUserStore.update((persistentState) => {
     const currentDraft = persistentState.drafts[assignmentId];
     if (currentDraft?.assignmentId) {

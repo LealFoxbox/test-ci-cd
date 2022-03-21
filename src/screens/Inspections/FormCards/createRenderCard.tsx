@@ -55,7 +55,7 @@ function getListCardButtonName(listChoiceIds: number[], rating: SelectRating | u
 }
 
 export const createRenderCard = (
-  { values, setFieldValue, setValues }: FormikProps<Record<string, DraftField>>,
+  { values, setFieldValue, setValues, getFieldProps }: FormikProps<Record<string, DraftField>>,
   {
     setExpandedPhoto,
     assignmentId,
@@ -116,20 +116,22 @@ export const createRenderCard = (
     };
     const handleTakePhoto = async ({ uri, fileName }: { uri: string; fileName: string }, isFromGallery: boolean) => {
       const coords = await getCurrentPosition();
-      console.log({ uri, fileName });
-      const newPhoto: DraftPhoto = {
-        isFromGallery,
-        uri,
-        fileName,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        created_at: Date.now(),
-      };
-
-      const newValues = set(`${getFormFieldId(draftField)}.photos`, fieldValue.photos.concat([newPhoto]), values);
-
-      setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
-      updateDraftFieldsAction(assignmentId, newValues);
+      setTimeout(() => {
+        const newPhoto: DraftPhoto = {
+          isFromGallery,
+          uri,
+          fileName,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          created_at: Date.now(),
+        };
+        // console.log('getFormFieldId(draftField) =>>>>>>>>>>>>>>>', getFormFieldId(draftField));
+        console.log('values at handleTakephoto', { values });
+        const newValues = set(`${getFormFieldId(draftField)}.photos`, fieldValue.photos.concat([newPhoto]), values);
+        // console.log({ newValues });
+        setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
+        updateDraftFieldsAction(assignmentId, newValues);
+      }, 3000);
     };
     const handleDeletePhoto = async (photo: DraftPhoto) => {
       const newPhotos = differenceBy({ uri: photo.uri }, fieldValue.photos, [photo]);
@@ -252,8 +254,9 @@ export const createRenderCard = (
           rangeChoices={rangeChoices}
           onChoicePress={(choice) => {
             const newValues = set(`${getFormFieldId(draftField)}.selectedChoice`, choice, values);
-
+            console.log('values at rangeCard onchoice', { values });
             setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(draftField)]);
+            console.log({ values });
             updateDraftFieldsAction(assignmentId, newValues);
           }}
         />

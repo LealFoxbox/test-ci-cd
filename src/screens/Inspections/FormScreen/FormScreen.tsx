@@ -203,6 +203,7 @@ const EditFormScreen: React.FC<{}> = () => {
 
   useEffect(() => {
     // This is for when coming back from the signature screen
+    console.log('entrou aqui no signature');
     componentMounted.current = true;
 
     (async () => {
@@ -222,6 +223,7 @@ const EditFormScreen: React.FC<{}> = () => {
 
   useEffect(() => {
     // This is for when coming back from the rating choices screen
+    console.log('entrou aqui no rangeChoices');
     if (formikBagRef.current && rangeChoicesSelection && rangeChoicesSelection !== previousRangeChoicesSelection) {
       const { formFieldId, listChoiceIds } = rangeChoicesSelection;
       const formValues = formikBagRef.current.values;
