@@ -1,5 +1,8 @@
 import { PermissionsAndroid } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import Geolocation from 'react-native-geolocation-service';
+
+import { logErrorToSentry } from './logger';
 
 export type Coords = { latitude: number | null; longitude: number | null };
 
@@ -16,14 +19,21 @@ export default async function getCurrentPosition() {
           resolve(p);
         },
         (error) => {
+          logErrorToSentry('[APP][Geolocation Error]', {
+            severity: Sentry.Severity.Info,
+            error,
+          });
           reject(`Geolocation Error. Code: ${error.code}, Message: ${error.message}`);
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000, showLocationDialog: true },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 120000, showLocationDialog: true },
       );
     });
     coords = position.coords;
-  } catch (e) {
-    console.warn('getCurrentPosition failed with error: ', e);
+  } catch (err) {
+    logErrorToSentry('[APP][Geolocation Error]', {
+      severity: Sentry.Severity.Error,
+      error: err,
+    });
   }
 
   return coords;

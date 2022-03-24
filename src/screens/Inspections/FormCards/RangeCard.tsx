@@ -40,7 +40,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
   onTakeCamera,
 }) => {
   const [visible, setVisible] = useState(false);
-
+  const [disable, setDisable] = useState(false);
   const openMenu = () => setVisible(true);
 
   const closeMenu = () => setVisible(false);
@@ -52,7 +52,7 @@ const RangeCard: React.FC<RangeCardProps> = ({
       onPress={openMenu}
       mode="contained"
       dark
-      disabled={isReadonly}
+      disabled={disable}
       color={selectedRangeChoice?.deficient ? theme.colors.deficient : theme.colors.primary}
     >
       {selectedRangeChoice?.label}
@@ -63,7 +63,6 @@ const RangeCard: React.FC<RangeCardProps> = ({
     <Container>
       <Card>
         <CardHeader
-          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onTakePhoto={onTakePhoto}
@@ -71,8 +70,10 @@ const RangeCard: React.FC<RangeCardProps> = ({
           onDelete={onDelete}
           showCommentOption={!showComment}
           allowDelete={allowDelete}
-          isReadonly={isReadonly}
+          isReadonly={disable}
           allowPhotos
+          photoCallBack={setDisable}
+          onTakeCamera={onTakeCamera}
         />
         <Card.Content>
           {isReadonly && openButton}

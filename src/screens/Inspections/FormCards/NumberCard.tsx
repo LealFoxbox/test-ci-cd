@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Card, HelperText, Text, TextInput } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
@@ -40,11 +40,12 @@ const NumberCard: React.FC<NumberCardProps> = ({
   errorMessage,
   onTakeCamera,
 }) => {
+  const [disable, setDisable] = useState(false);
+
   return (
     <Container>
       <Card>
         <CardHeader
-          onTakeCamera={onTakeCamera}
           name={name}
           description={description}
           onTakePhoto={onTakePhoto}
@@ -53,7 +54,9 @@ const NumberCard: React.FC<NumberCardProps> = ({
           showCommentOption={!showComment}
           allowPhotos
           allowDelete={allowDelete}
-          isReadonly={isReadonly}
+          isReadonly={disable}
+          photoCallBack={setDisable}
+          onTakeCamera={onTakeCamera}
         />
         <Card.Content style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
           {!!rating?.prefix && <Text>{rating.prefix}</Text>}
@@ -65,7 +68,7 @@ const NumberCard: React.FC<NumberCardProps> = ({
               placeholder="Enter a number"
               dense
               {...numberInputProps}
-              disabled={isReadonly}
+              disabled={disable}
             />
             {error && (
               <HelperText type="error" visible padding="none">

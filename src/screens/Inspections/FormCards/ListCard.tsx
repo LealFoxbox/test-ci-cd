@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Card } from 'react-native-paper';
 
 import { styled } from 'src/paperTheme';
@@ -35,6 +35,8 @@ const ListCard: React.FC<SignatureCardProps> = ({
   isReadonly,
   onTakeCamera,
 }) => {
+  const [disable, setDisable] = useState(false);
+
   return (
     <Container>
       <Card>
@@ -43,15 +45,16 @@ const ListCard: React.FC<SignatureCardProps> = ({
           name={name}
           description={description}
           onAddComment={onAddComment}
+          photoCallBack={setDisable}
           onTakePhoto={onTakePhoto}
           onDelete={onDelete}
           showCommentOption={!showComment}
-          isReadonly={isReadonly}
+          isReadonly={disable}
           allowDelete={allowDelete}
           allowPhotos
         />
         <Card.Content>
-          <Button onPress={onOpen} mode="contained" dark disabled={isReadonly}>
+          <Button onPress={onOpen} mode="contained" dark disabled={disable}>
             {ratingName}
           </Button>
         </Card.Content>

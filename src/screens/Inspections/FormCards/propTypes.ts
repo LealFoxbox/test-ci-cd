@@ -1,6 +1,7 @@
 import { DraftPhoto } from 'src/types';
 
 import { CommentInputProps } from './CardFooter';
+import { onTakePhotoType } from './createRenderCard';
 
 export interface TextCardProps {
   id: number;
@@ -9,7 +10,7 @@ export interface TextCardProps {
   commentInputProps: CommentInputProps;
   photos: DraftPhoto[];
   onTapPhoto: (index: number) => void;
-  onTakePhoto: (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
+  onTakePhoto: onTakePhotoType;
   onDeletePhoto: (photo: DraftPhoto) => void;
   onDelete: () => void;
   allowDelete: boolean;

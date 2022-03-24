@@ -20,6 +20,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
   allowPhotos,
   allowDelete,
   isReadonly,
+  photoCallBack,
   onTakeCamera,
 }) => {
   return (
@@ -40,6 +41,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
           showCommentOption={showCommentOption}
           allowPhotos={allowPhotos}
           allowDelete={allowDelete}
+          photoCallBack={photoCallBack}
           onTakeCamera={onTakeCamera}
         />
       )}

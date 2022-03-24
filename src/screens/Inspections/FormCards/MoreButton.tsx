@@ -12,6 +12,8 @@ import LoadingOverlay from 'src/components/LoadingOverlay';
 import { ImageHandled, handleCamera, handleGallery } from 'src/services/imageHandler/imagePicker';
 import { errorMessages } from 'src/utils/errorMessages';
 
+import { onTakePhotoType } from './createRenderCard';
+
 const Container = styled.View`
   position: relative;
   width: ${widthAreaTouch};
@@ -24,8 +26,6 @@ const ViewStyled = styled.View`
   z-index: 1;
 `;
 
-export type onTakePhotoType = (params: { uri: string; fileName: string }, isFromGallery: boolean) => Promise<void>;
-
 export interface MoreButtonProps {
   onAddComment?: () => void;
   onTakePhoto: onTakePhotoType;
@@ -33,6 +33,7 @@ export interface MoreButtonProps {
   showCommentOption: boolean;
   allowPhotos: boolean;
   allowDelete: boolean;
+  photoCallBack: React.Dispatch<React.SetStateAction<boolean>>;
   onTakeCamera: (callback: () => void) => void;
 }
 
@@ -47,6 +48,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
   onAddComment,
   onTakePhoto,
   onDelete,
+  photoCallBack,
   showCommentOption,
   allowPhotos,
   allowDelete,
@@ -61,17 +63,21 @@ const MoreButton: React.FC<MoreButtonProps> = ({
 
   const closeMenu = useCallback(() => setVisible(false), [setVisible]);
 
-  function handleImageResult(result: ImageHandled) {
+  async function handleImageResult(result: ImageHandled) {
     closeMenu();
     try {
       if (result.error) {
+        photoCallBack(false);
         return Alert.alert(result.error);
       }
       if (result.data) {
-        return void onTakePhoto(result.data, false);
+        await onTakePhoto(result.data, false, photoCallBack);
+        photoCallBack(false);
       }
+      photoCallBack(false);
       return;
     } catch (error) {
+      photoCallBack(false);
       return Alert.alert(errorMessages.generic_problem);
     }
   }
