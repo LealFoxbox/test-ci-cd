@@ -91,7 +91,7 @@ export async function handleCamera(): Promise<ImageHandled> {
   }
   const result = await launchCamera({
     mediaType: 'photo',
-    quality: 0.3,
+    quality: 0.8,
     saveToPhotos: true,
   });
   return handleImages(result);
@@ -104,9 +104,9 @@ export async function handleGallery(): Promise<ImageHandled> {
   }
   const result = await launchImageLibrary({
     mediaType: 'photo',
-    maxWidth: 500, //	To resize the image
-    maxHeight: 500, //	To resize the image
-    quality: 0.4, //	0 to 1, photos
+    maxWidth: 2000, //	To resize the image
+    maxHeight: 2000, //	To resize the image
+    quality: 0.8, //	0 to 1, photos
     includeBase64: false,
   });
   return handleImages(result);

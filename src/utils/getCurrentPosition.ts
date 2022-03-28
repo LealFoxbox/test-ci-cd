@@ -25,7 +25,7 @@ export default async function getCurrentPosition() {
           });
           reject(`Geolocation Error. Code: ${error.code}, Message: ${error.message}`);
         },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 120000, showLocationDialog: true },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000, showLocationDialog: true },
       );
     });
     coords = position.coords;
