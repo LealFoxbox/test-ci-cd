@@ -115,9 +115,6 @@ export async function handleGallery(): Promise<ImageHandled> {
   }
   const result = await launchImageLibrary({
     mediaType: 'photo',
-    maxWidth: 2000, //	To resize the image
-    maxHeight: 2000, //	To resize the image
-    quality: 0.8, //	0 to 1, photos
     includeBase64: false,
   });
   return handleImages(result);
