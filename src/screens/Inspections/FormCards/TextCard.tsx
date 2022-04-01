@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from 'react-native-paper';
 
 import { styled } from 'src/paperTheme';
@@ -26,12 +26,14 @@ const TextCard: React.FC<TextCardProps> = ({
   isReadonly,
   onTakeCamera,
 }) => {
+  const [disable, setDisable] = useState(false);
   return (
     <Container>
       <Card>
         <CardHeader
           onTakeCamera={onTakeCamera}
           name={name}
+          photoCallBack={setDisable}
           description={description}
           onTakePhoto={onTakePhoto}
           onDelete={onDelete}
@@ -47,7 +49,7 @@ const TextCard: React.FC<TextCardProps> = ({
           photos={photos}
           onTapPhoto={onTapPhoto}
           onDeletePhoto={onDeletePhoto}
-          isReadonly={isReadonly}
+          isReadonly={disable}
         />
       </Card>
     </Container>

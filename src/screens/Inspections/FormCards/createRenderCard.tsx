@@ -135,7 +135,7 @@ export const createRenderCard = (
         longitude: coords.longitude,
         created_at: Date.now(),
       };
-      console.log({ values });
+
       const newValues = set(`${getFormFieldId(draftField)}.photos`, fieldValue.photos.concat([newPhoto]), values);
       setFieldValue(`${getFormFieldId(fieldValue)}`, newValues[getFormFieldId(fieldValue)]);
       updateDraftFieldsAction(assignmentId, newValues);

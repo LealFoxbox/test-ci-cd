@@ -6,12 +6,15 @@ import { errorMessages } from 'src/utils/errorMessages';
 import { logErrorToSentry } from 'src/utils/logger';
 
 import { askWriteStoragePermission } from '../storage';
+import { resizeImage } from '../resizedImage';
+
+export interface ImageLocation {
+  uri: string;
+  fileName: string;
+}
 
 export interface ImageHandled {
-  data?: ImagePickerResponse & {
-    uri: string;
-    fileName: string;
-  };
+  data?: ImagePickerResponse & ImageLocation;
   error?: string;
 }
 
@@ -29,7 +32,7 @@ async function askCameraPermission() {
   }
 }
 
-const handleImages = (result: ImagePickerResponse): ImageHandled => {
+const handleImages = async (result: ImagePickerResponse): Promise<ImageHandled> => {
   try {
     if (result?.didCancel) {
       return {};
@@ -70,10 +73,15 @@ const handleImages = (result: ImagePickerResponse): ImageHandled => {
       });
       return { error: result?.errorMessage || errorMessages.generic_problem };
     }
-
     const fileName = `photo - ${Date.now()}.jpg`;
-    const uri = result.assets[0].uri;
-    return { data: { uri, fileName } };
+    const resizedPhoto = await resizeImage({
+      uri: result.assets[0].uri,
+      fileName,
+      width: 2000,
+      height: 2000,
+    });
+
+    return { data: { uri: resizedPhoto, fileName } };
   } catch (error) {
     logErrorToSentry(`[ERROR][handleImage process error]`, {
       severity: Sentry.Severity.Error,
@@ -94,7 +102,10 @@ export async function handleCamera(): Promise<ImageHandled> {
     quality: 0.8,
     saveToPhotos: true,
   });
-  return handleImages(result);
+
+  const photo = await handleImages(result);
+
+  return photo;
 }
 
 export async function handleGallery(): Promise<ImageHandled> {

@@ -71,8 +71,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({
         return Alert.alert(result.error);
       }
       if (result.data) {
-        await onTakePhoto(result.data, false, photoCallBack);
-        photoCallBack(false);
+        return await onTakePhoto(result.data, false, photoCallBack);
       }
       photoCallBack(false);
       return;
