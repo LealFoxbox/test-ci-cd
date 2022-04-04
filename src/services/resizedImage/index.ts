@@ -13,7 +13,17 @@ type ResizedImageOptions = ImageLocation & {
 
 export async function resizeImage(photo: ResizedImageOptions): Promise<string> {
   try {
-    const result = await ImageResizer.createResizedImage(photo.uri, photo.width, photo.height, 'JPEG', 80);
+    const result = await ImageResizer.createResizedImage(
+      photo.uri,
+      photo.width,
+      photo.height,
+      'JPEG',
+      80,
+      undefined,
+      undefined,
+      undefined,
+      { onlyScaleDown: true },
+    );
     const newUri = await fileUrlCopy(result.uri, photo.fileName);
     return newUri;
   } catch (error) {
